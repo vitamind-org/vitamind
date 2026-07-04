@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\ApiKey\CreateApiKey;
 use App\Http\Resources\ApiKeyResource;
-use App\Http\Resources\ProjectResource;
+use App\Http\Resources\WorkspaceResource;
 use App\Models\PersonalAccessToken;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,13 +25,13 @@ class ApiKeyController extends Controller
     {
         $this->authorize('viewAny', PersonalAccessToken::class);
 
-        $projects = config('vitamin-d.features.projects', false) 
-            ? user()->projects()->get() 
+        $workspaces = config('vitamin-d.features.workspaces', false) 
+            ? user()->workspaces()->get() 
             : collect();
 
         return Inertia::render('api-keys/index', [
             'apiKeys' => ApiKeyResource::collection(user()->tokens()->simplePaginate(config('web.pagination_size', 10))),
-            'projects' => ProjectResource::collection($projects)->resolve(),
+            'workspaces' => WorkspaceResource::collection($workspaces)->resolve(),
         ]);
     }
 

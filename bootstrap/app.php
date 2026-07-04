@@ -19,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'must-be-admin' => \App\Http\Middleware\MustBeAdminMiddleware::class,
+            'has-workspace' => \App\Http\Middleware\HasWorkspaceMiddleware::class,
+            'can-see-workspace' => \App\Http\Middleware\CanSeeWorkspaceMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

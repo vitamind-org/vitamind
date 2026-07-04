@@ -20,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Http\Resources\Json\JsonResource::withoutWrapping();
+
         Vite::prefetch(concurrency: 3);
 
         \Laravel\Sanctum\Sanctum::usePersonalAccessTokenModel(

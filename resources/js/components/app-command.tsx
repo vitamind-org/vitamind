@@ -11,9 +11,9 @@ export default function AppCommand() {
   const { props } = usePage<SharedData>();
   const { updateAppearance } = useAppearance();
 
-  const isProjectsEnabled = useMemo(() => {
+  const isWorkspacesEnabled = useMemo(() => {
     const features = props.features as Record<string, boolean> | undefined;
-    return !!(features && features.projects);
+    return !!(features && features.workspaces);
   }, [props.features]);
 
   useEffect(() => {
@@ -72,10 +72,10 @@ export default function AppCommand() {
               <UsersIcon className="mr-2 size-4" />
               Go to Users
             </CommandItem>
-            {isProjectsEnabled && (
-              <CommandItem value="go-to-projects" onSelect={() => navigateTo('projects')}>
+            {isWorkspacesEnabled && (
+              <CommandItem value="go-to-workspaces" onSelect={() => navigateTo('workspaces')}>
                 <ListIcon className="mr-2 size-4" />
-                Go to Projects
+                Go to Workspaces
               </CommandItem>
             )}
           </CommandGroup>

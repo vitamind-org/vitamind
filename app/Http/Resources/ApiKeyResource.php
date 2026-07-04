@@ -18,10 +18,10 @@ class ApiKeyResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'permissions' => collect($this->abilities)
-                ->filter(fn (string $ability) => ! str_starts_with($ability, 'project:'))
+                ->filter(fn (string $ability) => ! str_starts_with($ability, 'workspace:'))
                 ->values()
                 ->all(),
-            'project_ids' => $this->getProjectIds(),
+            'workspace_ids' => $this->getWorkspaceIds(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

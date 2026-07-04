@@ -7,10 +7,10 @@ import Layout from '@/layouts/app/layout';
 export default function SettingsLayout({ children }: { children: ReactNode }) {
   const { props } = usePage<SharedData>();
 
-  // Determine if the projects feature is enabled from backend shared data
-  const isProjectsEnabled = useMemo(() => {
+  // Determine if the workspaces feature is enabled from backend shared data
+  const isWorkspacesEnabled = useMemo(() => {
     const features = props.features as Record<string, boolean> | undefined;
-    return !!(features && features.projects);
+    return !!(features && features.workspaces);
   }, [props.features]);
 
   const sidebarNavItems = useMemo(() => {
@@ -22,10 +22,10 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
       },
     ];
 
-    if (isProjectsEnabled) {
+    if (isWorkspacesEnabled) {
       items.push({
-        title: 'Projects',
-        href: route('projects'),
+        title: 'Workspaces',
+        href: route('workspaces'),
         icon: ListIcon,
       });
     }
@@ -37,7 +37,7 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
     });
 
     return items;
-  }, [isProjectsEnabled]);
+  }, [isWorkspacesEnabled]);
 
   // When server-side rendering, we only render the layout on the client...
   if (typeof window === 'undefined') {

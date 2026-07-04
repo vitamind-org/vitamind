@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table): void {
             $table->boolean('is_admin')->default(false)->after('password');
             $table->string('timezone')->default('UTC')->after('is_admin');
-            $table->unsignedBigInteger('current_project_id')->nullable()->after('timezone');
+            $table->unsignedBigInteger('current_workspace_id')->nullable()->after('timezone');
         });
     }
 
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->dropColumn([
                 'is_admin',
                 'timezone',
-                'current_project_id',
+                'current_workspace_id',
             ]);
         });
     }

@@ -2,13 +2,13 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Project;
+use App\Models\Workspace;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin Project */
-class ProjectResource extends JsonResource
+/** @mixin Workspace */
+class WorkspaceResource extends JsonResource
 {
     /**
      * @return array<string, mixed>
@@ -21,10 +21,10 @@ class ProjectResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'role' => $user ? $this->role($user)->value ?? null : null,
+            'role' => $user ? $this->role($user)->value : null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'users' => ProjectUserResource::collection($this->whenLoaded('users')),
+            'users' => WorkspaceUserResource::collection($this->whenLoaded('users')),
         ];
     }
 }

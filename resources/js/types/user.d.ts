@@ -1,4 +1,4 @@
-import { Project } from '@/types/project';
+import { Workspace } from '@/types/workspace';
 
 export interface User {
   id: number;
@@ -9,7 +9,7 @@ export interface User {
   created_at: string;
   updated_at: string;
   timezone: string;
-  projects?: Project[];
+  workspaces?: Workspace[];
   two_factor_enabled: boolean;
   is_admin: boolean;
   [key: string]: unknown;

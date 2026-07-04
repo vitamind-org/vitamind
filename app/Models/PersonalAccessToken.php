@@ -22,31 +22,31 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
     use HasTimezoneTimestamps;
 
     /**
-     * Get the project IDs this token is scoped to.
+     * Get the workspace IDs this token is scoped to.
      *
      * @return array<int>
      */
-    public function getProjectIds(): array
+    public function getWorkspaceIds(): array
     {
         return collect($this->abilities)
-            ->filter(fn (string $ability) => str_starts_with($ability, 'project:'))
-            ->map(fn (string $ability) => (int) str_replace('project:', '', $ability))
+            ->filter(fn (string $ability) => str_starts_with($ability, 'workspace:'))
+            ->map(fn (string $ability) => (int) str_replace('workspace:', '', $ability))
             ->values()
             ->all();
     }
 
     /**
-     * Check if the token has access to the given project.
-     * Tokens with no project restrictions have access to all projects (backward compatible).
+     * Check if the token has access to the given workspace.
+     * Tokens with no workspace restrictions have access to all workspaces (backward compatible).
      */
-    public function hasProjectAccess(Project $project): bool
+    public function hasWorkspaceAccess(Workspace $workspace): bool
     {
-        $projectIds = $this->getProjectIds();
+        $workspaceIds = $this->getWorkspaceIds();
 
-        if (empty($projectIds)) {
+        if (empty($workspaceIds)) {
             return true;
         }
 
-        return in_array($project->id, $projectIds);
+        return in_array($workspace->id, $workspaceIds);
     }
 }

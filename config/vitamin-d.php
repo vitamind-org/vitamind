@@ -12,8 +12,8 @@ return [
     */
 
     'features' => [
-        // Multi-tenant workspace system (Project model + user ↔ project pivot)
-        'projects' => (bool) env('VITAMIND_FEATURE_PROJECTS', false),
+        // Multi-tenant workspace system (Workspace model + user ↔ workspace pivot)
+        'workspaces' => (bool) env('VITAMIND_FEATURE_WORKSPACES', false),
 
         // REST API layer (Sanctum + API controllers)
         'api' => (bool) env('VITAMIND_FEATURE_API', true),

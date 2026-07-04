@@ -17,16 +17,16 @@ import InputError from '@/components/ui/input-error';
 import { Form, FormField, FormFields } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Project } from '@/types/project';
+import { Workspace } from '@/types/workspace';
 import { MultiSelect } from '@/components/multi-select';
 
 type ApiKeyForm = {
   name: string;
   permission: string;
-  projects: string[];
+  workspaces: string[];
 };
 
-export default function CreateApiKey({ children, projects = [] }: { children: ReactNode; projects?: Project[] }) {
+export default function CreateApiKey({ children, workspaces = [] }: { children: ReactNode; workspaces?: Workspace[] }) {
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState<string | undefined>();
   const tokenInputRef = useRef<HTMLInputElement>(null);
@@ -44,7 +44,7 @@ export default function CreateApiKey({ children, projects = [] }: { children: Re
   const form = useForm<Required<ApiKeyForm>>({
     name: '',
     permission: '',
-    projects: [],
+    workspaces: [],
   });
 
   const submit: FormEventHandler = (e) => {
@@ -65,15 +65,15 @@ export default function CreateApiKey({ children, projects = [] }: { children: Re
     }
   };
 
-  const projectList: Project[] = Array.isArray(projects)
-    ? projects
-    : projects && typeof projects === 'object' && 'data' in projects && Array.isArray((projects as any).data)
-      ? (projects as any).data
+  const workspaceList: Workspace[] = Array.isArray(workspaces)
+    ? workspaces
+    : workspaces && typeof workspaces === 'object' && 'data' in workspaces && Array.isArray((workspaces as any).data)
+      ? (workspaces as any).data
       : [];
 
-  const projectOptions = projectList.map((project) => ({
-    label: project.name,
-    value: String(project.id),
+  const workspaceOptions = workspaceList.map((workspace) => ({
+    label: workspace.name,
+    value: String(workspace.id),
   }));
 
   return (
@@ -121,16 +121,16 @@ export default function CreateApiKey({ children, projects = [] }: { children: Re
                 <InputError message={form.errors.permission} />
               </FormField>
               <FormField>
-                <Label htmlFor="projects">Projects</Label>
+                <Label htmlFor="workspaces">Workspaces</Label>
                 <MultiSelect
-                  options={projectOptions}
-                  onValueChange={(value) => form.setData('projects', value)}
-                  defaultValue={form.data.projects}
-                  placeholder="All projects"
+                  options={workspaceOptions}
+                  onValueChange={(value) => form.setData('workspaces', value)}
+                  defaultValue={form.data.workspaces}
+                  placeholder="All workspaces"
                   maxCount={3}
                 />
-                <p className="text-muted-foreground text-xs">Leave empty for access to all projects.</p>
-                <InputError message={form.errors.projects} />
+                <p className="text-muted-foreground text-xs">Leave empty for access to all workspaces.</p>
+                <InputError message={form.errors.workspaces} />
               </FormField>
             </FormFields>
           )}

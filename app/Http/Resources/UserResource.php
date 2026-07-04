@@ -22,7 +22,7 @@ class UserResource extends JsonResource
             'two_factor_enabled' => (bool) $this->two_factor_secret,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'projects' => ProjectResource::collection($this->whenLoaded('projects')),
+            'workspaces' => WorkspaceResource::collection($this->whenLoaded('workspaces')),
         ];
     }
 }

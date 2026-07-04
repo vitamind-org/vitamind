@@ -1,5 +1,5 @@
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { ProjectSwitch } from '@/components/project-switch';
+import { WorkspaceSwitch } from '@/components/workspace-switch';
 import { HeartIcon, SlashIcon, WifiIcon, WifiOffIcon } from 'lucide-react';
 import AppCommand from '@/components/app-command';
 import { usePage } from '@inertiajs/react';
@@ -12,10 +12,10 @@ import { useMemo } from 'react';
 export function AppHeader({ socketStatus, socketReconnect }: { socketStatus: SocketStatus; socketReconnect: () => void }) {
   const page = usePage<SharedData>();
 
-  // Safely check if projects feature is enabled
-  const isProjectsEnabled = useMemo(() => {
+  // Safely check if workspaces feature is enabled
+  const isWorkspacesEnabled = useMemo(() => {
     const features = page.props.features as Record<string, boolean> | undefined;
-    return !!(features && features.projects);
+    return !!(features && features.workspaces);
   }, [page.props.features]);
 
   // Safely check if events.token route exists (meaning WS is enabled)
@@ -29,7 +29,7 @@ export function AppHeader({ socketStatus, socketReconnect }: { socketStatus: Soc
       <div className="flex items-center">
         <SidebarTrigger className="-ml-1 md:hidden" />
         <div className="flex items-center space-x-2 text-xs">
-          {isProjectsEnabled && <ProjectSwitch />}
+          {isWorkspacesEnabled && <WorkspaceSwitch />}
         </div>
       </div>
       <div className="flex items-center gap-2">

@@ -21,10 +21,10 @@ class CreateApiKey
             $abilities[] = 'write';
         }
 
-        // If projects feature is enabled and projects are selected
-        if (config('vitamin-d.features.projects', false) && ! empty($input['projects'])) {
-            foreach ($input['projects'] as $projectId) {
-                $abilities[] = 'project:'.$projectId;
+        // If workspaces feature is enabled and workspaces are selected
+        if (config('vitamin-d.features.workspaces', false) && ! empty($input['workspaces'])) {
+            foreach ($input['workspaces'] as $workspaceId) {
+                $abilities[] = 'workspace:'.$workspaceId;
             }
         }
 
@@ -36,15 +36,15 @@ class CreateApiKey
      */
     private function validate(User $user, array $input): void
     {
-        $projectIds = config('vitamin-d.features.projects', false) 
-            ? $user->projects()->pluck('projects.id')->toArray() 
+        $workspaceIds = config('vitamin-d.features.workspaces', false) 
+            ? $user->workspaces()->pluck('workspaces.id')->toArray() 
             : [];
 
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
             'permission' => ['required', Rule::in(['read', 'write'])],
-            'projects' => ['nullable', 'array'],
-            'projects.*' => ['required', 'integer', Rule::in($projectIds)],
+            'workspaces' => ['nullable', 'array'],
+            'workspaces.*' => ['required', 'integer', Rule::in($workspaceIds)],
         ])->validate();
     }
 }

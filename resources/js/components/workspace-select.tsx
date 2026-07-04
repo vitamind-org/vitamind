@@ -1,4 +1,4 @@
-import { type Project } from '@/types/project';
+import { type Workspace } from '@/types/workspace';
 import { useState, useEffect, useRef } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -9,9 +9,9 @@ import { cn } from '@/lib/utils';
 import axios from 'axios';
 import { ReactNode } from 'react';
 
-interface ProjectSelectProps {
+interface WorkspaceSelectProps {
   value?: string;
-  onValueChange: (value: string, project: Project) => void;
+  onValueChange: (value: string, workspace: Workspace) => void;
   placeholder?: string;
   trigger?: ReactNode;
   className?: string;
@@ -20,16 +20,16 @@ interface ProjectSelectProps {
   footer?: ReactNode;
 }
 
-export function ProjectSelect({
+export function WorkspaceSelect({
   value,
   onValueChange,
-  placeholder = 'Select project...',
+  placeholder = 'Select workspace...',
   trigger,
   className,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
   footer,
-}: ProjectSelectProps) {
+}: WorkspaceSelectProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [query, setQuery] = useState('');
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -37,10 +37,10 @@ export function ProjectSelect({
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = controlledOnOpenChange || setInternalOpen;
 
-  const { data, isFetching, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<Project[]>({
-    queryKey: ['projects', query],
+  const { data, isFetching, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<Workspace[]>({
+    queryKey: ['workspaces', query],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await axios.get(route('projects.json', { query: query || '', page: pageParam }));
+      const response = await axios.get(route('workspaces.json', { query: query || '', page: pageParam }));
       return response.data;
     },
     enabled: open,
@@ -57,8 +57,8 @@ export function ProjectSelect({
     },
   });
 
-  const projects = data?.pages.flat() ?? [];
-  const selectedProject = projects.find((project) => project.id.toString() === value);
+  const workspaces = data?.pages.flat() ?? [];
+  const selectedWorkspace = workspaces.find((workspace) => workspace.id.toString() === value);
   const refetchRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export function ProjectSelect({
         observer.disconnect();
       }
     };
-  }, [open, hasNextPage, isFetchingNextPage, fetchNextPage, query, projects.length]);
+  }, [open, hasNextPage, isFetchingNextPage, fetchNextPage, query, workspaces.length]);
 
   const handleClose = () => {
     const commandList = document.querySelector('[data-slot="command-list"]');
@@ -110,14 +110,14 @@ export function ProjectSelect({
     }
   };
 
-  const handleSelect = (project: Project) => {
-    onValueChange(project.id.toString(), project);
+  const handleSelect = (workspace: Workspace) => {
+    onValueChange(workspace.id.toString(), workspace);
     setOpen(false);
   };
 
   const defaultTrigger = (
     <Button variant="outline" role="combobox" aria-expanded={open} className={cn('w-full justify-between', className)}>
-      {selectedProject ? selectedProject.name : placeholder}
+      {selectedWorkspace ? selectedWorkspace.name : placeholder}
       <ChevronsUpDownIcon className="ml-2 size-4 shrink-0 opacity-50" />
     </Button>
   );
@@ -127,23 +127,23 @@ export function ProjectSelect({
       <PopoverTrigger asChild>{trigger || defaultTrigger}</PopoverTrigger>
       <PopoverContent className="flex max-h-[400px] w-56 flex-col p-0" align="start">
         <Command shouldFilter={false} className="flex flex-col overflow-hidden">
-          <CommandInput placeholder="Search project..." value={query} onValueChange={setQuery} />
+          <CommandInput placeholder="Search workspace..." value={query} onValueChange={setQuery} />
           <CommandList className="min-h-0 flex-1 overflow-y-auto" onWheel={(e) => e.stopPropagation()}>
-            {projects.length === 0 ? (
+            {workspaces.length === 0 ? (
               <div className="text-muted-foreground py-6 text-center text-sm">
-                {isFetching ? 'Searching...' : query === '' ? 'Start typing to search projects' : 'No projects found.'}
+                {isFetching ? 'Searching...' : query === '' ? 'Start typing to search workspaces' : 'No workspaces found.'}
               </div>
             ) : (
               <CommandGroup>
-                {projects.map((project: Project) => (
+                {workspaces.map((workspace: Workspace) => (
                   <CommandItem
-                    key={`project-select-${project.id}`}
-                    value={project.id.toString()}
-                    onSelect={() => handleSelect(project)}
+                    key={`workspace-select-${workspace.id}`}
+                    value={workspace.id.toString()}
+                    onSelect={() => handleSelect(workspace)}
                     className="truncate"
                   >
-                    {project.name}
-                    <CheckIcon className={cn('ml-auto', value === project.id.toString() ? 'opacity-100' : 'opacity-0')} />
+                    {workspace.name}
+                    <CheckIcon className={cn('ml-auto', value === workspace.id.toString() ? 'opacity-100' : 'opacity-0')} />
                   </CommandItem>
                 ))}
                 {hasNextPage && (

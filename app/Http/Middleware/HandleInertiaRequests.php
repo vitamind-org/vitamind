@@ -2,6 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Resources\UserResource;
+use App\Http\Resources\WorkspaceResource;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -29,11 +32,30 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        /** @var ?User $user */
+        $user = $request->user();
+
+        $features = config('vitamin-d.features');
+
+        $currentWorkspace = null;
+        if ($user && config('vitamin-d.features.workspaces', false)) {
+            $currentWorkspace = $user->currentWorkspace;
+            $canSeeCurrentWorkspace = $currentWorkspace && $user->can('view', $currentWorkspace);
+            if (! $currentWorkspace || ! $canSeeCurrentWorkspace) {
+                $user->ensureHasDefaultWorkspace();
+                $user->unsetRelation('currentWorkspace');
+                $currentWorkspace = $user->currentWorkspace;
+            }
+        }
+
         return [
             ...parent::share($request),
-            'auth' => [
-                'user' => $request->user(),
-            ],
+            'auth' => $user ? [
+                'user' => UserResource::make($user->load('workspaces')),
+                'currentWorkspace' => $currentWorkspace ? WorkspaceResource::make($currentWorkspace) : null,
+            ] : null,
+            'features' => $features,
+            'csrf_token' => csrf_token(),
         ];
     }
 }

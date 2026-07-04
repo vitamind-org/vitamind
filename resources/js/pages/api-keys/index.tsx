@@ -9,16 +9,16 @@ import { getColumns } from '@/pages/api-keys/components/columns';
 import CreateApiKey from '@/pages/api-keys/components/create-api-key';
 import { PageProps, PaginatedData } from '@/types';
 import { BookOpenIcon, PlusIcon } from 'lucide-react';
-import { Project } from '@/types/project';
+import { Workspace } from '@/types/workspace';
 import { useMemo } from 'react';
 
 export default function ApiKeys() {
   const page = usePage<PageProps<{
     apiKeys: PaginatedData<ApiKey>;
-    projects: Project[];
+    workspaces: Workspace[];
   }>>();
 
-  const columns = useMemo(() => getColumns(page.props.projects || []), [page.props.projects]);
+  const columns = useMemo(() => getColumns(page.props.workspaces || []), [page.props.workspaces]);
 
   return (
     <SettingsLayout>
@@ -33,7 +33,7 @@ export default function ApiKeys() {
                 Docs
               </Button>
             </a>
-            <CreateApiKey projects={page.props.projects || []}>
+            <CreateApiKey workspaces={page.props.workspaces || []}>
               <Button>
                 <PlusIcon />
                 Create

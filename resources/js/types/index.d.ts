@@ -1,12 +1,12 @@
 import { LucideIcon } from 'lucide-react';
 import type { Config } from 'ziggy-js';
-import { Project } from '@/types/project';
+import { Workspace } from '@/types/workspace';
 import { User } from '@/types/user';
 import { DynamicFieldConfig } from './dynamic-field-config';
 
 export interface Auth {
   user: User;
-  currentProject?: Project;
+  currentWorkspace?: Workspace;
 }
 
 export interface BreadcrumbItem {

@@ -15,16 +15,16 @@ import { useForm } from '@inertiajs/react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import InputError from '@/components/ui/input-error';
-import { Project } from '@/types/project';
+import { Workspace } from '@/types/workspace';
 import { Form, FormField, FormFields } from '@/components/ui/form';
 
-export default function ProjectForm({
-  project,
+export default function WorkspaceForm({
+  workspace,
   defaultOpen,
   onOpenChange,
   children,
 }: {
-  project?: Project;
+  workspace?: Workspace;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   children: ReactNode;
@@ -42,14 +42,14 @@ export default function ProjectForm({
   };
 
   const form = useForm({
-    name: project?.name || '',
+    name: workspace?.name || '',
   });
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
 
-    if (project) {
-      form.patch(`/settings/projects/${project.id}`, {
+    if (workspace) {
+      form.patch(`/settings/workspaces/${workspace.id}`, {
         onSuccess() {
           setOpen(false);
         },
@@ -57,7 +57,7 @@ export default function ProjectForm({
       return;
     }
 
-    form.post('/settings/projects', {
+    form.post('/settings/workspaces', {
       onSuccess() {
         setOpen(false);
       },
@@ -69,10 +69,10 @@ export default function ProjectForm({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{project ? 'Edit Project' : 'Create Project'}</DialogTitle>
-          <DialogDescription className="sr-only">{project ? 'Edit the project details.' : 'Here you can create a new project.'}</DialogDescription>
+          <DialogTitle>{workspace ? 'Edit Workspace' : 'Create Workspace'}</DialogTitle>
+          <DialogDescription className="sr-only">{workspace ? 'Edit the workspace details.' : 'Here you can create a new workspace.'}</DialogDescription>
         </DialogHeader>
-        <Form id="project-form" onSubmit={submit} className="p-4">
+        <Form id="workspace-form" onSubmit={submit} className="p-4">
           <FormFields>
             <FormField>
               <Label htmlFor="name">Name</Label>
@@ -87,7 +87,7 @@ export default function ProjectForm({
               Cancel
             </Button>
           </DialogClose>
-          <Button form="project-form" type="button" onClick={submit} disabled={form.processing}>
+          <Button form="workspace-form" type="button" onClick={submit} disabled={form.processing}>
             {form.processing && <LoaderCircle className="animate-spin" />}
             Save
           </Button>

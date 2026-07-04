@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { MoreVerticalIcon } from 'lucide-react';
 import { ApiKey } from '@/types/api-key';
 import { Badge } from '@/components/ui/badge';
-import { Project } from '@/types/project';
+import { Workspace } from '@/types/workspace';
 import { useDialog } from '@/hooks/use-dialog';
 
 function Delete({ apiKey }: { apiKey: ApiKey }) {
@@ -30,11 +30,11 @@ function Delete({ apiKey }: { apiKey: ApiKey }) {
   );
 }
 
-export function getColumns(projects: Project[] = []): ColumnDef<ApiKey>[] {
-  const projectList: Project[] = Array.isArray(projects)
-    ? projects
-    : projects && typeof projects === 'object' && 'data' in projects && Array.isArray((projects as any).data)
-      ? (projects as any).data
+export function getColumns(workspaces: Workspace[] = []): ColumnDef<ApiKey>[] {
+  const workspaceList: Workspace[] = Array.isArray(workspaces)
+    ? workspaces
+    : workspaces && typeof workspaces === 'object' && 'data' in workspaces && Array.isArray((workspaces as any).data)
+      ? (workspaces as any).data
       : [];
 
   return [
@@ -54,22 +54,22 @@ export function getColumns(projects: Project[] = []): ColumnDef<ApiKey>[] {
       },
     },
     {
-      accessorKey: 'project_ids',
-      header: 'Projects',
+      accessorKey: 'workspace_ids',
+      header: 'Workspaces',
       enableColumnFilter: false,
       enableSorting: false,
       cell: ({ row }) => {
-        const projectIds = row.original.project_ids;
-        if (!projectIds || projectIds.length === 0) {
-          return <Badge variant="outline">All projects</Badge>;
+        const workspaceIds = row.original.workspace_ids;
+        if (!workspaceIds || workspaceIds.length === 0) {
+          return <Badge variant="outline">All workspaces</Badge>;
         }
         return (
           <div className="flex flex-wrap gap-1">
-            {projectIds.map((id) => {
-              const project = projectList.find((p) => p.id === id);
+            {workspaceIds.map((id) => {
+              const workspace = workspaceList.find((w) => w.id === id);
               return (
                 <Badge key={id} variant="default">
-                  {project?.name ?? `Project #${id}`}
+                  {workspace?.name ?? `Workspace #${id}`}
                 </Badge>
               );
             })}

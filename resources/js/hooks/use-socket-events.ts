@@ -16,9 +16,9 @@ export function useSocketEvents(): { status: SocketStatus; reconnect: () => void
   const connect = useSocketStore((s) => s.connect);
   const disconnect = useSocketStore((s) => s.disconnect);
   const storeReconnect = useSocketStore((s) => s.reconnect);
-  const switchProject = useSocketStore((s) => s.switchProject);
+  const switchWorkspace = useSocketStore((s) => s.switchWorkspace);
 
-  const projectId = auth?.currentProject?.id;
+  const workspaceId = auth?.currentWorkspace?.id;
 
   useEffect(() => {
     // Only connect if the route exists
@@ -30,10 +30,10 @@ export function useSocketEvents(): { status: SocketStatus; reconnect: () => void
   }, [auth, connect]);
 
   useEffect(() => {
-    if (projectId) {
-      switchProject(projectId);
+    if (workspaceId) {
+      switchWorkspace(workspaceId);
     }
-  }, [projectId, switchProject]);
+  }, [workspaceId, switchWorkspace]);
 
   useEffect(() => {
     if (!auth) {

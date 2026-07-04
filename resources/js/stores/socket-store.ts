@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export type SocketEventData = {
-  project_id: number;
+  workspace_id: number;
   type: string;
   data: Record<string, unknown>;
 };
@@ -15,8 +15,8 @@ declare global {
 }
 
 export type WebSocketMessage =
-  | { type: 'connected'; project_id: number }
-  | { type: 'subscribed'; project_id: number }
+  | { type: 'connected'; workspace_id: number }
+  | { type: 'subscribed'; workspace_id: number }
   | { type: 'event'; data: SocketEventData }
   | { type: 'error'; message: string };
 
@@ -33,11 +33,11 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
 type SocketStore = {
   status: SocketStatus;
-  currentProjectId: number | null;
+  currentWorkspaceId: number | null;
   connect: (csrfToken: string) => Promise<void>;
   disconnect: () => void;
   reconnect: (csrfToken: string) => void;
-  switchProject: (projectId: number) => void;
+  switchWorkspace: (workspaceId: number) => void;
 };
 
 async function requestEventsToken(csrfToken: string): Promise<{ token: string; url: string } | null> {
@@ -87,7 +87,7 @@ function scheduleReconnect(csrfToken: string): void {
 
 export const useSocketStore = create<SocketStore>((set, get) => ({
   status: 'disconnected', // Default to disconnected
-  currentProjectId: null,
+  currentWorkspaceId: null,
 
   connect: async (csrfToken: string) => {
     // If the route doesn't exist, we don't try to connect
@@ -120,11 +120,11 @@ export const useSocketStore = create<SocketStore>((set, get) => ({
         switch (msg.type) {
           case 'connected':
             reconnectAttempt = 0;
-            set({ status: 'connected', currentProjectId: msg.project_id });
+            set({ status: 'connected', currentWorkspaceId: msg.workspace_id });
             break;
 
           case 'subscribed':
-            set({ currentProjectId: msg.project_id });
+            set({ currentWorkspaceId: msg.workspace_id });
             break;
 
           case 'event':
@@ -171,10 +171,10 @@ export const useSocketStore = create<SocketStore>((set, get) => ({
     get().connect(csrfToken);
   },
 
-  switchProject: (projectId: number) => {
-    const { currentProjectId } = get();
-    if (ws && ws.readyState === WebSocket.OPEN && projectId !== currentProjectId) {
-      ws.send(JSON.stringify({ type: 'subscribe', project_id: projectId }));
+  switchWorkspace: (workspaceId: number) => {
+    const { currentWorkspaceId } = get();
+    if (ws && ws.readyState === WebSocket.OPEN && workspaceId !== currentWorkspaceId) {
+      ws.send(JSON.stringify({ type: 'subscribe', workspace_id: workspaceId }));
     }
   },
 }));

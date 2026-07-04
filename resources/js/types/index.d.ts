@@ -1,0 +1,142 @@
+import { LucideIcon } from 'lucide-react';
+import type { Config } from 'ziggy-js';
+import { Project } from '@/types/project';
+import { User } from '@/types/user';
+import { DynamicFieldConfig } from './dynamic-field-config';
+
+export interface Auth {
+  user: User;
+  currentProject?: Project;
+}
+
+export interface BreadcrumbItem {
+  title: string;
+  href: string;
+}
+
+export interface NavGroup {
+  title: string;
+  items: NavItem[];
+}
+
+export interface NavItem {
+  title: string;
+  href: string;
+  onlyActivePath?: string;
+  icon?: LucideIcon | null;
+  isActive?: boolean;
+  isDisabled?: boolean;
+  children?: NavItem[];
+  hidden?: boolean;
+  external?: boolean;
+}
+
+export interface Configs {
+  operating_systems?: string[];
+  colors?: string[];
+  cronjob_intervals?: {
+    [key: string]: string;
+  };
+  metrics_periods?: string[];
+  server_provider?: {
+    providers: {
+      [provider: string]: {
+        label: string;
+        handler: string;
+        form?: DynamicFieldConfig[];
+      };
+    };
+  };
+  storage_provider?: {
+    providers: {
+      [provider: string]: {
+        label: string;
+        handler: string;
+        form?: DynamicFieldConfig[];
+      };
+    };
+  };
+  source_control?: {
+    providers: {
+      [provider: string]: {
+        label: string;
+        handler: string;
+        form?: DynamicFieldConfig[];
+      };
+    };
+  };
+  dns_provider?: {
+    providers: {
+      [provider: string]: {
+        label: string;
+        handler: string;
+        form?: DynamicFieldConfig[];
+      };
+    };
+  };
+  notification_channel?: {
+    providers: {
+      [channel: string]: {
+        label: string;
+        handler: string;
+        form?: DynamicFieldConfig[];
+      };
+    };
+  };
+  plugins?: {
+    views?: {
+      [name: string]: string;
+    };
+  };
+  [key: string]: unknown;
+}
+
+export interface SharedData {
+  name: string;
+  version: string;
+  env: string;
+  demo: boolean;
+  quote?: { message: string; author: string };
+  auth: Auth;
+  ziggy?: Config & { location: string };
+  csrf_token: string;
+  bootstrap_version: string;
+  flash?: {
+    status: string;
+    success: string;
+    error: string;
+    info: string;
+    warning: string;
+    data: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export interface PaginatedData<TData> {
+  data: TData[];
+  links: PaginationLinks;
+  meta: PaginationMeta;
+}
+
+export interface PaginationLinks {
+  first: string | null;
+  last: string | null;
+  prev: string | null;
+  next: string | null;
+}
+
+export interface PaginationMeta {
+  current_page: number;
+  current_page_url: string;
+  from: number | null;
+  path: string;
+  per_page: number;
+  to: number | null;
+  total?: number;
+  last_page?: number;
+}
+
+export type PageProps<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> = T & SharedData;
+

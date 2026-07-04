@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import ConfirmationDialog from './confirmation-dialog';
+import PluginLogsDialog from '@/pages/plugins/components/logs-dialog';
 
 export type DialogControlProps = { open: boolean; onOpenChange: (open: boolean) => void };
 
@@ -9,6 +10,7 @@ export type DialogControlProps = { open: boolean; onOpenChange: (open: boolean) 
  */
 export const dialogs = {
   confirm: ConfirmationDialog,
+  pluginLogs: PluginLogsDialog,
 } as const satisfies Record<string, ComponentType<any>>;
 
 export type DialogRegistry = typeof dialogs;

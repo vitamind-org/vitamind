@@ -1,0 +1,91 @@
+import AdminLayout from '@/layouts/admin/layout';
+import { Head, usePage } from '@inertiajs/react';
+import Heading from '@/components/heading';
+import { useState } from 'react';
+import Container from '@/components/container';
+import InstalledPlugins from '@/pages/plugins/components/installed';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plugin } from '@/types/plugin';
+import { PageProps } from '@/types';
+import { Button } from '@/components/ui/button';
+import { BookOpenIcon } from 'lucide-react';
+import InstallDialog from '@/pages/plugins/components/install-dialog';
+import DiscoveredPlugins from '@/pages/plugins/components/discovered';
+import CheckForUpdates from '@/pages/plugins/components/check-updates';
+import OfficialPlugins from '@/pages/plugins/components/official';
+
+export default function Plugins() {
+  const page = usePage<PageProps<{
+    plugins: Plugin[];
+    marketplace: {
+      enabled: boolean;
+      github: {
+        org: string;
+        topic: string;
+      };
+    };
+  }>>();
+
+  const marketplaceEnabled = page.props.marketplace?.enabled ?? false;
+  const [tab, setTab] = useState('installed');
+
+  return (
+    <AdminLayout>
+      <Head title="Plugins" />
+
+      <Container className="max-w-5xl">
+        <div className="flex items-start justify-between">
+          <Heading title="Plugins" description="Here you can install/uninstall plugins" />
+          <div className="flex items-center gap-2">
+            <CheckForUpdates />
+            <InstallDialog />
+          </div>
+        </div>
+
+        <Tabs defaultValue={tab} onValueChange={setTab}>
+          <TabsList>
+            <TabsTrigger value="installed">Installed</TabsTrigger>
+            <TabsTrigger value="discovered">Discovered</TabsTrigger>
+            {marketplaceEnabled && <TabsTrigger value="official">Available</TabsTrigger>}
+          </TabsList>
+          <TabsContent value="installed">
+            <Card className="overflow-hidden">
+              <CardHeader>
+                <CardTitle>Installed plugins</CardTitle>
+                <CardDescription>All the currently installed plugins</CardDescription>
+              </CardHeader>
+              <CardContent className="bg-background">
+                <InstalledPlugins plugins={page.props.plugins} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="discovered">
+            <Card className="overflow-hidden">
+              <CardHeader>
+                <CardTitle>Discovered plugins</CardTitle>
+                <CardDescription>These plugins are present on the system, but have not been installed</CardDescription>
+              </CardHeader>
+              <CardContent className="bg-background">
+                <DiscoveredPlugins plugins={page.props.plugins} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          {marketplaceEnabled && (
+            <TabsContent value="official">
+              <Card className="overflow-hidden">
+                <CardHeader>
+                  <CardTitle>Available plugins</CardTitle>
+                  <CardDescription>These plugins are available to install from the community</CardDescription>
+                </CardHeader>
+                <CardContent className="bg-background">
+                  <OfficialPlugins marketplace={page.props.marketplace} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+        </Tabs>
+      </Container>
+    </AdminLayout>
+  );
+}

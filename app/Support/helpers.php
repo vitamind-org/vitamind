@@ -86,3 +86,21 @@ if (! function_exists('git_path')) {
         return array_find($paths, fn ($path) => is_executable($path));
     }
 }
+
+if (! function_exists('move_directory')) {
+    function move_directory(string $from, string $to): void
+    {
+        if (\Illuminate\Support\Facades\File::exists($to)) {
+            \Illuminate\Support\Facades\File::deleteDirectory($to);
+        }
+
+        \Illuminate\Support\Facades\File::ensureDirectoryExists(dirname($to));
+
+        if (! \Illuminate\Support\Facades\File::copyDirectory($from, $to)) {
+            throw new RuntimeException("Could not copy [$from] to [$to]");
+        }
+
+        \Illuminate\Support\Facades\File::deleteDirectory($from);
+    }
+}
+

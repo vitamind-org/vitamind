@@ -35,4 +35,20 @@ return [
     */
 
     'pagination_size' => (int) env('VITAMIND_PAGINATION_SIZE', 25),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Plugins Configuration
+    |--------------------------------------------------------------------------
+    */
+    'plugins' => [
+        'marketplace' => [
+            'enabled' => (bool) env('VITAMIND_PLUGINS_MARKETPLACE', true),
+            'provider' => 'github',
+            'github' => [
+                'org' => env('VITAMIND_PLUGINS_GITHUB_ORG', 'vitamind-org'),
+                'topic' => env('VITAMIND_PLUGINS_GITHUB_TOPIC', 'vitamind-plugin'),
+            ],
+        ],
+    ],
 ];

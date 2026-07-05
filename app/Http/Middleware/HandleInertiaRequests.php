@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Actions\Bootstrap\GetBootstrap;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\WorkspaceResource;
 use App\Models\User;
@@ -56,6 +57,13 @@ class HandleInertiaRequests extends Middleware
             ] : null,
             'features' => $features,
             'csrf_token' => csrf_token(),
+            'bootstrap_version' => app(GetBootstrap::class)->version(),
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error') ?? $request->session()->get('danger'),
+                'warning' => fn () => $request->session()->get('warning'),
+                'info' => fn () => $request->session()->get('info'),
+            ],
         ];
     }
 }

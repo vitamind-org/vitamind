@@ -15,7 +15,6 @@
         "typescript": "^5.7.2"
     },
     "dependencies": {
-        "@forjedio/inertia-table-react": "^1.2.0",
         "@headlessui/react": "^2.2.0",
         "@hookform/resolvers": "^5.0.1",
         "@inertiajs/react": "^3.0.0",

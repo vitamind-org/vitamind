@@ -19,6 +19,12 @@ return [
             'patterns' => ['*Controller.php'],
             'not_patterns' => ['API/*'],
         ],
+        app_path('Http/Controllers/API') => [
+            'prefix' => '',
+            'middleware' => 'api',
+            'patterns' => ['*Controller.php'],
+            'not_patterns' => [],
+        ],
     ],
 
     /*

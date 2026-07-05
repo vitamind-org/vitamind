@@ -1,58 +1,115 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Vitamin-D
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Vitamin-D is a modern, enterprise-ready, metadata-driven Single Page Application (SPA) portal framework built on top of Laravel 13, Inertia.js v3, React 19, Tailwind CSS v4, and TypeScript. 
 
-## About Laravel
+It provides a highly decoupled, plugin-based architecture where dashboard pages, forms, and data tables can be fully defined in backend PHP code and dynamically rendered using typed React components on the frontend.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+> [!NOTE]  
+> **Inspiration & Acknowledgement:** Vitamin-D is heavily inspired by and adapted from the brilliant architecture of [VitoDeploy](https://github.com/vitodeploy/vito). We have extracted, generalized, and decoupled many of their robust patterns to create this generic, metadata-driven SPA solution.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🚀 Key Advantages & Feature
 
-## Learning Laravel
+Vitamin-D is designed to offer the developer velocity of rapid admin panel builders  combined with the rich user experience and flexibility of a modern React SPA.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 1. Modern SPA Tech Stack
+* **React 19 + Inertia.js v3 + TypeScript:** Benefit from strict static typing, reusable frontend components, and smooth client-side transitions (no full-page reloads).
+* **Tailwind CSS v4:** Leverages the latest CSS-first Tailwind compiler with CSS variables, cascading layers, and optimized utility compilation.
+* **Next-Themes Integration:** Seamless out-of-the-box light/dark/system theme synchronization on the frontend.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 2. Metadata-Driven Dynamic UI Engine
+* Define complete admin interfaces—including multi-tab setups, complex forms, search/sort filters, and custom column formatters—entirely in PHP using the custom **Plugin SDK**.
+* Layout configs are serialized to JSON and sent to a single React dynamic page (`resources/js/pages/plugins/dynamic-page.tsx`), which automatically renders the corresponding form fields and DataTables.
+* Drastically reduces boilerplate: you write the schema once in PHP, and the React frontend handles the rest.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### 3. Clean & Maintainable Architecture
+* **Action Pattern:** All business logic is separated from HTTP requests. Thin controllers handle requests/responses and delegate execution to reusable service actions under `app/Actions/`.
+* **Spatie Route Attributes:** Keep routes clean and close to the execution context. Routes are declared directly on controllers using PHP 8 attributes instead of sprawling `web.php` or `api.php` files.
+* **Abstract Models:** Base model inheritance (`App\Models\AbstractModel`) ensures consistency in UUIDs, audit logs, and global query scopes.
 
-## Agentic Development
+### 4. Modular Plugin Architecture
+* Build self-contained features under `app/Plugins/Local/`.
+* Each plugin can register its own migrations, custom database schemas, navigation items, tabs, forms, and custom business logic in a single directory.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
 
-```bash
-composer require laravel/boost --dev
+## 🛠️ Architecture vs. Standard FilamentPHP
 
-php artisan boost:install
-```
+While FilamentPHP is the go-to standard for Laravel admin panels utilizing Livewire and server-rendered HTML fragments, Vitamin-D takes a fundamentally different route by using a modern Inertia React SPA stack. This enables dynamic client-side rendering, type-safety with TypeScript, and a highly interactive, decoupled frontend.
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Here is a high-level comparison of the architectural approaches:
 
-## Contributing
+| Feature | FilamentPHP | Vitamin-D |
+| :--- | :--- | :--- |
+| **Frontend Framework** | Blade + Alpine.js | React 19 + TypeScript |
+| **Server Connection** | Livewire (Server-side HTML diffs) | Inertia.js (JSON API / Client SPA state) |
+| **Styling Engine** | Tailwind CSS v3 | Tailwind CSS v4 |
+| **Routing** | Web Routes / Resource classes | Controller Route Attributes |
+| **Business Logic** | Embedded in Livewire/Resources | Clean Actions (`app/Actions`) |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## ⚙️ Getting Started
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Prerequisites
+* PHP >= 8.2
+* Node.js >= 20.x
+* Composer
+* NPM
 
-## Security Vulnerabilities
+### Local Installation
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. **Clone and Navigate:**
+   ```bash
+   cd vitamin-d
+   ```
 
-## License
+2. **Install Composer Dependencies:**
+   ```bash
+   composer install
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+3. **Install NPM Dependencies:**
+   ```bash
+   npm install
+   ```
+
+4. **Environment Setup:**
+   Copy the example environment file and configure your database settings:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+5. **Run Migrations & Seeders:**
+   ```bash
+   php artisan migrate --seed
+   ```
+
+6. **Start Development Servers:**
+   Run the Vite development server:
+   ```bash
+   npm run dev
+   ```
+   In a separate terminal, serve the Laravel application:
+   ```bash
+   php artisan serve
+   ```
+
+7. **Verify Types:**
+   To ensure all TypeScript code compiles successfully:
+   ```bash
+   npm run types
+   ```
+
+---
+
+## 📁 Key Directory Structure
+
+* 📂 **`app/Actions/`** — Houses all business logic/service classes.
+* 📂 **`app/Plugins/`** — Contains local and dynamic plugin code (SDK registrations).
+* 📂 **`app/Http/Controllers/`** — Thin controllers annotated with Spatie Route Attributes.
+* 📂 **`resources/js/pages/`** — React page components rendered via Inertia.
+* 📂 **`resources/js/components/ui/`** — Reusable, generic UI components (Buttons, Inputs, Dialogs, DataTables).
+* 📄 **`config/vitamin-d.php`** — Feature flags and configuration settings.

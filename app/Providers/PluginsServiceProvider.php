@@ -5,8 +5,8 @@ namespace App\Providers;
 use App\Actions\Plugins\BootPlugins;
 use App\Actions\Plugins\DiscoverPlugins;
 use App\Actions\Plugins\GetPluginInstance;
-use App\Plugins\RegisterCommand;
-use App\Plugins\RegisterViews;
+use VitaminD\PluginSdk\RegisterCommand;
+use VitaminD\PluginSdk\RegisterViews;
 use Illuminate\Support\ServiceProvider;
 
 class PluginsServiceProvider extends ServiceProvider

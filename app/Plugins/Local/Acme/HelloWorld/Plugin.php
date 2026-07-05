@@ -2,7 +2,7 @@
 
 namespace App\Plugins\Local\Acme\HelloWorld;
 
-use App\Plugins\AbstractPlugin;
+use VitaminD\PluginSdk\AbstractPlugin;
 use Illuminate\Support\Facades\Log;
 
 class Plugin extends AbstractPlugin

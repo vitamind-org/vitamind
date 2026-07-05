@@ -201,6 +201,26 @@ export default function DynamicField({ value, onChange, config, error }: Dynamic
         <p className="text-destructive mt-1 text-xs font-semibold">
           Component "{config.name}" is not registered.
         </p>
+        <InputError message={error} />
+      </FormField>
+    );
+  }
+
+  if (config?.type === 'number') {
+    const step = (config.componentProps?.step as string | number) || 'any';
+    return (
+      <FormField>
+        <Label htmlFor={`field-${config.name}`} className="capitalize">
+          {label}
+        </Label>
+        <Input
+          type="number"
+          step={step}
+          id={`field-${config.name}`}
+          value={value !== undefined && value !== null ? String(value) : ''}
+          onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
+          placeholder={config?.placeholder}
+        />
         {config.description && <p className="text-muted-foreground text-xs">{config.description}</p>}
         <InputError message={error} />
       </FormField>

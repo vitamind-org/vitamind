@@ -1,6 +1,7 @@
 export interface DynamicFieldConfig {
   type:
     | 'text'
+    | 'number'
     | 'password'
     | 'password-with-toggle'
     | 'textarea'

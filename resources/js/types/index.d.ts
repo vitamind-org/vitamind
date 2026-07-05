@@ -101,6 +101,7 @@ export interface SharedData {
   ziggy?: Config & { location: string };
   csrf_token: string;
   bootstrap_version: string;
+  pluginPages?: Array<{ key: string; title: string; icon: string; admin_only: boolean }>;
   flash?: {
     status: string;
     success: string;

@@ -56,6 +56,7 @@ class HandleInertiaRequests extends Middleware
                 'currentWorkspace' => $currentWorkspace ? WorkspaceResource::make($currentWorkspace) : null,
             ] : null,
             'features' => $features,
+            'pluginPages' => array_map(fn($p) => $p->toArray(), array_values(\VitaminD\PluginSdk\RegisterPage::get())),
             'csrf_token' => csrf_token(),
             'bootstrap_version' => app(GetBootstrap::class)->version(),
             'flash' => [

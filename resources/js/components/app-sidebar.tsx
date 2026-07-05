@@ -24,6 +24,7 @@ import {
   ListEndIcon,
   LogsIcon,
 } from 'lucide-react';
+import * as Icons from 'lucide-react';
 import AppLogo from './app-logo';
 import { Icon } from '@/components/icon';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -32,6 +33,7 @@ import { useMemo } from 'react';
 
 export function AppSidebar({ secondNavItems, secondNavTitle }: { secondNavItems?: NavItem[]; secondNavTitle?: string }) {
   const page = usePage<SharedData>();
+  const pluginPages = page.props.pluginPages || [];
 
   // Helper to check route existence safely
   const hasRoute = (name: string) => {
@@ -47,6 +49,29 @@ export function AppSidebar({ secondNavItems, secondNavTitle }: { secondNavItems?
         title: 'Dashboard',
         href: route('dashboard'),
         icon: LayoutDashboardIcon,
+      });
+    }
+
+    // Dynamic user-level plugin pages
+    const getIconComponent = (iconName: string) => {
+      if (!iconName) return Icons.PackageIcon;
+      const pascalName = iconName
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('');
+      return (Icons as any)[pascalName] || (Icons as any)[`${pascalName}Icon`] || Icons.PackageIcon;
+    };
+
+    if (hasRoute('plugins.page')) {
+      pluginPages.forEach((p) => {
+        if (!p.admin_only) {
+          items.push({
+            title: p.title,
+            // @ts-ignore
+            href: route('plugins.page', p.key),
+            icon: getIconComponent(p.icon),
+          });
+        }
       });
     }
 
@@ -87,7 +112,7 @@ export function AppSidebar({ secondNavItems, secondNavTitle }: { secondNavItems?
     }
 
     return items;
-  }, [page.props.auth.user?.is_admin]);
+  }, [page.props.auth.user?.is_admin, pluginPages]);
 
   const footerNavItems = useMemo(() => {
     const items: NavItem[] = [];

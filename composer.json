@@ -18,7 +18,8 @@
         "mobiledetect/mobiledetectlib": "^4.8",
         "spatie/laravel-route-attributes": "*",
         "symfony/yaml": "^8.1",
-        "tightenco/ziggy": "^2.0"
+        "tightenco/ziggy": "^2.0",
+        "vitamind/plugin-sdk": "dev-main"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -99,6 +100,15 @@
             "php-http/discovery": true
         }
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../packages/plugin-sdk",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
     "minimum-stability": "stable",
     "prefer-stable": true
 }

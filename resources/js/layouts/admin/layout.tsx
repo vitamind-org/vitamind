@@ -1,10 +1,15 @@
-import { type NavItem } from '@/types';
+import { type NavItem, SharedData } from '@/types';
 import { UsersIcon, PlugIcon } from 'lucide-react';
+import * as Icons from 'lucide-react';
 import { ReactNode, useMemo } from 'react';
 import Layout from '@/layouts/app/layout';
 import VitaminIcon from '@/icons/vitamin';
+import { usePage } from '@inertiajs/react';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
+  const { props } = usePage<SharedData>();
+  const pluginPages = props.pluginPages || [];
+
   const sidebarNavItems = useMemo(() => {
     const items: NavItem[] = [];
 
@@ -30,6 +35,29 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       });
     }
 
+    // Dynamic plugin pages
+    const getIconComponent = (iconName: string) => {
+      if (!iconName) return Icons.PackageIcon;
+      const pascalName = iconName
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('');
+      return (Icons as any)[pascalName] || (Icons as any)[`${pascalName}Icon`] || Icons.PackageIcon;
+    };
+
+    if (hasRoute('plugins.page')) {
+      pluginPages.forEach((p) => {
+        if (p.admin_only) {
+          items.push({
+            title: p.title,
+            // @ts-ignore
+            href: route('plugins.page', p.key),
+            icon: getIconComponent(p.icon),
+          });
+        }
+      });
+    }
+
     if (hasRoute('settings')) {
       items.push({
         title: 'Settings',
@@ -39,7 +67,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     }
 
     return items;
-  }, []);
+  }, [pluginPages]);
 
   // When server-side rendering, we only render the layout on the client...
   if (typeof window === 'undefined') {

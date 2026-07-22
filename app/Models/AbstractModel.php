@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\HasTimezoneTimestamps;
+use VitaminD\Core\Traits\HasTimezoneTimestamps;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 

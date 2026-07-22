@@ -102,7 +102,7 @@ export default function DynamicField({ value, onChange, config, error }: Dynamic
           id={`field-${config.name}`}
           value={(value as string) || ''}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={config?.placeholder}
+          placeholder={config?.placeholder ?? undefined}
         />
         {config.description && <p className="text-muted-foreground text-xs">{config.description}</p>}
         <InputError message={error} />
@@ -120,7 +120,7 @@ export default function DynamicField({ value, onChange, config, error }: Dynamic
           id={`field-${config.name}`}
           value={(value as string) || ''}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={config?.placeholder}
+          placeholder={config?.placeholder ?? undefined}
           autoComplete="off"
         />
         {config.description && <p className="text-muted-foreground text-xs">{config.description}</p>}
@@ -196,7 +196,7 @@ export default function DynamicField({ value, onChange, config, error }: Dynamic
           id={`field-${config.name}`}
           value={(value as string) || ''}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={config?.placeholder}
+          placeholder={config?.placeholder ?? undefined}
         />
         <p className="text-destructive mt-1 text-xs font-semibold">
           Component "{config.name}" is not registered.
@@ -207,7 +207,7 @@ export default function DynamicField({ value, onChange, config, error }: Dynamic
   }
 
   if (config?.type === 'number') {
-    const step = (config.componentProps?.step as string | number) || 'any';
+    const step = ((config.componentProps as any)?.step as string | number) || 'any';
     return (
       <FormField>
         <Label htmlFor={`field-${config.name}`} className="capitalize">
@@ -219,7 +219,7 @@ export default function DynamicField({ value, onChange, config, error }: Dynamic
           id={`field-${config.name}`}
           value={value !== undefined && value !== null ? String(value) : ''}
           onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
-          placeholder={config?.placeholder}
+          placeholder={config?.placeholder ?? undefined}
         />
         {config.description && <p className="text-muted-foreground text-xs">{config.description}</p>}
         <InputError message={error} />
@@ -230,7 +230,7 @@ export default function DynamicField({ value, onChange, config, error }: Dynamic
   // Default to text input
   const props: InputHTMLAttributes<HTMLInputElement> = {};
   if (config?.placeholder) {
-    props.placeholder = config.placeholder;
+    props.placeholder = config.placeholder ?? undefined;
   }
 
   return (

@@ -19,7 +19,11 @@
         "spatie/laravel-route-attributes": "*",
         "symfony/yaml": "^8.1",
         "tightenco/ziggy": "^2.0",
-        "vitamind/plugin-sdk": "dev-main"
+        "spatie/laravel-data": "^4.23",
+        "spatie/laravel-typescript-transformer": "^3.3",
+        "vitamind/plugin-sdk": "dev-main",
+        "vitamind/core": "dev-main",
+        "vitamind/workspace-plugin": "dev-main"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -34,16 +38,17 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
+            "App\\Plugins\\": "app/Plugins/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        },
-        "files": [
-            "app/Support/helpers.php"
-        ]
+        }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "VitaminD\\PluginSdk\\Tests\\": "dev-packages/vitamind-plugin-sdk/tests/",
+            "VitaminD\\Core\\Tests\\": "dev-packages/vitamind-core/tests/",
+            "VitaminD\\Plugins\\Workspace\\Tests\\": "dev-packages/vitamind-workspace-plugin/tests/"
         }
     },
     "scripts": {
@@ -103,7 +108,21 @@
     "repositories": [
         {
             "type": "path",
-            "url": "../packages/plugin-sdk",
+            "url": "dev-packages/vitamind-plugin-sdk",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "dev-packages/vitamind-core",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "dev-packages/vitamind-workspace-plugin",
             "options": {
                 "symlink": true
             }

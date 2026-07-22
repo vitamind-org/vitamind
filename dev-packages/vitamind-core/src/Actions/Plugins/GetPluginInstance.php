@@ -1,0 +1,50 @@
+<?php
+
+namespace VitaminD\Core\Actions\Plugins;
+
+use VitaminD\Core\Models\Plugin;
+use VitaminD\Core\Models\PluginError;
+use VitaminD\PluginSdk\Interfaces\PluginInterface;
+use Exception;
+use Throwable;
+
+final class GetPluginInstance
+{
+    private array $implementations = [];
+
+    public function __construct() {}
+
+    public function handle(Plugin $plugin): ?PluginInterface
+    {
+        if (array_key_exists($plugin->id, $this->implementations)) {
+            return $this->implementations[$plugin->id];
+        }
+
+        try {
+            $namespace = $plugin->namespace;
+            
+            if (! class_exists($namespace)) {
+                throw new Exception("Plugin class $namespace does not exist");
+            }
+
+            $implementation = new $namespace;
+
+            if (! $implementation instanceof PluginInterface) {
+                throw new Exception('Plugin does not implement '.PluginInterface::class);
+            }
+
+            $this->implementations[$plugin->id] = $implementation;
+
+            return $implementation;
+        } catch (Throwable $ex) {
+            PluginError::createFromException($ex, $plugin, true);
+        }
+
+        return null;
+    }
+
+    public function clear(): void
+    {
+        $this->implementations = [];
+    }
+}

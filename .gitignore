@@ -27,3 +27,7 @@ Homestead.yaml
 Thumbs.db
 composer.lock
 package-lock.json
+/dev-packages/*/vendor
+/dev-packages/*/.env
+/dev-packages/*/.env.backup
+/dev-packages/*/.env.production

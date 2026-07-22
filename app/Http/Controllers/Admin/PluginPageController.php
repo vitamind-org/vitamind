@@ -129,7 +129,12 @@ class PluginPageController extends Controller
             abort(404);
         }
 
-        $rules = $this->getRules($pageKey, $tabKey);
+        $form = $table->getForm();
+        if ($form) {
+            $rules = $form->getFieldValidationRules();
+        } else {
+            $rules = $this->getRules($pageKey, $tabKey);
+        }
         $data = $request->validate($rules);
 
         $modelClass = $table->getModel();
@@ -155,7 +160,20 @@ class PluginPageController extends Controller
         $modelClass = $table->getModel();
         $record = $modelClass::findOrFail($id);
 
-        $rules = $this->getRules($pageKey, $tabKey, $id);
+        $form = $table->getForm();
+        if ($form) {
+            $rules = $form->getFieldValidationRules();
+            // Replace {id} placeholder with actual record id
+            foreach ($rules as $fieldName => $fieldRules) {
+                if (is_array($fieldRules)) {
+                    $rules[$fieldName] = array_map(fn($r) => is_string($r) ? str_replace('{id}', $id, $r) : $r, $fieldRules);
+                } elseif (is_string($fieldRules)) {
+                    $rules[$fieldName] = str_replace('{id}', $id, $fieldRules);
+                }
+            }
+        } else {
+            $rules = $this->getRules($pageKey, $tabKey, $id);
+        }
         $data = $request->validate($rules);
 
         $record->update($data);
@@ -186,24 +204,6 @@ class PluginPageController extends Controller
 
     private function getRules(string $pageKey, string $tabKey, $id = null): array
     {
-        if ($pageKey === 'mock-product') {
-            if ($tabKey === 'products') {
-                return [
-                    'name' => 'required|string|max:255',
-                    'price' => 'required|numeric|min:0',
-                    'category_id' => 'required|integer',
-                    'is_active' => 'required|boolean',
-                ];
-            } elseif ($tabKey === 'categories') {
-                $uniqueRule = $id ? 'unique:mock_categories,name,' . $id : 'unique:mock_categories,name';
-
-                return [
-                    'name' => 'required|string|max:255|' . $uniqueRule,
-                    'is_active' => 'required|boolean',
-                ];
-            }
-        }
-
         return [];
     }
 }

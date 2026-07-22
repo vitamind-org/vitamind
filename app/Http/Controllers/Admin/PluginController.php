@@ -12,7 +12,7 @@ use App\Actions\Plugins\Github\UpdateGithubPlugin;
 use App\Actions\Plugins\InstallPlugin;
 use App\Actions\Plugins\UninstallPlugin;
 use App\Http\Controllers\Controller;
-use App\Models\Plugin;
+use VitaminD\Core\Models\Plugin;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

@@ -2,9 +2,9 @@
 
 namespace VitaminD\Core\Http\Middleware;
 
-use VitaminD\Core\Models\PersonalAccessToken;
+use App\Models\PersonalAccessToken;
 use VitaminD\Core\Models\Workspace;
-use VitaminD\Core\Models\User;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 

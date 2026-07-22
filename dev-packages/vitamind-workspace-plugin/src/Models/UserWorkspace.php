@@ -2,6 +2,7 @@
 
 namespace VitaminD\Plugins\Workspace\Models;
 
+use App\Models\AbstractModel;
 use VitaminD\Plugins\Workspace\Enums\UserRole;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

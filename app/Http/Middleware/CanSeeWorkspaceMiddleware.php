@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\PersonalAccessToken;
-use App\Models\Workspace;
+use VitaminD\Plugins\Workspace\Models\Workspace;
 use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;

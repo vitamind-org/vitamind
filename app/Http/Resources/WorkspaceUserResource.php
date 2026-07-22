@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Models\UserWorkspace;
+use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 

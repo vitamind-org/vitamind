@@ -2,7 +2,7 @@
 
 namespace VitaminD\Core\Actions\ApiKey;
 
-use VitaminD\Core\Models\User;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Sanctum\NewAccessToken;

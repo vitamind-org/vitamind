@@ -3,7 +3,7 @@
 namespace VitaminD\Plugins\Workspace\Policies;
 
 use VitaminD\Plugins\Workspace\Models\Workspace;
-use VitaminD\Core\Models\User;
+use App\Models\User;
 use VitaminD\Plugins\Workspace\Traits\HasRolePolicies;
 
 class WorkspacePolicy

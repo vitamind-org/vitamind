@@ -4,7 +4,7 @@ namespace VitaminD\Core\Traits;
 
 use VitaminD\Core\Enums\UserRole;
 use VitaminD\Core\Models\Workspace;
-use VitaminD\Core\Models\User;
+use App\Models\User;
 
 trait HasRolePolicies
 {

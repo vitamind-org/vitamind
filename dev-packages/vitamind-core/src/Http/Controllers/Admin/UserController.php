@@ -6,7 +6,7 @@ use VitaminD\Core\Actions\User\CreateUser;
 use VitaminD\Core\Actions\User\UpdateUser;
 use VitaminD\Core\Http\Controllers\Controller;
 use VitaminD\Core\Http\Resources\UserResource;
-use VitaminD\Core\Models\User;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;

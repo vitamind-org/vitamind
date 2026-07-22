@@ -2,8 +2,8 @@
 
 namespace VitaminD\Core\Policies;
 
-use VitaminD\Core\Models\PersonalAccessToken;
-use VitaminD\Core\Models\User;
+use App\Models\PersonalAccessToken;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class PersonalAccessTokenPolicy

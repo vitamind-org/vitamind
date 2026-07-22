@@ -5,7 +5,7 @@ namespace VitaminD\Core\Http\Controllers;
 use VitaminD\Core\Actions\ApiKey\CreateApiKey;
 use VitaminD\Core\Http\Resources\ApiKeyResource;
 use VitaminD\Core\Http\Resources\WorkspaceResource;
-use VitaminD\Core\Models\PersonalAccessToken;
+use App\Models\PersonalAccessToken;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

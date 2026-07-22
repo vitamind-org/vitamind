@@ -3,7 +3,7 @@
 namespace VitaminD\Core\Actions\User;
 
 use VitaminD\Core\Enums\UserRole;
-use VitaminD\Core\Models\User;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 

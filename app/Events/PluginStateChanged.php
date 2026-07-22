@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Plugin;
+use VitaminD\Core\Models\Plugin;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 

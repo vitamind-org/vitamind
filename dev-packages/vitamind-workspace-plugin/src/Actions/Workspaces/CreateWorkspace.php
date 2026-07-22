@@ -4,7 +4,7 @@ namespace VitaminD\Plugins\Workspace\Actions\Workspaces;
 
 use VitaminD\Plugins\Workspace\Enums\UserRole;
 use VitaminD\Plugins\Workspace\Models\Workspace;
-use VitaminD\Core\Models\User;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 class CreateWorkspace

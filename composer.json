@@ -22,8 +22,8 @@
         "spatie/laravel-data": "^4.23",
         "spatie/laravel-typescript-transformer": "^3.3",
         "vitamind/plugin-sdk": "dev-main",
-        "vitamind/core": "dev-main",
-        "vitamind/workspace-plugin": "dev-main"
+        "vitamind/core": "dev-master",
+        "vitamind/workspace-plugin": "dev-master"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

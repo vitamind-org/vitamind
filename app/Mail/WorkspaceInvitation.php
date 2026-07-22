@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\Workspace;
+use VitaminD\Plugins\Workspace\Models\Workspace;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;

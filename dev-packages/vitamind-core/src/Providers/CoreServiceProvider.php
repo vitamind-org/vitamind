@@ -11,7 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
-use VitaminD\Core\Models\PersonalAccessToken;
+use App\Models\PersonalAccessToken;
 
 class CoreServiceProvider extends ServiceProvider
 {

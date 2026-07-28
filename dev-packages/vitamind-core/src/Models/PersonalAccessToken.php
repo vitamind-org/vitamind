@@ -20,33 +20,4 @@ use Laravel\Sanctum\PersonalAccessToken as SanctumPersonalAccessToken;
 class PersonalAccessToken extends SanctumPersonalAccessToken
 {
     use HasTimezoneTimestamps;
-
-    /**
-     * Get the workspace IDs this token is scoped to.
-     *
-     * @return array<int>
-     */
-    public function getWorkspaceIds(): array
-    {
-        return collect($this->abilities)
-            ->filter(fn (string $ability) => str_starts_with($ability, 'workspace:'))
-            ->map(fn (string $ability) => (int) str_replace('workspace:', '', $ability))
-            ->values()
-            ->all();
-    }
-
-    /**
-     * Check if the token has access to the given workspace.
-     * Tokens with no workspace restrictions have access to all workspaces (backward compatible).
-     */
-    public function hasWorkspaceAccess(Workspace $workspace): bool
-    {
-        $workspaceIds = $this->getWorkspaceIds();
-
-        if (empty($workspaceIds)) {
-            return true;
-        }
-
-        return in_array($workspace->id, $workspaceIds);
-    }
 }

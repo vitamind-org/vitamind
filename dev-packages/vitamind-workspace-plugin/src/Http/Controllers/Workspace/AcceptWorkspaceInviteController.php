@@ -2,9 +2,9 @@
 
 namespace VitaminD\Plugins\Workspace\Http\Controllers\Workspace;
 
-use VitaminD\Plugins\Workspace\Http\Controllers\Controller;
+use VitaminD\Core\Http\Controllers\Controller;
 use VitaminD\Plugins\Workspace\Models\Workspace;
-use VitaminD\Core\Models\UserWorkspace;
+use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use Illuminate\Http\RedirectResponse;
 use Spatie\RouteAttributes\Attributes\Get;
 use Spatie\RouteAttributes\Attributes\Middleware;

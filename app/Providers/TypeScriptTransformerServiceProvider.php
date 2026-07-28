@@ -15,8 +15,9 @@ class TypeScriptTransformerServiceProvider extends BaseTypeScriptTransformerServ
     {
         $directories = array_filter([
             app_path(),
+            base_path('vendor/vitamind/core/src/DTOs'),
+            base_path('vendor/vitamind/workspace-plugin/src/DTOs'),
             base_path('vendor/vitamind/plugin-sdk/src/DTOs'),
-            base_path('../packages/plugin-sdk/src/DTOs'),
             storage_path('plugins'),
         ], 'is_dir');
 

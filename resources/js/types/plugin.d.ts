@@ -8,8 +8,10 @@ export interface Plugin {
   id: number;
   version: string;
   repo: string;
+  source: 'local' | 'github' | 'composer';
   is_enabled: boolean;
   is_installed: boolean;
+  installed_at: string | null;
   folder: string;
   error_count: number;
   updates_available: boolean;

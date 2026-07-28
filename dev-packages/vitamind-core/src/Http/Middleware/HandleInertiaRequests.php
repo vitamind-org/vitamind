@@ -4,7 +4,7 @@ namespace VitaminD\Core\Http\Middleware;
 
 use VitaminD\Core\Actions\Bootstrap\GetBootstrap;
 use VitaminD\Core\Http\Resources\UserResource;
-use VitaminD\Core\Http\Resources\WorkspaceResource;
+use VitaminD\Core\Support\InertiaSharedData;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -38,22 +38,10 @@ class HandleInertiaRequests extends Middleware
 
         $features = config('vitamin-d.features');
 
-        $currentWorkspace = null;
-        if ($user && config('vitamin-d.features.workspaces', false)) {
-            $currentWorkspace = $user->currentWorkspace;
-            $canSeeCurrentWorkspace = $currentWorkspace && $user->can('view', $currentWorkspace);
-            if (! $currentWorkspace || ! $canSeeCurrentWorkspace) {
-                $user->ensureHasDefaultWorkspace();
-                $user->unsetRelation('currentWorkspace');
-                $currentWorkspace = $user->currentWorkspace;
-            }
-        }
-
-        return [
+        $shared = [
             ...parent::share($request),
             'auth' => $user ? [
-                'user' => UserResource::make($user->load('workspaces')),
-                'currentWorkspace' => $currentWorkspace ? WorkspaceResource::make($currentWorkspace) : null,
+                'user' => UserResource::make($user),
             ] : null,
             'features' => $features,
             'pluginPages' => array_map(fn($p) => $p->toArray(), array_values(\VitaminD\PluginSdk\RegisterPage::get())),
@@ -67,5 +55,7 @@ class HandleInertiaRequests extends Middleware
                 'data' => fn () => $request->session()->get('data'),
             ],
         ];
+
+        return array_replace_recursive($shared, InertiaSharedData::resolve($request));
     }
 }

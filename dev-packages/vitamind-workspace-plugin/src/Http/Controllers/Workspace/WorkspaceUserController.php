@@ -2,11 +2,11 @@
 
 namespace VitaminD\Plugins\Workspace\Http\Controllers\Workspace;
 
+use VitaminD\Core\Enums\UserRole;
+use VitaminD\Core\Http\Controllers\Controller;
 use VitaminD\Plugins\Workspace\Actions\Workspaces\InviteToWorkspace;
-use VitaminD\Plugins\Workspace\Enums\UserRole;
-use VitaminD\Plugins\Workspace\Http\Controllers\Controller;
 use VitaminD\Plugins\Workspace\Models\Workspace;
-use VitaminD\Core\Models\UserWorkspace;
+use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Spatie\RouteAttributes\Attributes\Delete;

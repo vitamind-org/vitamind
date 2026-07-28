@@ -3,6 +3,8 @@
 namespace VitaminD\Core\Actions\Plugins\Github;
 
 use VitaminD\Core\Actions\Plugins\InstallPlugin;
+use VitaminD\Core\Actions\Plugins\PluginCache;
+use VitaminD\Core\Enums\PluginSource;
 use VitaminD\Core\Models\Plugin;
 use Exception;
 use Illuminate\Support\Facades\File;
@@ -14,6 +16,7 @@ final readonly class InstallGithubPlugin
         private DownloadRelease $downloadRelease,
         private ExtractPlugin $extractZip,
         private InstallPlugin $installPlugin,
+        private PluginCache $cache,
     ) {}
 
     /**
@@ -39,37 +42,40 @@ final readonly class InstallGithubPlugin
             throw new Exception('Plugin has no released versions');
         }
 
-        $psrUser = $this->toPsrCase($username);
         $psrRepo = $this->toPsrCase($repo);
 
         if ($plugin === null) {
-            $existingPlugin = Plugin::where('name', $psrRepo)->exists();
+            $existingPlugin = Plugin::where('folder', $psrRepo)->exists();
             if ($existingPlugin) {
                 throw new Exception('A plugin with the same name is already installed');
             }
         }
 
-        $folder = implode(DIRECTORY_SEPARATOR, [$psrUser, $psrRepo]);
-        $pluginsFolder = implode(DIRECTORY_SEPARATOR, ['Plugins', 'Local', $folder]);
         $zipFile = implode(DIRECTORY_SEPARATOR, ['app', 'temp', "$repo.zip"]);
-
         $zipLocation = storage_path($zipFile);
-        $extractLocation = app_path($pluginsFolder);
+        $extractLocation = plugins_path($psrRepo);
 
         $this->downloadRelease->handle($release, $zipLocation);
         $this->extractZip->handle($zipLocation, $extractLocation);
 
         File::delete($zipLocation);
 
+        $metadata = $this->cache->resolvePluginMetadata(PluginSource::GITHUB->value, $psrRepo, $extractLocation);
+        if ($metadata === null) {
+            File::deleteDirectory($extractLocation);
+            throw new Exception('Invalid plugin: composer.json with a PSR-4 autoload entry pointing to a Plugin.php class was not found.');
+        }
+
         if ($plugin === null) {
             $plugin = Plugin::updateOrCreate(
-                ['folder' => $folder],
+                ['folder' => $psrRepo],
                 [
                     'repo' => $url,
                     'username' => $username,
-                    'folder' => $folder,
+                    'folder' => $psrRepo,
                     'version' => $release->tagName,
-                    'namespace' => "VitaminD\Core\\Plugins\\Local\\$psrUser\\$psrRepo\\Plugin",
+                    'namespace' => $metadata['namespace'],
+                    'source' => PluginSource::GITHUB,
                     'is_installed' => false,
                     'is_enabled' => false,
                     'name' => null,
@@ -81,9 +87,12 @@ final readonly class InstallGithubPlugin
             $this->installPlugin->handle($plugin);
         } else {
             $plugin->version = $release->tagName;
+            $plugin->namespace = $metadata['namespace'];
             $plugin->updates_available = false;
             $plugin->save();
         }
+
+        $this->cache->clear();
 
         return $plugin;
     }

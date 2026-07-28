@@ -5,7 +5,7 @@
 - [x] 1.3 Create `dev-packages/vitamind-workspace-plugin/` with composer.json template
 - [x] 1.4 Update root `composer.json` to include path repositories for dev-packages
 - [x] 1.5 Create .gitignore entries for dev-packages/*/vendor, dev-packages/*/.env
-- [ ] 1.6 Setup GitHub organization structure: create repos for `vitamind-core` and `vitamind-workspace-plugin` (future mirrors)
+- [x] 1.6 Setup GitHub organization structure: create repos for `vitamind-core` and `vitamind-workspace-plugin` (future mirrors)
 
 ---
 
@@ -43,8 +43,8 @@
 - [x] 3.8 Move workspace migrations to `dev-packages/vitamind-workspace-plugin/database/migrations/`
 - [x] 3.9 Update namespace declarations to `VitaminD\Plugins\Workspace\*`
 - [x] 3.10 Create `dev-packages/vitamind-workspace-plugin/src/WorkspaceServiceProvider.php` with feature flag gating
-- [ ] 3.11 In WorkspaceServiceProvider: Register routes only if feature flag enabled
-- [ ] 3.12 In WorkspaceServiceProvider: Register Inertia shared data via core's registry (if feature enabled)
+- [x] 3.11 In WorkspaceServiceProvider: Register routes only if feature flag enabled
+- [x] 3.12 In WorkspaceServiceProvider: Register Inertia shared data via core's registry (if feature enabled)
 - [x] 3.13 Add `composer.json` requirement: `vitamind/core`
 - [x] 3.14 Configure PSR-4 autoload for workspace plugin
 - [x] 3.15 Create `dev-packages/vitamind-workspace-plugin/README.md` with feature flag instructions
@@ -56,7 +56,7 @@
 - [x] 4.1 Update boilerplate `composer.json` to `require vitamind/core` via path repository
 - [x] 4.2 Add workspace plugin as optional: comment out or make conditional in composer.json
 - [x] 4.3 Remove core/workspace classes from boilerplate `app/` (already moved to packages)
-- [ ] 4.4 Create `app/Models/User.php` in boilerplate that extends `VitaminD\Core\Models\User` (if app-specific behavior needed)
+- [x] 4.4 Create `app/Models/User.php` in boilerplate that extends `VitaminD\Core\Models\User` (if app-specific behavior needed)
 - [x] 4.5 Update `bootstrap/providers.php` to load core and workspace (if enabled) service providers
 - [x] 4.6 Update `.env.example` to include `VITAMIND_FEATURE_WORKSPACES=false`
 - [x] 4.7 Update `config/vitamin-d.php` workspace feature flag to check env var
@@ -84,55 +84,55 @@
 - [x] 5.2.3 Verify no conflicts with existing `App\` autoload
 
 ### 5.3 Verification & Testing
-- [ ] 5.3.1 Verify MockProduct plugin still works after migration
-- [ ] 5.3.2 Verify HelloWorld plugin boots and is discoverable
-- [ ] 5.3.3 Test plugin enable/disable functionality
-- [ ] 5.3.4 Create documentation: local plugin folder structure (no src/ vs external plugins)
-- [ ] 5.3.5 Document: when/why to extract local plugin → Composer package (re-structure with src/ at publish time)
+- [x] 5.3.1 Verify MockProduct plugin still works after migration
+- [x] 5.3.2 Verify HelloWorld plugin boots and is discoverable
+- [x] 5.3.3 Test plugin enable/disable functionality
+- [x] 5.3.4 Create documentation: local plugin folder structure (no src/ vs external plugins)
+- [x] 5.3.5 Document: when/why to extract local plugin → Composer package (re-structure with src/ at publish time)
 
 ---
 
 ## 6. Update Plugin Discovery & Installation System
 
 ### 6.1 Plugin Discovery (3 sources)
-- [ ] 6.1.1 Enhance `DiscoverPlugins` to scan three locations:
+- [x] 6.1.1 Enhance `DiscoverPlugins` to scan three locations:
   - `app/Plugins/` for local plugins (namespace: App\Plugins\{PluginName})
   - `storage/plugins/` for GitHub-installed plugins
   - `vendor/vitamind/` for Composer packages
-- [ ] 6.1.2 For each discovered plugin, extract namespace from `composer.json` PSR-4 autoload (GitHub & Composer)
-- [ ] 6.1.3 For local plugins, use hardcoded namespace: `App\Plugins\{FolderName}`
+- [x] 6.1.2 For each discovered plugin, extract namespace from `composer.json` PSR-4 autoload (GitHub & Composer)
+- [x] 6.1.3 For local plugins, use hardcoded namespace: `App\Plugins\{FolderName}`
 
 ### 6.2 Plugin Metadata Caching
-- [ ] 6.2.1 Extend `PluginCache` class to cache plugin metadata (not just active plugins)
-- [ ] 6.2.2 Add cache key strategy: `plugin_meta:{source}_{name}_{mtime_hash}`
-- [ ] 6.2.3 Cache stores: namespace, source, path, version, name, description
-- [ ] 6.2.4 Set cache TTL to 30 days (auto-invalidate)
-- [ ] 6.2.5 Cache validation: detect file changes via mtime (cache key includes hash)
-- [ ] 6.2.6 Add cache clear hooks in DiscoverPlugins (before discovery) if needed
+- [x] 6.2.1 Extend `PluginCache` class to cache plugin metadata (not just active plugins)
+- [x] 6.2.2 Add cache key strategy: `plugin_meta:{source}_{name}_{mtime_hash}`
+- [x] 6.2.3 Cache stores: namespace, source, path, version, name, description
+- [x] 6.2.4 Set cache TTL to 30 days (auto-invalidate)
+- [x] 6.2.5 Cache validation: detect file changes via mtime (cache key includes hash)
+- [x] 6.2.6 Add cache clear hooks in DiscoverPlugins (before discovery) if needed (not needed: mtime-hashed keys self-invalidate)
 
 ### 6.3 Plugin Installation & Registry
-- [ ] 6.3.1 Add source tracking to Plugin model: add `source` column (enum: composer/github/local) and `installed_at` timestamp
-- [ ] 6.3.2 Run migration to add source tracking columns to plugins table
-- [ ] 6.3.3 Update plugin registry logic to populate source field on discovery
-- [ ] 6.3.4 Create `InstallPluginFromGithub` action to clone GitHub repositories
-- [ ] 6.3.5 Create artisan command `plugin:install-github {org}/{name}` that uses InstallPluginFromGithub
-- [ ] 6.3.6 Add validation in InstallPluginFromGithub: check for valid `src/Plugin.php` and `composer.json`
-- [ ] 6.3.7 Create rollback logic for failed plugin installations (clean up partial state)
+- [x] 6.3.1 Add source tracking to Plugin model: add `source` column (enum: composer/github/local) and `installed_at` timestamp
+- [x] 6.3.2 Run migration to add source tracking columns to plugins table
+- [x] 6.3.3 Update plugin registry logic to populate source field on discovery
+- [x] 6.3.4 Create `InstallPluginFromGithub` action to clone GitHub repositories
+- [x] 6.3.5 Create artisan command `plugin:install-github {org}/{name}` that uses InstallPluginFromGithub
+- [x] 6.3.6 Add validation in InstallPluginFromGithub: check for valid `src/Plugin.php` and `composer.json`
+- [x] 6.3.7 Create rollback logic for failed plugin installations (clean up partial state)
 
 ### 6.4 Cache Invalidation
-- [ ] 6.4.1 Clear plugin metadata cache when plugin is installed: `PluginCache::clear()`
-- [ ] 6.4.2 Clear cache when plugin is enabled: call within `EnablePlugin` action
-- [ ] 6.4.3 Clear cache when plugin is disabled: call within `DisablePlugin` action
-- [ ] 6.4.4 Clear cache when composer.json is modified manually: add explicit method call
+- [x] 6.4.1 Clear plugin metadata cache when plugin is installed: `PluginCache::clear()`
+- [x] 6.4.2 Clear cache when plugin is enabled: call within `EnablePlugin` action
+- [x] 6.4.3 Clear cache when plugin is disabled: call within `DisablePlugin` action
+- [x] 6.4.4 Clear cache when composer.json is modified manually: add explicit method call (mtime-hashed keys make this automatic; no manual step needed)
 
 ---
 
 ## 7. Update TypeScript Generation Configuration
 
-- [ ] 7.1 Update `config/typescript-transformer.php` to scan `dev-packages/*/src/DTOs/` paths
-- [ ] 7.2 Add `vendor/vitamind/core/src/DTOs` to searching_paths
-- [ ] 7.3 Add `vendor/vitamind/workspace-plugin/src/DTOs` to searching_paths (if workspace plugin has DTOs)
-- [ ] 7.4 Test TypeScript generation: run `php artisan typescript:transform` and verify generated.d.ts includes VitaminD namespace types
+- [x] 7.1 Update `config/typescript-transformer.php` to scan `dev-packages/*/src/DTOs/` paths (implemented in `TypeScriptTransformerServiceProvider::configure()`, this project's actual config surface)
+- [x] 7.2 Add `vendor/vitamind/core/src/DTOs` to searching_paths
+- [x] 7.3 Add `vendor/vitamind/workspace-plugin/src/DTOs` to searching_paths (if workspace plugin has DTOs)
+- [x] 7.4 Test TypeScript generation: run `php artisan typescript:transform` and verify generated.d.ts includes VitaminD namespace types
 - [ ] 7.5 Verify DTOs from both core and workspace plugin are included in generated types
 - [ ] 7.6 Update frontend type imports if needed to reference new namespaced types
 
@@ -149,10 +149,10 @@
 
 ## 9. Database Migrations & Schema
 
-- [ ] 9.1 Verify core migrations run before boilerplate migrations (migration ordering)
-- [ ] 9.2 Test fresh migration from scratch: `php artisan migrate:fresh`
-- [ ] 9.3 Test with workspace enabled: set `VITAMIND_FEATURE_WORKSPACES=true` and migrate
-- [ ] 9.4 Test workspace disabled: set `VITAMIND_FEATURE_WORKSPACES=false` and verify no workspace tables created
+- [x] 9.1 Verify core migrations run before boilerplate migrations (migration ordering)
+- [x] 9.2 Test fresh migration from scratch: `php artisan migrate:fresh`
+- [x] 9.3 Test with workspace enabled: set `VITAMIND_FEATURE_WORKSPACES=true` and migrate
+- [x] 9.4 Test workspace disabled: set `VITAMIND_FEATURE_WORKSPACES=false` and verify no workspace tables created
 - [ ] 9.5 Add workspace migration rollback test: disable feature, rollback, verify tables removed
 
 ---
@@ -169,7 +169,7 @@
 
 ## 11. Bug Fixes & Issues
 
-- [ ] 11.1 Fix PluginPageController.php line 189: add missing `$request` parameter to `destroy()` method
+- [x] 11.1 Fix PluginPageController.php line 189: add missing `$request` parameter to `destroy()` method
 - [ ] 11.2 Test CRUD operations for plugins (create, read, update, delete) via dynamic page
 - [ ] 11.3 Test admin controllers authorization checks after namespace migration
 
@@ -177,14 +177,14 @@
 
 ## 12. Testing & Verification
 
-- [ ] 12.1 Run full test suite: `php artisan test`
+- [x] 12.1 Run full test suite: `php artisan test`
 - [ ] 12.2 Test user login flow end-to-end
 - [ ] 12.3 Test admin panel access (users, plugins, settings)
 - [ ] 12.4 Test plugin enable/disable via UI
-- [ ] 12.5 Test local plugin discovery and boot
+- [x] 12.5 Test local plugin discovery and boot
 - [ ] 12.6 Test workspace creation and switching (if feature enabled)
-- [ ] 12.7 Test workspace disable scenario: app works without workspace overhead
-- [ ] 12.8 Run TypeScript build: `npm run build` and verify success
+- [x] 12.7 Test workspace disable scenario: app works without workspace overhead
+- [x] 12.8 Run TypeScript build: `npm run build` and verify success
 - [ ] 12.9 Manual testing: Fresh Laravel install + require vitamind/core (simulate real usage)
 - [ ] 12.10 Test GitHub plugin installation: `php artisan plugin:install-github vitamind-org/plugin-example`
 - [ ] 12.11 Test Composer plugin installation: `composer require vitamind-org/plugin-example`

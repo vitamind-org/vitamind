@@ -3,6 +3,7 @@
 namespace VitaminD\Core\Actions\Plugins;
 
 use VitaminD\Core\Actions\Bootstrap\GetBootstrap;
+use VitaminD\Core\Enums\PluginSource;
 use VitaminD\Core\Events\PluginStateChanged;
 use VitaminD\Core\Models\Plugin;
 use VitaminD\Core\Models\PluginError;
@@ -26,6 +27,10 @@ final readonly class UninstallPlugin
             throw new Exception('Unable to uninstall an enabled plugin, disable the plugin first');
         }
 
+        if ($plugin->source === PluginSource::COMPOSER) {
+            throw new Exception("This plugin was installed via Composer. Run 'composer remove' to uninstall it.");
+        }
+
         if ($plugin->is_installed) {
             $implementation = $this->getImplementation->handle($plugin);
             if ($implementation === null) {
@@ -42,13 +47,8 @@ final readonly class UninstallPlugin
             }
         }
 
-        $folder = $this->path_join([app_path('Plugins/Local'), $plugin->folder]);
-        File::deleteDirectory($folder);
-
-        $subFolder = dirname($folder);
-        if (count(File::directories($subFolder)) === 0) {
-            File::deleteDirectory($subFolder);
-        }
+        $basePath = $plugin->source === PluginSource::GITHUB ? plugins_path() : app_path('Plugins');
+        File::deleteDirectory($basePath.DIRECTORY_SEPARATOR.$plugin->folder);
 
         $plugin->delete();
 
@@ -57,10 +57,5 @@ final readonly class UninstallPlugin
         GetBootstrap::forgetVersion();
 
         PluginStateChanged::dispatch($plugin, 'uninstalled');
-    }
-
-    public function path_join(array $strings): string
-    {
-        return implode(DIRECTORY_SEPARATOR, $strings);
     }
 }

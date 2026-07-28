@@ -2,9 +2,10 @@
 
 namespace VitaminD\Plugins\Workspace\Models;
 
-use App\Models\AbstractModel;
-use VitaminD\Plugins\Workspace\Enums\UserRole;
-use VitaminD\Plugins\Workspace\Traits\HasTimezoneTimestamps;
+use App\Models\User;
+use VitaminD\Core\Enums\UserRole;
+use VitaminD\Core\Models\AbstractModel;
+use VitaminD\Core\Traits\HasTimezoneTimestamps;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;

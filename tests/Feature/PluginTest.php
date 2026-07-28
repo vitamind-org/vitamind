@@ -43,6 +43,6 @@ class PluginTest extends TestCase
 
         $response->assertOk();
 
-        $this->assertTrue(Plugin::where('folder', 'Acme/HelloWorld')->exists());
+        $this->assertTrue(Plugin::where('folder', 'HelloWorld')->exists());
     }
 }

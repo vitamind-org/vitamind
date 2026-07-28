@@ -2,7 +2,7 @@
 
 namespace VitaminD\Plugins\Workspace\Actions\Workspaces;
 
-use VitaminD\Plugins\Workspace\Enums\UserRole;
+use VitaminD\Core\Enums\UserRole;
 use VitaminD\Plugins\Workspace\Mail\WorkspaceInvitation;
 use VitaminD\Plugins\Workspace\Models\Workspace;
 use Illuminate\Database\Query\Builder;

@@ -2,7 +2,7 @@
 
 namespace VitaminD\Plugins\Workspace\Http\Controllers\Workspace;
 
-use VitaminD\Plugins\Workspace\Http\Controllers\Controller;
+use VitaminD\Core\Http\Controllers\Controller;
 use VitaminD\Plugins\Workspace\Models\Workspace;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Request;

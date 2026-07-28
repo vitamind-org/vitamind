@@ -11,13 +11,22 @@
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
+        <testsuite name="Core">
+            <directory>dev-packages/vitamind-core/tests</directory>
+        </testsuite>
+        <testsuite name="Workspace">
+            <directory>dev-packages/vitamind-workspace-plugin/tests</directory>
+        </testsuite>
         <testsuite name="PluginSdk">
-            <directory>../packages/plugin-sdk/tests</directory>
+            <directory>dev-packages/vitamind-plugin-sdk/tests</directory>
         </testsuite>
     </testsuites>
     <source>
         <include>
             <directory>app</directory>
+            <directory>dev-packages/vitamind-core/src</directory>
+            <directory>dev-packages/vitamind-workspace-plugin/src</directory>
+            <directory>dev-packages/vitamind-plugin-sdk/src</directory>
         </include>
     </source>
     <php>

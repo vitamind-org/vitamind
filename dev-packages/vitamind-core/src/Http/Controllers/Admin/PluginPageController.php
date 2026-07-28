@@ -183,7 +183,7 @@ class PluginPageController extends Controller
 
     #[Delete('p/{pageKey}/{tabKey}/{id}', name: 'plugins.page.destroy')]
     #[Middleware(['auth', 'verified'])]
-    public function destroy(string $pageKey, string $tabKey, $id): RedirectResponse
+    public function destroy(Request $request, string $pageKey, string $tabKey, $id): RedirectResponse
     {
         $page = RegisterPage::find($pageKey);
         if (! $page || ($page->isAdminOnly() && ! $request->user()?->isAdmin())) {

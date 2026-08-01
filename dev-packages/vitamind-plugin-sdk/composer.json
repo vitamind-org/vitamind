@@ -1,0 +1,36 @@
+{
+    "name": "vitamind/plugin-sdk",
+    "description": "Core SDK contracts, DTOs, and registries for VitaminD plugins.",
+    "type": "library",
+    "license": "MIT",
+    "version": "dev-master",
+    "authors": [
+        {
+            "name": "Wuri Nugrahadi",
+            "email": "wuri.nugrahadi@gmail.com",
+            "homepage": "https://nugrahadi.com",
+            "role": "Developer"
+        },
+        {
+            "name": "DeepMind Advanced Agentic Coding",
+            "email": "support@google.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2|^8.3|^8.4",
+        "illuminate/database": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "spatie/laravel-data": "^4.23",
+        "spatie/laravel-typescript-transformer": "^3.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "VitaminD\\PluginSdk\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "VitaminD\\PluginSdk\\Tests\\": "tests/"
+        }
+    }
+}

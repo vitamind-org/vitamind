@@ -11,10 +11,22 @@
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
+        <testsuite name="Core">
+            <directory>dev-packages/vitamind-core/tests</directory>
+        </testsuite>
+        <testsuite name="Workspace">
+            <directory>dev-packages/vitamind-workspace-plugin/tests</directory>
+        </testsuite>
+        <testsuite name="PluginSdk">
+            <directory>dev-packages/vitamind-plugin-sdk/tests</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
             <directory>app</directory>
+            <directory>dev-packages/vitamind-core/src</directory>
+            <directory>dev-packages/vitamind-workspace-plugin/src</directory>
+            <directory>dev-packages/vitamind-plugin-sdk/src</directory>
         </include>
     </source>
     <php>
@@ -29,6 +41,7 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <env name="VITAMIND_FEATURE_WORKSPACES" value="true"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>

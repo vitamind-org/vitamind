@@ -1,5 +1,31 @@
 <?php
 
+$directories = [];
+
+if (is_dir(app_path('Http/Controllers'))) {
+    $directories[app_path('Http/Controllers')] = [
+        'prefix' => '',
+        'middleware' => 'web',
+        'patterns' => ['*Controller.php'],
+        'not_patterns' => ['API/*'],
+    ];
+}
+
+if (is_dir(app_path('Http/Controllers/API'))) {
+    $directories[app_path('Http/Controllers/API')] = [
+        'prefix' => '',
+        'middleware' => 'api',
+        'patterns' => ['*Controller.php'],
+        'not_patterns' => [],
+    ];
+}
+
+// vitamind/core and vitamind/workspace-plugin register their own routes
+// directly (in CoreServiceProvider/WorkspaceServiceProvider) rather than
+// relying on this file — a fresh `composer require vitamind/core` shouldn't
+// depend on the consuming app knowing the package's internal directory
+// structure. This file only needs to cover the boilerplate's own app/
+// controllers.
 return [
     /*
      *  Automatic registration of routes will only happen if this setting is `true`
@@ -12,20 +38,7 @@ return [
      *
      * Optionally, you can specify group configuration by using key/values
      */
-    'directories' => [
-        app_path('Http/Controllers') => [
-            'prefix' => '',
-            'middleware' => 'web',
-            'patterns' => ['*Controller.php'],
-            'not_patterns' => ['API/*'],
-        ],
-        app_path('Http/Controllers/API') => [
-            'prefix' => '',
-            'middleware' => 'api',
-            'patterns' => ['*Controller.php'],
-            'not_patterns' => [],
-        ],
-    ],
+    'directories' => $directories,
 
     /*
      * This middleware will be applied to all routes.

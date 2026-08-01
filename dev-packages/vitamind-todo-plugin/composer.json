@@ -1,0 +1,24 @@
+{
+    "name": "vitamind/todo-plugin",
+    "description": "Demo plugin for VitaminD, used to test GitHub and Composer plugin installation.",
+    "type": "library",
+    "license": "MIT",
+    "version": "dev-main",
+    "authors": [
+        {
+            "name": "Wuri Nugrahadi",
+            "email": "wuri.nugrahadi@gmail.com",
+            "homepage": "https://nugrahadi.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2|^8.3|^8.4",
+        "vitamind/plugin-sdk": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "VitaminD\\Plugins\\TodoPlugin\\": "src/"
+        }
+    }
+}

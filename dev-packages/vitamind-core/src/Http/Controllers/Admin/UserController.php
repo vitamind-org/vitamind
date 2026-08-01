@@ -1,0 +1,93 @@
+<?php
+
+namespace VitaminD\Core\Http\Controllers\Admin;
+
+use VitaminD\Core\Actions\User\CreateUser;
+use VitaminD\Core\Actions\User\DeleteUser;
+use VitaminD\Core\Actions\User\UpdateUser;
+use VitaminD\Core\Http\Controllers\Controller;
+use VitaminD\Core\Http\Resources\UserResource;
+use VitaminD\Core\Models\User;
+use function VitaminD\Core\Support\authUserModel;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\ResourceCollection;
+use Inertia\Inertia;
+use Inertia\Response;
+use Spatie\RouteAttributes\Attributes\Delete;
+use Spatie\RouteAttributes\Attributes\Get;
+use Spatie\RouteAttributes\Attributes\Middleware;
+use Spatie\RouteAttributes\Attributes\Patch;
+use Spatie\RouteAttributes\Attributes\Post;
+use Spatie\RouteAttributes\Attributes\Prefix;
+
+#[Prefix('admin/users')]
+#[Middleware(['auth', 'must-be-admin'])]
+class UserController extends Controller
+{
+    #[Get('/', name: 'users')]
+    public function index(): Response
+    {
+        $this->authorize('viewAny', User::class);
+
+        $userModel = authUserModel();
+
+        return Inertia::render('users/index', [
+            'users' => UserResource::collection(
+                $userModel::query()->simplePaginate(config('web.pagination_size', 10))
+            ),
+        ]);
+    }
+
+    #[Get('/json', name: 'users.json')]
+    public function json(Request $request): ResourceCollection
+    {
+        $this->authorize('viewAny', User::class);
+
+        $request->validate([
+            'query' => [
+                'nullable',
+                'string',
+            ],
+        ]);
+
+        $userModel = authUserModel();
+
+        $users = $userModel::query()->where('name', 'like', "%{$request->input('query')}%")
+            ->orWhere('email', 'like', "%{$request->input('query')}%")
+            ->take(10)
+            ->get();
+
+        return UserResource::collection($users);
+    }
+
+    #[Post('/', name: 'users.store')]
+    public function store(Request $request): RedirectResponse
+    {
+        $this->authorize('create', User::class);
+
+        app(CreateUser::class)->create($request->all());
+
+        return to_route('users')->with('success', 'User created successfully.');
+    }
+
+    #[Patch('/{user}', name: 'users.update')]
+    public function update(Request $request, User $user): RedirectResponse
+    {
+        $this->authorize('update', $user);
+
+        app(UpdateUser::class)->update($user, $request->all());
+
+        return to_route('users')->with('success', 'User updated successfully.');
+    }
+
+    #[Delete('/{user}', name: 'users.destroy')]
+    public function destroy(User $user): RedirectResponse
+    {
+        $this->authorize('delete', $user);
+
+        app(DeleteUser::class)->delete($user);
+
+        return to_route('users')->with('success', 'User was successfully deleted.');
+    }
+}

@@ -1,0 +1,57 @@
+<?php
+
+namespace VitaminD\Core\Actions\User;
+
+use VitaminD\Core\Enums\UserRole;
+use VitaminD\Core\Events\UserChanged;
+use VitaminD\Core\Events\UserChanging;
+use VitaminD\Core\Models\User;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
+class UpdateUser
+{
+    /**
+     * @param  array<string, mixed>  $input
+     */
+    public function update(User $user, array $input): User
+    {
+        $this->validate($user, $input);
+
+        UserChanging::dispatch($user, $input);
+
+        $user->name = $input['name'];
+        $user->email = $input['email'];
+        $user->is_admin = $input['role'] === UserRole::ADMIN->value;
+
+        if (isset($input['password']) && filled($input['password'])) {
+            $user->password = bcrypt($input['password']);
+        }
+
+        $user->save();
+
+        UserChanged::dispatch($user);
+
+        return $user;
+    }
+
+    /**
+     * @param  array<string, mixed>  $input
+     */
+    private function validate(User $user, array $input): void
+    {
+        Validator::make($input, [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'email', 'max:255',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'role' => [
+                'required',
+                Rule::in([UserRole::ADMIN->value, UserRole::USER->value]),
+            ],
+            'password' => ['nullable', 'string', 'min:8'],
+        ])->validate();
+    }
+}

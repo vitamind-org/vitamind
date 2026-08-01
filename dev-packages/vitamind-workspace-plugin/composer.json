@@ -1,0 +1,39 @@
+{
+    "name": "vitamind/workspace-plugin",
+    "description": "VitaminD Workspace Plugin - Optional multi-tenancy workspace/project system for VitaminD Core.",
+    "type": "library",
+    "license": "MIT",
+    "version": "dev-master",
+    "authors": [
+        {
+            "name": "Wuri Nugrahadi",
+            "email": "wuri.nugrahadi@gmail.com",
+            "homepage": "https://nugrahadi.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2|^8.3|^8.4",
+        "laravel/framework": "^11.0|^12.0|^13.0",
+        "inertiajs/inertia-laravel": "^0.6|^1.0|^3.0",
+        "vitamind/core": "dev-master",
+        "vitamind/plugin-sdk": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "VitaminD\\Plugins\\Workspace\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "VitaminD\\Plugins\\Workspace\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "VitaminD\\Plugins\\Workspace\\Providers\\WorkspaceServiceProvider"
+            ]
+        }
+    }
+}

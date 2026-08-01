@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Models\Plugin;
+use VitaminD\Core\Models\Plugin;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -43,6 +43,6 @@ class PluginTest extends TestCase
 
         $response->assertOk();
 
-        $this->assertTrue(Plugin::where('folder', 'Acme/HelloWorld')->exists());
+        $this->assertTrue(Plugin::where('folder', 'HelloWorld')->exists());
     }
 }

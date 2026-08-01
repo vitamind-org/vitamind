@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use App\Actions\User\CreateNewUser;
-use App\Actions\User\ResetUserPassword;
-use App\Actions\User\UpdateUserPassword;
-use App\Actions\User\UpdateUserProfileInformation;
+use VitaminD\Core\Actions\User\CreateNewUser;
+use VitaminD\Core\Actions\User\ResetUserPassword;
+use VitaminD\Core\Actions\User\UpdateUserPassword;
+use VitaminD\Core\Actions\User\UpdateUserProfileInformation;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;

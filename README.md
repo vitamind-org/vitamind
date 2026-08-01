@@ -24,12 +24,13 @@ Vitamin-D is designed to offer the developer velocity of rapid admin panel build
 * Drastically reduces boilerplate: you write the schema once in PHP, and the React frontend handles the rest.
 
 ### 3. Clean & Maintainable Architecture
-* **Action Pattern:** All business logic is separated from HTTP requests. Thin controllers handle requests/responses and delegate execution to reusable service actions under `app/Actions/`.
+* **Action Pattern:** All business logic is separated from HTTP requests. Thin controllers handle requests/responses and delegate execution to reusable service actions (`VitaminD\Core\Actions\*`).
 * **Spatie Route Attributes:** Keep routes clean and close to the execution context. Routes are declared directly on controllers using PHP 8 attributes instead of sprawling `web.php` or `api.php` files.
-* **Abstract Models:** Base model inheritance (`App\Models\AbstractModel`) ensures consistency in UUIDs, audit logs, and global query scopes.
+* **Abstract Models:** Base model inheritance (`VitaminD\Core\Models\AbstractModel`) ensures consistency in timestamps and shared query helpers.
 
 ### 4. Modular Plugin Architecture
-* Build self-contained features under `app/Plugins/Local/`.
+* Build self-contained local features under `app/Plugins/{PluginName}/` — no `src/` subfolder needed, since it's application code, not a distributed package.
+* Install community/1st-party plugins from GitHub (`storage/plugins/`) or Composer (`vendor/vitamind/*`) — see [`docs/local-plugins.md`](docs/local-plugins.md) for the full folder conventions and when to graduate a local plugin into a real package.
 * Each plugin can register its own migrations, custom database schemas, navigation items, tabs, forms, and custom business logic in a single directory.
 
 ---
@@ -107,9 +108,28 @@ Here is a high-level comparison of the architectural approaches:
 
 ## 📁 Key Directory Structure
 
-* 📂 **`app/Actions/`** — Houses all business logic/service classes.
-* 📂 **`app/Plugins/`** — Contains local and dynamic plugin code (SDK registrations).
-* 📂 **`app/Http/Controllers/`** — Thin controllers annotated with Spatie Route Attributes.
+* 📂 **`app/Plugins/`** — Local plugin code (`app/Plugins/{Name}/Plugin.php`, no `src/`).
+* 📂 **`app/Models/`, `app/Providers/`** — Boilerplate-specific code that composes the packages below (e.g. `App\Models\User extends VitaminD\Core\Models\User`).
+* 📂 **`dev-packages/`** — Development home for the extracted packages (see below). Wired into `vendor/vitamind/*` via Composer path repositories, so `composer install` is all that's needed — this isn't a separate setup step.
 * 📂 **`resources/js/pages/`** — React page components rendered via Inertia.
 * 📂 **`resources/js/components/ui/`** — Reusable, generic UI components (Buttons, Inputs, Dialogs, DataTables).
 * 📄 **`config/vitamin-d.php`** — Feature flags and configuration settings.
+
+---
+
+## 📦 Phase 1: Extracted Packages
+
+Vitamin-D's core functionality has been extracted into standalone Composer packages, so it can be required into a fresh Laravel project without pulling in this whole boilerplate:
+
+| Package | Purpose | Source (dev) |
+| :--- | :--- | :--- |
+| `vitamind/core` | User management, auth (Fortify/Sanctum), admin panel infra, plugin engine, REST API | `dev-packages/vitamind-core/` |
+| `vitamind/workspace-plugin` | Optional multi-tenancy (workspaces), opt-in via `VITAMIND_FEATURE_WORKSPACES` | `dev-packages/vitamind-workspace-plugin/` |
+| `vitamind/plugin-sdk` | Contracts, DTOs, and registries used by all plugins | `dev-packages/vitamind-plugin-sdk/` |
+
+This boilerplate is now a **starter kit** that requires `vitamind/core` (plus the optional workspace plugin) rather than containing that logic directly. During development, the packages live in `dev-packages/` and are symlinked into `vendor/vitamind/*` via a Composer path repository; in production they're installed like any other Packagist dependency.
+
+See:
+- [`docs/local-plugins.md`](docs/local-plugins.md) — local vs. GitHub vs. Composer plugin folder conventions
+- [`MIGRATION_GUIDE.md`](MIGRATION_GUIDE.md) — installing `vitamind/core` in a fresh Laravel project, or upgrading an existing pre-Phase-1 project
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — building plugins for Vitamin-D

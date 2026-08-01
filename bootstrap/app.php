@@ -13,14 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
-            \App\Http\Middleware\HandleInertiaRequests::class,
+            \VitaminD\Core\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
-        ]);
-
-        $middleware->alias([
-            'must-be-admin' => \App\Http\Middleware\MustBeAdminMiddleware::class,
-            'has-workspace' => \App\Http\Middleware\HasWorkspaceMiddleware::class,
-            'can-see-workspace' => \App\Http\Middleware\CanSeeWorkspaceMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

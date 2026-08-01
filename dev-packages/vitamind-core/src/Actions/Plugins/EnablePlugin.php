@@ -3,10 +3,13 @@
 namespace VitaminD\Core\Actions\Plugins;
 
 use VitaminD\Core\Actions\Bootstrap\GetBootstrap;
+use VitaminD\Core\Enums\PluginSource;
 use VitaminD\Core\Events\PluginStateChanged;
 use VitaminD\Core\Models\Plugin;
 use VitaminD\Core\Models\PluginError;
 use Exception;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
 use Throwable;
 
 final readonly class EnablePlugin
@@ -43,6 +46,8 @@ final readonly class EnablePlugin
         }
 
         try {
+            $this->runPendingMigrations($plugin);
+
             $plugin->name = $implementation->getName();
             $plugin->description = $implementation->getDescription();
             $implementation->enable();
@@ -59,5 +64,34 @@ final readonly class EnablePlugin
         GetBootstrap::forgetVersion();
 
         PluginStateChanged::dispatch($plugin, 'enabled');
+    }
+
+    /**
+     * Migration paths are registered with the migrator on every boot (see
+     * DiscoverPlugins), but registering a path never runs anything — only
+     * `artisan migrate` does. Enable is the deliberate "activate this now"
+     * moment, so it's the right place to apply the plugin's own pending
+     * migrations rather than leaving admins to discover a missing-table
+     * error and run migrate by hand.
+     */
+    private function runPendingMigrations(Plugin $plugin): void
+    {
+        $basePath = match ($plugin->source) {
+            PluginSource::LOCAL => app_path('Plugins'),
+            PluginSource::GITHUB => plugins_path(),
+            PluginSource::COMPOSER => base_path('vendor'.DIRECTORY_SEPARATOR.'vitamind'),
+        };
+
+        $migrationsPath = implode(DIRECTORY_SEPARATOR, [$basePath, $plugin->folder, 'database', 'migrations']);
+
+        if (! File::isDirectory($migrationsPath)) {
+            return;
+        }
+
+        Artisan::call('migrate', [
+            '--path' => $migrationsPath,
+            '--realpath' => true,
+            '--force' => true,
+        ]);
     }
 }

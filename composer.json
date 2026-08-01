@@ -16,13 +16,13 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
         "mobiledetect/mobiledetectlib": "^4.8",
+        "spatie/laravel-data": "^4.23",
         "spatie/laravel-route-attributes": "*",
+        "spatie/laravel-typescript-transformer": "^3.3",
         "symfony/yaml": "^8.1",
         "tightenco/ziggy": "^2.0",
-        "spatie/laravel-data": "^4.23",
-        "spatie/laravel-typescript-transformer": "^3.3",
-        "vitamind/plugin-sdk": "dev-main",
         "vitamind/core": "dev-master",
+        "vitamind/plugin-sdk": "dev-master",
         "vitamind/workspace-plugin": "dev-master"
     },
     "require-dev": {

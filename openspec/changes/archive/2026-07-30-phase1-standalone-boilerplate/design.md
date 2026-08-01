@@ -39,6 +39,8 @@
 
 **Decision**: Extract core functionality via **local path repositories** (`dev-packages/`) for development, then publish to Packagist for production consumption.
 
+**Timing update (revised)**: The move to Packagist is deferred behind a stability gate — at least 2 of 3 dogfooding projects (BukuWarga, LembarUji, UangKas) must successfully extend the boilerplate via path repositories without requiring a breaking change to `vitamind/core` or `vitamind/workspace-plugin` (tracked as a separate change, `stabilize-vitamind-packages`, so it does not block this phase's closure). Until the gate passes, the `vitamind-org` GitHub repos are mirror-only (code pushed, no tags/releases, no Packagist registration). Publishing itself is executed as a separate change, `publish-vitamind-packages`, once the gate is met.
+
 **Rationale:**
 - Developers dapat `require vitamind/core` dari Packagist instantly
 - During development, symlink to local `dev-packages/vitamind-core` untuk hot edits
@@ -229,6 +231,32 @@ Composer 1st-Party (PACKAGES):
 
 ---
 
+### D7: Workspace-Scoped Plugin Data (relaxed, convention-based)
+
+**Context**: Discovered by using `TodoPlugin` for real — todos leaked across workspaces, because a plugin model is a plain Eloquent model with no notion of tenancy.
+
+**Decision**: Plugin models opt into workspace scoping with a single trait, `VitaminD\PluginSdk\Concerns\BelongsToWorkspace`, which adds a global read scope plus a `creating` hook that stamps `workspace_id`. Plugins add a nullable, **unconstrained** `workspace_id` column.
+
+**Where scoping lives — the model, not the SDK page/table registry or the controller.** `PluginPageController` drives CRUD for every plugin through plain Eloquent (`$modelClass::query()`, `::create()`, `::findOrFail()`). Putting the scope on the model therefore secures the whole generic CRUD surface for free — including `findOrFail`, so a record from another workspace can't be read, updated, or deleted (the lookup misses outright, rather than merely being hidden from the list). No changes to `RegisterPage` / `RegisterDataTable` / `Column` were needed.
+
+**Relaxed, not gated.** With `vitamin-d.features.workspaces` disabled, every hook is a no-op and the model behaves as an ordinary global model. So a workspace-aware plugin still installs and works on a single-tenant project — it *adapts* instead of demanding multi-tenancy.
+
+**Where the trait lives — `plugin-sdk`, kept convention-based.** The trait touches only three names: the `vitamin-d.features.workspaces` config key (which belongs to the consuming app's `config/vitamin-d.php`, not to any package), the `current_workspace_id` attribute on the authenticated user, and the model's own `workspace_id` column. It references no workspace-plugin class, so `plugin-sdk` gains **zero dependency** on `vitamind/workspace-plugin` — the same way Laravel's `SoftDeletes` knows the name `deleted_at` without knowing any domain model.
+
+**Alternatives rejected:**
+- **Trait in `vitamind-workspace-plugin`** → any workspace-aware plugin would have to `require vitamind/workspace-plugin` to autoload it, dragging workspace models and migrations into single-tenant installs. That directly contradicts D2's "single-tenant apps stay lean, no database overhead".
+- **A typed `workspace()` BelongsTo relation on the trait** → the one thing that *would* force a workspace-plugin class reference. Dropped from the trait; a plugin that wants it declares it on its own model and opts into the dependency itself.
+- **An enable-time gate (`getRequiredFeatures() = ['workspaces']`)** → would block installing the plugin at all when workspaces are off. Wrong tool for an *adaptive* plugin like TodoPlugin. Such a gate is only meaningful for a plugin inherently *about* workspaces (e.g. per-workspace billing); no such plugin exists yet, so building the gate now would be speculation with no real case to shape it. Deferred until one appears.
+- **A third "support" package for shared plugin classes** → not warranted: `plugin-sdk` (the foundation every plugin already depends on) and `workspace-plugin` (home of everything workspace-specific) between them already cover it. A third package only adds another dependency every plugin author must learn.
+
+**Trade-offs accepted:**
+- `plugin-sdk` now requires `illuminate/database` (it did not before) because the trait targets Eloquent. In practice free — `laravel/framework` already provides it.
+- No foreign key on `workspace_id`, so no cascade delete when a workspace is removed: a single-tenant install has no `workspaces` table for the key to reference. Cleanup of orphaned plugin rows is left to the workspace deletion path.
+- Unauthenticated contexts (console commands, queued jobs) are **unscoped rather than empty**. Scoping to a null workspace would compare against SQL NULL and silently match nothing, so an artisan command would quietly see an empty table instead of the data it exists to process.
+- Rows predating the column keep `workspace_id = NULL` and become invisible once the feature is on. A plugin carrying real data across this change must decide where those rows belong and backfill them.
+
+---
+
 ## Risks / Trade-offs
 
 | Risk | Mitigation |
@@ -329,6 +357,21 @@ Composer 1st-Party (PACKAGES):
 - Plugin-sdk manages plugin migrations auto-discovery
 - Rationale: Plugin system is plugin-sdk's responsibility
 - Plugins declare migrations, plugin-sdk ensures they run at boot time
+
+---
+
+## Phase 2 Outlook (planned at Phase 1 closure)
+
+Phase 1's structural extraction (§1–13) is done and verified (83/83 tests). Closure (§14–15) intentionally split the *not-yet-controllable* parts into their own changes rather than blocking on them:
+
+- **`stabilize-vitamind-packages`** — dogfooding gate (0/3 proyek konsumen selesai per closure Phase 1: BukuWarga, LembarUji, UangKas belum mulai extend boilerplate ini). Ini yang membuka `publish-vitamind-packages`.
+- **`publish-vitamind-packages`** — Packagist registration, tag/release, org docs; diblokir oleh gate di atas.
+
+**Phase 2 focus** (setelah Phase 1 closed):
+1. **Monitor dogfooding** — pantau progres 3 proyek konsumen di `stabilize-vitamind-packages` tasks.md §1; setiap proyek yang selesai extend tanpa breaking change dicatat di sana. Begitu ≥2/3 lulus, gate §2 terbuka untuk `publish-vitamind-packages`.
+2. **Triage breaking changes dari dogfooding** — jika sebuah proyek konsumen menemukan kebutuhan breaking change pada `vitamind/core`/`vitamind/workspace-plugin`, evaluasi itu sebagai change tersendiri (bukan reopen Phase 1), lalu retry integrasi proyek tersebut.
+3. **GitHub plugin registry** (disebut di proposal.md sebagai "phase lanjutan") — belum dibangun; namespace/discovery registry untuk memudahkan menemukan plugin pihak ketiga dari GitHub, di luar scope Phase 1.
+4. **Tidak menambah scope baru ke core/workspace-plugin** sebelum gate stabilitas lulus — perubahan API selama masa dogfooding meningkatkan risiko proyek konsumen harus retry integrasi.
 
 ---
 

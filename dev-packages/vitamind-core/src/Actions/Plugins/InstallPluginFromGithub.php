@@ -47,6 +47,11 @@ final readonly class InstallPluginFromGithub
         try {
             $metadata = $this->validate($destination, $folder);
 
+            // The class was never scanned by DiscoverPlugins (app already booted
+            // before this clone happened), so it isn't autoloadable yet in this
+            // process — register it now, before InstallPlugin tries to instantiate it.
+            $this->registerAutoload($metadata['prefix'], $destination.DIRECTORY_SEPARATOR.$metadata['srcPath']);
+
             File::deleteDirectory($destination.DIRECTORY_SEPARATOR.'.git');
 
             $plugin = Plugin::create([
@@ -126,5 +131,12 @@ final readonly class InstallPluginFromGithub
         $string = str_replace(' ', '', $string);
 
         return ucfirst($string);
+    }
+
+    private function registerAutoload(string $prefix, string $srcPath): void
+    {
+        /** @var \Composer\Autoload\ClassLoader $loader */
+        $loader = require base_path('vendor'.DIRECTORY_SEPARATOR.'autoload.php');
+        $loader->addPsr4($prefix, $srcPath);
     }
 }

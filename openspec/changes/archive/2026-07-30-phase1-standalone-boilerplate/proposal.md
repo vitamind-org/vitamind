@@ -17,9 +17,9 @@ VitaminD telah berkembang menjadi framework SPA yang matang dengan arsitektur pl
 - **GitHub Plugin Registry** (phase lanjutan) — namespace registry untuk mudah discover plugins dari GitHub
 
 ### Distribution Model
-- **Development Mode**: Core dan plugins hidup di `dev-packages/` untuk development dengan symlink
-- **Production Mode**: Semua packages di-publish ke Packagist under `vitamind-org` GitHub organization
-- **GitHub Organization**: Centralize semua repos (boilerplate, packages, plugins, documentation) di https://github.com/vitamind-org
+- **Development Mode (aktif saat ini)**: Core dan plugins hidup di `dev-packages/` untuk development dengan symlink path repositories. Ini mode yang dipakai selama masa stabilisasi.
+- **GitHub Organization (mirror only)**: Repos di `vitamind-org` (core, workspace-plugin) menerima push kode sebagai mirror selama masa stabilisasi — tanpa version tag, tanpa GitHub release.
+- **Production Mode (deferred)**: Publish ke Packagist ditunda sampai stability gate terpenuhi — minimal 2 dari 3 proyek konsumen (BukuWarga, LembarUji, UangKas) berhasil meng-extend boilerplate ini tanpa breaking change pada core/workspace-plugin (lihat change `stabilize-vitamind-packages`). Setelah gate lulus, publishing dieksekusi lewat change terpisah `publish-vitamind-packages`.
 
 ---
 
@@ -59,8 +59,8 @@ VitaminD telah berkembang menjadi framework SPA yang matang dengan arsitektur pl
 
 ### Dependencies
 - **New Packages**: `vitamind/core`, `vitamind/workspace-plugin` (dan semua 1st-party plugins)
-- **Publishing**: Semua packages harus di-publish ke Packagist (private or public)
-- **Organization**: Centralize di GitHub `vitamind-org`
+- **Publishing**: Ditunda (deferred) sampai stability gate terpenuhi — gate ditrack di change `stabilize-vitamind-packages`, publishing dieksekusi di change `publish-vitamind-packages`
+- **Organization**: Centralize di GitHub `vitamind-org` (mirror only selama masa stabilisasi)
 
 ### Breaking Changes
 - **BREAKING**: Plugin folder structure — existing local plugins harus migrate ke `src/` structure

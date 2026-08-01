@@ -15,6 +15,21 @@ final readonly class DiscoverPlugins
 
     public function handle(): void
     {
+        $discovered = [
+            ...$this->discoverLocalPlugins(),
+            ...$this->discoverPackagedPlugins(plugins_path(), PluginSource::GITHUB),
+            ...$this->discoverPackagedPlugins(base_path('vendor'.DIRECTORY_SEPARATOR.'vitamind'), PluginSource::COMPOSER),
+        ];
+
+        // Registering each plugin's migrations path is filesystem-only, so it
+        // happens unconditionally — including on the very first ever
+        // `artisan migrate`, before the `plugins` table (or any row in it)
+        // exists to drive the usual discover → boot → register lifecycle
+        // that individual plugins otherwise rely on in their own boot().
+        foreach ($discovered as $entry) {
+            $this->registerMigrations($entry['path']);
+        }
+
         // Guards against schema drift during `artisan migrate` itself: every
         // console command boots the app (running this via the `booted()`
         // hook) before its own logic runs, including migrate — so a pending
@@ -22,12 +37,6 @@ final readonly class DiscoverPlugins
         if (! Schema::hasTable('plugins') || ! Schema::hasColumns('plugins', ['source', 'installed_at'])) {
             return;
         }
-
-        $discovered = [
-            ...$this->discoverLocalPlugins(),
-            ...$this->discoverPackagedPlugins(plugins_path(), PluginSource::GITHUB),
-            ...$this->discoverPackagedPlugins(base_path('vendor'.DIRECTORY_SEPARATOR.'vitamind'), PluginSource::COMPOSER),
-        ];
 
         $plugins = Plugin::all();
 
@@ -62,7 +71,7 @@ final readonly class DiscoverPlugins
     }
 
     /**
-     * @return array<int, array{folder: string, namespace: string, source: PluginSource}>
+     * @return array<int, array{folder: string, namespace: string, source: PluginSource, path: string}>
      */
     private function discoverLocalPlugins(): array
     {
@@ -83,6 +92,7 @@ final readonly class DiscoverPlugins
                     'folder' => $folder,
                     'namespace' => 'App\\Plugins\\'.$folder.'\\Plugin',
                     'source' => PluginSource::LOCAL,
+                    'path' => $path,
                 ];
             })
             ->values()
@@ -96,7 +106,7 @@ final readonly class DiscoverPlugins
      * and — for GitHub plugins, which aren't part of the Composer autoloader —
      * registered for autoloading at runtime.
      *
-     * @return array<int, array{folder: string, namespace: string, source: PluginSource}>
+     * @return array<int, array{folder: string, namespace: string, source: PluginSource, path: string}>
      */
     private function discoverPackagedPlugins(string $basePath, PluginSource $source): array
     {
@@ -121,6 +131,7 @@ final readonly class DiscoverPlugins
                     'folder' => $folder,
                     'namespace' => $meta['namespace'],
                     'source' => $source,
+                    'path' => $path,
                 ];
             })
             ->filter()
@@ -133,5 +144,14 @@ final readonly class DiscoverPlugins
         /** @var \Composer\Autoload\ClassLoader $loader */
         $loader = require base_path('vendor'.DIRECTORY_SEPARATOR.'autoload.php');
         $loader->addPsr4($prefix, $srcPath);
+    }
+
+    private function registerMigrations(string $pluginPath): void
+    {
+        $migrationsPath = implode(DIRECTORY_SEPARATOR, [$pluginPath, 'database', 'migrations']);
+
+        if (File::isDirectory($migrationsPath)) {
+            app('migrator')->path($migrationsPath);
+        }
     }
 }

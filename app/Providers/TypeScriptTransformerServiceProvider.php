@@ -9,6 +9,14 @@ use Spatie\TypeScriptTransformer\TypeScriptTransformerConfigFactory;
 use Spatie\TypeScriptTransformer\Writers\GlobalNamespaceWriter;
 use Spatie\LaravelTypeScriptTransformer\TypeScriptTransformerApplicationServiceProvider as BaseTypeScriptTransformerServiceProvider;
 
+/**
+ * This is the TypeScript transformer's configuration surface for this
+ * project — there is no config/typescript-transformer.php file. The base
+ * spatie/laravel-typescript-transformer package supports both a plain config
+ * file and this ServiceProvider-based factory; this project uses the latter
+ * so the directory list can be computed (e.g. `is_dir()`-filtered) rather
+ * than hardcoded.
+ */
 class TypeScriptTransformerServiceProvider extends BaseTypeScriptTransformerServiceProvider
 {
     protected function configure(TypeScriptTransformerConfigFactory $config): void

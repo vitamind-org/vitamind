@@ -86,6 +86,25 @@ System SHALL check plugin dependencies before enabling a plugin, ensuring all re
 - **THEN** "Dependencies" section shows required plugins
 - **AND** if dependency is not met, it is highlighted as unavailable
 
+### Requirement: Enabling a plugin runs its pending migrations
+
+VitaminD SHALL automatically run a plugin's own pending migrations when it is enabled, so activating a plugin from any source (GitHub, Composer, Local) never requires a separate manual `artisan migrate` step. Disabling a plugin SHALL NOT reverse or drop its migrations — plugin data remains intact so the plugin can be safely re-enabled later without data loss.
+
+#### Scenario: Enabling a plugin creates its tables
+- **WHEN** an admin enables a freshly installed plugin whose migrations have not yet run
+- **THEN** its pending migrations (scoped to the plugin's own `database/migrations` path) run automatically before the plugin is marked enabled
+- **AND** if migration fails, the plugin is not marked enabled and the error is recorded
+
+#### Scenario: Disabling a plugin preserves its data
+- **WHEN** an admin disables an enabled plugin
+- **THEN** its database tables and data remain untouched
+- **AND** re-enabling the same plugin later does not error or require re-running migrations for tables that already exist
+
+#### Scenario: CLI can install and enable in one step
+- **WHEN** a developer runs `php artisan plugin:install-github {org}/{name} --enable` (or `-e`)
+- **THEN** the plugin is cloned, installed, migrated, and enabled in a single command
+- **AND** running `php artisan plugin:enable {folder}` on an already-installed plugin has the same enable + migrate effect
+
 ### Requirement: Plugin installation is atomic and recoverable
 
 Plugin installation (from any source) SHALL be atomic: either completely succeed or completely fail without partial state.

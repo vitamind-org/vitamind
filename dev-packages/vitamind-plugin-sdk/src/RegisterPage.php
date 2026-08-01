@@ -74,6 +74,17 @@ class RegisterPage
         return self::$registry[$key] ?? null;
     }
 
+    /**
+     * Clears the registry. Pages are registered once per process (in each
+     * plugin's `boot()`), so tests that re-run plugin discovery/boot between
+     * cases need this to avoid a page registered by one test — and any
+     * closures it captured — leaking into another.
+     */
+    public static function flush(): void
+    {
+        self::$registry = [];
+    }
+
     public function toArray(): array
     {
         $tabsData = [];

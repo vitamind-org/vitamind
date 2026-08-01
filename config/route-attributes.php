@@ -20,47 +20,12 @@ if (is_dir(app_path('Http/Controllers/API'))) {
     ];
 }
 
-// realpath() is required here: in local development `vendor/vitamind/*` is a
-// symlink to `dev-packages/*` (path repository), and the route registrar
-// matches file paths against this base path using SplFileInfo::getRealPath(),
-// which resolves symlinks. A non-resolved path would never match, silently
-// dropping every controller in the directory from route discovery.
-$corePath = realpath(base_path('vendor/vitamind/core/src/Http/Controllers'));
-$coreApiPath = realpath(base_path('vendor/vitamind/core/src/Http/Controllers/API'));
-$workspacePath = realpath(base_path('vendor/vitamind/workspace-plugin/src/Http/Controllers'));
-
-if ($corePath) {
-    $directories[$corePath] = [
-        'namespace' => 'VitaminD\\Core\\Http\\Controllers',
-        'prefix' => '',
-        'middleware' => 'web',
-        'patterns' => ['*Controller.php'],
-        'not_patterns' => ['API/*'],
-    ];
-}
-
-if ($coreApiPath) {
-    $directories[$coreApiPath] = [
-        'namespace' => 'VitaminD\\Core\\Http\\Controllers\\API',
-        'prefix' => '',
-        'middleware' => 'api',
-        'patterns' => ['*Controller.php'],
-        'not_patterns' => [],
-    ];
-}
-
-// Workspace plugin controllers are only routable when the feature is enabled,
-// keeping non-workspace apps free of workspace routes entirely.
-if ($workspacePath && env('VITAMIND_FEATURE_WORKSPACES', false)) {
-    $directories[$workspacePath] = [
-        'namespace' => 'VitaminD\\Plugins\\Workspace\\Http\\Controllers',
-        'prefix' => '',
-        'middleware' => 'web',
-        'patterns' => ['*Controller.php'],
-        'not_patterns' => [],
-    ];
-}
-
+// vitamind/core and vitamind/workspace-plugin register their own routes
+// directly (in CoreServiceProvider/WorkspaceServiceProvider) rather than
+// relying on this file — a fresh `composer require vitamind/core` shouldn't
+// depend on the consuming app knowing the package's internal directory
+// structure. This file only needs to cover the boilerplate's own app/
+// controllers.
 return [
     /*
      *  Automatic registration of routes will only happen if this setting is `true`

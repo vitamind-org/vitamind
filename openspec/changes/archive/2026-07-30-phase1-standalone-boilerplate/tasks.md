@@ -133,17 +133,17 @@
 - [x] 7.2 Add `vendor/vitamind/core/src/DTOs` to searching_paths
 - [x] 7.3 Add `vendor/vitamind/workspace-plugin/src/DTOs` to searching_paths (if workspace plugin has DTOs)
 - [x] 7.4 Test TypeScript generation: run `php artisan typescript:transform` and verify generated.d.ts includes VitaminD namespace types
-- [ ] 7.5 Verify DTOs from both core and workspace plugin are included in generated types
-- [ ] 7.6 Update frontend type imports if needed to reference new namespaced types
+- [x] 7.5 Verify DTOs from both core and workspace plugin are included in generated types (neither currently defines any TS-transformable DTO — Core's `GitHub\*Dto` classes are plain internal PHP, not `spatie/laravel-data` objects — so there's nothing to include yet; paths are wired for when one is added)
+- [x] 7.6 Update frontend type imports if needed to reference new namespaced types (none found referencing stale namespaces)
 
 ---
 
 ## 8. Frontend Updates for Workspace & Plugin Changes
 
-- [ ] 8.1 Update React components to import workspace types from generated namespace
-- [ ] 8.2 Update plugin page component (`pages/plugins/dynamic-page.tsx`) if namespace changes affect it
-- [ ] 8.3 Test frontend type checking: run `npm run types` and verify no TypeScript errors
-- [ ] 8.4 Update workspace switcher component if workspace plugin namespace changed
+- [x] 8.1 Update React components to import workspace types from generated namespace (no changes needed — backend namespace renames don't leak into JSON prop shapes)
+- [x] 8.2 Update plugin page component (`pages/plugins/dynamic-page.tsx`) if namespace changes affect it (no namespace references in this file, unaffected)
+- [x] 8.3 Test frontend type checking: run `npm run types` and verify no TypeScript errors
+- [x] 8.4 Update workspace switcher component if workspace plugin namespace changed (`auth.currentWorkspace` shape unchanged, verified via `WorkspaceTest` + `npm run types`)
 
 ---
 
@@ -153,76 +153,76 @@
 - [x] 9.2 Test fresh migration from scratch: `php artisan migrate:fresh`
 - [x] 9.3 Test with workspace enabled: set `VITAMIND_FEATURE_WORKSPACES=true` and migrate
 - [x] 9.4 Test workspace disabled: set `VITAMIND_FEATURE_WORKSPACES=false` and verify no workspace tables created
-- [ ] 9.5 Add workspace migration rollback test: disable feature, rollback, verify tables removed
+- [x] 9.5 Add workspace migration rollback test: disable feature, rollback, verify tables removed
 
 ---
 
 ## 10. Configuration & Environment
 
-- [ ] 10.1 Update `.env.example` with all new config variables
-- [ ] 10.2 Document all config options in `.env.example` comments
-- [ ] 10.3 Update `config/vitamin-d.php` to include workspace feature flag
-- [ ] 10.4 Create `config/typescript-transformer.php` if not exists, or update paths
-- [ ] 10.5 Verify plugin discovery config: storage paths, vendor paths, all documented
+- [x] 10.1 Update `.env.example` with all new config variables
+- [x] 10.2 Document all config options in `.env.example` comments
+- [x] 10.3 Update `config/vitamin-d.php` to include workspace feature flag
+- [x] 10.4 Create `config/typescript-transformer.php` if not exists, or update paths (project uses `TypeScriptTransformerServiceProvider` instead of a config file; paths updated there, now documented)
+- [x] 10.5 Verify plugin discovery config: storage paths, vendor paths, all documented (see `docs/local-plugins.md` and `DiscoverPlugins` docblocks)
 
 ---
 
 ## 11. Bug Fixes & Issues
 
 - [x] 11.1 Fix PluginPageController.php line 189: add missing `$request` parameter to `destroy()` method
-- [ ] 11.2 Test CRUD operations for plugins (create, read, update, delete) via dynamic page
-- [ ] 11.3 Test admin controllers authorization checks after namespace migration
+- [x] 11.2 Test CRUD operations for plugins (create, read, update, delete) via dynamic page
+- [x] 11.3 Test admin controllers authorization checks after namespace migration
 
 ---
 
 ## 12. Testing & Verification
 
 - [x] 12.1 Run full test suite: `php artisan test`
-- [ ] 12.2 Test user login flow end-to-end
-- [ ] 12.3 Test admin panel access (users, plugins, settings)
-- [ ] 12.4 Test plugin enable/disable via UI
+- [x] 12.2 Test user login flow end-to-end
+- [x] 12.3 Test admin panel access (users, plugins, settings)
+- [x] 12.4 Test plugin enable/disable via UI
 - [x] 12.5 Test local plugin discovery and boot
-- [ ] 12.6 Test workspace creation and switching (if feature enabled)
+- [x] 12.6 Test workspace creation and switching (if feature enabled)
 - [x] 12.7 Test workspace disable scenario: app works without workspace overhead
 - [x] 12.8 Run TypeScript build: `npm run build` and verify success
-- [ ] 12.9 Manual testing: Fresh Laravel install + require vitamind/core (simulate real usage)
-- [ ] 12.10 Test GitHub plugin installation: `php artisan plugin:install-github vitamind-org/plugin-example`
-- [ ] 12.11 Test Composer plugin installation: `composer require vitamind-org/plugin-example`
+- [x] 12.9 Manual testing: Fresh Laravel install + require vitamind/core (simulate real usage) — found & fixed: missing `extra.laravel.providers` auto-discovery, missing self-registered routes (consumer's route-attributes config can't know package internals), stale `vitamind/plugin-sdk` version constraint. Verified `api/health` returns 200 in a bare `laravel/laravel` project with just `composer require` + a path repo.
+- [x] 12.10 Create demo plugin `TodoPlugin` — authored in `dev-packages/vitamind-todo-plugin/` (`composer.json`, `src/Plugin.php`, `src/Models/Todo.php`, migration), following the GitHub/Composer plugin structure from §5/§6. Pushed as a mirror to GitHub repo `vitamind-org/todo-plugin`; the Composer package name is `vitamind/todo-plugin` (vendor `vitamind`, matching how `DiscoverPlugins` scans `vendor/vitamind/*` — the GitHub org name and the Composer vendor name are intentionally different, same as `vitamind/core` living at `vitamind-org/vitamind-core`)
+- [x] 12.11 Test GitHub plugin installation: `php artisan plugin:install-github vitamind-org/todo-plugin` — verified end-to-end (clone → discover → install → `migrate` → enable → boot, zero plugin errors, full test suite green). Found & fixed a real bug in `InstallPluginFromGithub`: it never registered the freshly cloned plugin's PSR-4 autoload before instantiating it, so the very first install of any brand-new GitHub plugin always failed class-not-found and rolled back. Fixed by registering the autoload prefix right after validation succeeds (mirrors what `DiscoverPlugins` does on the next boot). Cleaned up the test install afterward (uninstalled, `storage/plugins/TodoPlugin` removed).
+- [x] 12.12 Test Composer plugin installation: `composer require vitamind/todo-plugin` (previous wording said `vitamind-org/todo-plugin`, which was wrong — that's the GitHub org/repo, not the Composer package name). Since Packagist publishing is still deferred, verified via a temporary `"type": "vcs"` repository pointing at the `vitamind-org/todo-plugin` mirror rather than Packagist — this is consistent with the "GitHub org as mirror" model already in place. Discover → install → enable all succeeded with zero plugin errors. Cleaned up afterward: `composer remove vitamind/todo-plugin`, removed the temporary VCS repository entry, dropped the test-only `todos` table, refreshed `composer.lock`. Full test suite green throughout (74/74).
+- [x] 12.13 Found via real usage (installing `TodoPlugin` manually): enabling a plugin left its migrations merely *registered* with the migrator (via `DiscoverPlugins`), not actually *run* — first page load hit `SQLSTATE[42S02]: Base table or view not found`. Fixed by having `EnablePlugin` run the plugin's own pending migrations (scoped to its `database/migrations` path via `artisan migrate --path --realpath`) before flipping `is_enabled`. Deliberately NOT mirrored on `DisablePlugin` — migrate is additive/safe, rollback is destructive, and `UninstallPlugin` already treats plugin data as sticky (never drops tables), so disable staying non-destructive keeps the model consistent. Also added `php artisan plugin:enable {folder}` (mirrors `plugin:install-github`'s UX) and a `--enable|-e` flag on `plugin:install-github` for one-shot install+enable. Verified end-to-end: fresh enable auto-creates `todos`, fresh `install-github --enable` installs+migrates+enables in one command, zero plugin errors, full test suite green (74/74).
+- [x] 12.14 Found via real usage (todos leaked across workspaces): plugin models had no notion of tenancy. Added `VitaminD\PluginSdk\Concerns\BelongsToWorkspace` (global read scope + `creating` stamp), applied it to `TodoPlugin`'s `Todo` with a nullable unconstrained `workspace_id` column. Key finding: because `PluginPageController` drives all plugin CRUD through plain Eloquent, scoping at the *model* layer secures the entire generic CRUD surface — including `findOrFail`, so other workspaces' rows can't be read/updated/deleted, not merely hidden from listings. No changes needed to `RegisterPage`/`RegisterDataTable`/`Column`. Deliberately **relaxed**: with the workspaces feature off every hook is a no-op, so a scoped plugin still installs on single-tenant projects. Trait lives in `plugin-sdk` and stays convention-based (config key + `current_workspace_id` + `workspace_id`, zero workspace-plugin class references) — see D7 in `design.md` for the alternatives rejected (trait in workspace-plugin, typed `workspace()` relation, `requiredFeatures` enable-gate, a third "support" package). `plugin-sdk` now requires `illuminate/database`. Verified live across 2 real workspaces (isolation confirmed, cross-workspace `find()` blocked) plus 9 new SDK tests; full suite 83/83.
 
 ---
 
 ## 13. Documentation & Migration Guide
 
-- [ ] 13.1 Create MIGRATION_GUIDE.md for developers upgrading projects
-- [ ] 13.2 Document how to install VitaminD Core in fresh Laravel project
-- [ ] 13.3 Document workspace plugin opt-in process
-- [ ] 13.4 Document plugin folder structure changes and migration steps
-- [ ] 13.5 Document plugin installation methods (Composer, GitHub, Local)
-- [ ] 13.6 Create CONTRIBUTING.md for developers building plugins
-- [ ] 13.7 Update main README.md with Phase 1 completion summary
+- [x] 13.1 Create MIGRATION_GUIDE.md for developers upgrading projects
+- [x] 13.2 Document how to install VitaminD Core in fresh Laravel project
+- [x] 13.3 Document workspace plugin opt-in process
+- [x] 13.4 Document plugin folder structure changes and migration steps
+- [x] 13.5 Document plugin installation methods (Composer, GitHub, Local)
+- [x] 13.6 Create CONTRIBUTING.md for developers building plugins
+- [x] 13.7 Update main README.md with Phase 1 completion summary
 
 ---
 
-## 14. Publishing & Organization Setup
+## 14. Publishing & Organization Setup — DEFERRED
 
-- [ ] 14.1 Prepare `vitamind/core` package for Packagist publishing
-- [ ] 14.2 Prepare `vitamind/workspace-plugin` package for Packagist publishing
-- [ ] 14.3 Create README.md in each package with clear usage instructions
-- [ ] 14.4 Add LICENSE file to both packages
-- [ ] 14.5 Create GitHub repos in vitamind-org for core and workspace plugin
-- [ ] 14.6 Push package code to GitHub repositories
-- [ ] 14.7 Register packages on Packagist (or prepare for auto-publishing)
-- [ ] 14.8 Update vitamind-org README/docs to list all available packages
+Publishing ditunda sampai stability gate terpenuhi (lihat change `stabilize-vitamind-packages`). GitHub org repos (`vitamind-org`) selama ini berfungsi sebagai mirror only (push kode, tanpa tag/release, tanpa Packagist). Item yang sudah selesai di sini (README, LICENSE, repo dibuat, kode di-push) tidak diulang. Sisa pekerjaan publishing dipindah ke change terpisah: **`publish-vitamind-packages`** (dieksekusi setelah gate di `stabilize-vitamind-packages` lulus).
+
+- [x] 14.3 Create README.md in each package with clear usage instructions
+- [x] 14.4 Add LICENSE file to both packages
+- [x] 14.5 Create GitHub repos in vitamind-org for core and workspace plugin (mirror)
+- [x] 14.6 Push package code to GitHub repositories (mirror)
+- Sisanya (prep Packagist, register, org docs) → lihat `publish-vitamind-packages`
 
 ---
 
 ## 15. Final Checks & Phase 1 Closure
 
-- [ ] 15.1 Run all tests one final time
-- [ ] 15.2 Verify fresh installation works: `composer create-project laravel/laravel && composer require vitamind/core`
-- [ ] 15.3 Verify all GitHub organization repositories are properly structured
-- [ ] 15.4 Create GitHub release tags for core and workspace plugin v0.1.0
-- [ ] 15.5 Update CHANGELOG.md with Phase 1 completion
-- [ ] 15.6 Mark phase1-standalone-boilerplate as complete in OpenSpec
-- [ ] 15.7 Plan Phase 2 focus (to be determined)
+- [x] 15.1 Run all tests one final time (83/83 passed, 191 assertions)
+- [x] 15.2 Verify fresh installation works via dev-packages path repository (covered by 12.9 — Packagist-based verification moved to `publish-vitamind-packages`)
+- [x] 15.5 Update CHANGELOG.md noting Phase 1 (boilerplate + plugin system) stabilization complete (publishing not yet done)
+- [x] 15.6 Mark phase1-standalone-boilerplate as complete in OpenSpec (structural extraction work only — real-world stability validation across external consumer projects is tracked separately in `stabilize-vitamind-packages` and does not block this closure)
+- [x] 15.7 Plan Phase 2 focus, incl. monitoring `stabilize-vitamind-packages` dogfooding progress toward the publish gate (see "Phase 2 Outlook" in `design.md`)
 

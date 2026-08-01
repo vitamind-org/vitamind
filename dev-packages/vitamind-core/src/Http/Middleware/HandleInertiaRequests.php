@@ -5,7 +5,7 @@ namespace VitaminD\Core\Http\Middleware;
 use VitaminD\Core\Actions\Bootstrap\GetBootstrap;
 use VitaminD\Core\Http\Resources\UserResource;
 use VitaminD\Core\Support\InertiaSharedData;
-use App\Models\User;
+use VitaminD\Core\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 

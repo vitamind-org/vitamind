@@ -49,9 +49,56 @@ composer require vitamind/core:@dev inertiajs/inertia-laravel
 php artisan migrate
 ```
 
-That's it — `CoreServiceProvider` is auto-discovered (no `bootstrap/providers.php`
-edit needed), and it registers its own routes, migrations, and middleware. Verify
-with:
+`CoreServiceProvider` is auto-discovered (no `bootstrap/providers.php` edit
+needed), and it registers its own routes, migrations, and middleware.
+
+**Required — create `App\Models\User`.** This step is not optional and not
+specific to the workspace plugin: core's own controllers, policies, and
+actions (registration, admin user management, API keys, 2FA) call methods
+that only exist on `App\Models\User`, not on the bare package model. Every
+installation needs it, even a single-tenant one with no plugins at all:
+
+```php
+<?php
+
+namespace App\Models;
+
+use VitaminD\Core\Models\User as CoreUser;
+
+class User extends CoreUser
+{
+    //
+}
+```
+
+**Also required — create `App\Models\PersonalAccessToken`.** Core registers
+Sanctum against this exact class (`Sanctum::usePersonalAccessTokenModel(...)`
+in `CoreServiceProvider`) so that created API tokens keep any app-layer
+behavior mixed in, the same reasoning as the User model above. Without it,
+anything that creates a token (API key settings page, `$user->createToken()`)
+fails with `Class "App\Models\PersonalAccessToken" not found`:
+
+```php
+<?php
+
+namespace App\Models;
+
+use VitaminD\Core\Models\PersonalAccessToken as CorePersonalAccessToken;
+
+class PersonalAccessToken extends CorePersonalAccessToken
+{
+    //
+}
+```
+
+> **Don't also run `php artisan install:api`.** Sanctum's own installer
+> publishes a `personal_access_tokens` migration that collides with the one
+> `vitamind/core` already ships — running both leaves you with two migrations
+> claiming the same table. Core already wires up Sanctum for you
+> (`Sanctum::usePersonalAccessTokenModel(...)` in `CoreServiceProvider`), so
+> `install:api` is redundant here regardless of the collision.
+
+Verify with:
 
 ```bash
 php artisan route:list   # settings/profile, settings/api-keys, admin/*, api/health, ...
@@ -73,11 +120,18 @@ composer config repositories.vitamind-workspace-plugin path /path/to/vitamin-d/d
 composer require vitamind/workspace-plugin:@dev
 ```
 
-Then in `.env`:
+Just like core, `WorkspaceServiceProvider` is auto-discovered via Composer
+(`extra.laravel.providers` in the plugin's `composer.json`) — no
+`bootstrap/providers.php` edit needed here either. Then in `.env`:
 
 ```env
 VITAMIND_FEATURE_WORKSPACES=true
 ```
+
+`vitamind/core` ships its own default `config/vitamin-d.php`, so this flag
+resolves to `true` even if your app hasn't published/created a
+`config/vitamin-d.php` of its own — no config file is required just to flip
+the flag.
 
 And run migrations again — `workspaces` and `user_workspace` tables are
 created only now, gated by the flag:
@@ -86,8 +140,9 @@ created only now, gated by the flag:
 php artisan migrate
 ```
 
-Your own `App\Models\User` needs the workspace relations mixed in, since
-`vitamind/core`'s own `User` model stays workspace-agnostic by design:
+Your `App\Models\User` (already created in the step above) needs the
+workspace relations mixed in, since `vitamind/core`'s own `User` model stays
+workspace-agnostic by design:
 
 ```php
 use VitaminD\Core\Models\User as CoreUser;

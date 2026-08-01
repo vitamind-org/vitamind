@@ -2,12 +2,15 @@
 
 namespace VitaminD\Plugins\Workspace\Providers;
 
+use VitaminD\Core\Events\UserRemoving;
 use VitaminD\Core\Support\InertiaSharedData;
 use VitaminD\Plugins\Workspace\Http\Middleware\CanSeeWorkspaceMiddleware;
 use VitaminD\Plugins\Workspace\Http\Middleware\HasWorkspaceMiddleware;
 use VitaminD\Plugins\Workspace\Http\Resources\WorkspaceResource;
+use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Spatie\RouteAttributes\RouteRegistrar;
 
@@ -30,6 +33,7 @@ class WorkspaceServiceProvider extends ServiceProvider
         $this->registerMigrations();
         $this->registerInertiaSharedData();
         $this->registerRoutes();
+        $this->registerEventListeners();
     }
 
     /**
@@ -47,7 +51,7 @@ class WorkspaceServiceProvider extends ServiceProvider
         // realpath() matters here — see CoreServiceProvider::registerRoutes()
         // for why: `vendor/vitamind/workspace-plugin` is a symlink under the
         // dev-packages/ path-repository setup, and __DIR__ resolves through it.
-        $controllersPath = realpath(__DIR__.'/../Http/Controllers');
+        $controllersPath = realpath(__DIR__ . '/../Http/Controllers');
 
         if (! $controllersPath) {
             return;
@@ -58,7 +62,7 @@ class WorkspaceServiceProvider extends ServiceProvider
             ->useMiddleware([SubstituteBindings::class])
             ->useRootNamespace('VitaminD\\Plugins\\Workspace\\Http\\Controllers')
             ->useBasePath($controllersPath)
-            ->group(['middleware' => 'web'], fn () => $registrar->registerDirectory($controllersPath, ['*Controller.php']));
+            ->group(['middleware' => 'web'], fn() => $registrar->registerDirectory($controllersPath, ['*Controller.php']));
     }
 
     protected function registerMiddlewareAliases(): void
@@ -69,7 +73,23 @@ class WorkspaceServiceProvider extends ServiceProvider
 
     protected function registerMigrations(): void
     {
-        $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+    }
+
+    /**
+     * Cleans up workspace membership when a user is removed via core's
+     * admin panel. Listens on core's own domain event rather than an
+     * Eloquent model event, since Eloquent scopes model events to the
+     * exact runtime class — a listener registered against
+     * `VitaminD\Core\Models\User` would never fire for `App\Models\User`
+     * instances. Core dispatches `UserRemoving` explicitly regardless of
+     * which concrete User subclass is involved, so this fires either way.
+     */
+    protected function registerEventListeners(): void
+    {
+        Event::listen(UserRemoving::class, function (UserRemoving $event): void {
+            UserWorkspace::query()->where('user_id', $event->user->id)->delete();
+        });
     }
 
     protected function registerInertiaSharedData(): void

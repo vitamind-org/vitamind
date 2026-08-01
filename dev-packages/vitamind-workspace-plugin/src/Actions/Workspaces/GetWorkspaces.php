@@ -2,7 +2,7 @@
 
 namespace VitaminD\Plugins\Workspace\Actions\Workspaces;
 
-use App\Models\User;
+use VitaminD\Core\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 

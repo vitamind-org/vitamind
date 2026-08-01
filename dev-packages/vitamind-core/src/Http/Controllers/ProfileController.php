@@ -2,7 +2,7 @@
 
 namespace VitaminD\Core\Http\Controllers;
 
-use App\Models\User;
+use VitaminD\Core\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;

@@ -2,7 +2,7 @@
 
 namespace VitaminD\Core\Actions\User;
 
-use App\Models\User;
+use VitaminD\Core\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\UpdatesUserPasswords;

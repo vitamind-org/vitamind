@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use VitaminD\Core\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 if (! function_exists('date_with_timezone')) {

@@ -3,7 +3,7 @@
 namespace VitaminD\Plugins\Workspace\Http\Resources;
 
 use VitaminD\Plugins\Workspace\Models\Workspace;
-use App\Models\User;
+use VitaminD\Core\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 

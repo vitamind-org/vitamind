@@ -2,7 +2,7 @@
 
 namespace VitaminD\Plugins\Workspace\Http\Middleware;
 
-use App\Models\User;
+use VitaminD\Core\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 

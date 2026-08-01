@@ -31,7 +31,8 @@
             "VitaminD\\Core\\": "src/"
         },
         "files": [
-            "src/Support/helpers.php"
+            "src/Support/helpers.php",
+            "src/Support/AuthUserModel.php"
         ]
     },
     "autoload-dev": {

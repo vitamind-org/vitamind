@@ -2,7 +2,9 @@
 
 namespace VitaminD\Core\Actions\ApiKey;
 
-use App\Models\User;
+use VitaminD\Core\Events\ApiKeyStored;
+use VitaminD\Core\Events\ApiKeyStoring;
+use VitaminD\Core\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Sanctum\NewAccessToken;
@@ -16,6 +18,8 @@ class CreateApiKey
     {
         $this->validate($user, $input);
 
+        ApiKeyStoring::dispatch($user, $input);
+
         $abilities = ['read'];
         if ($input['permission'] === 'write') {
             $abilities[] = 'write';
@@ -28,7 +32,11 @@ class CreateApiKey
             }
         }
 
-        return $user->createToken($input['name'], $abilities);
+        $token = $user->createToken($input['name'], $abilities);
+
+        ApiKeyStored::dispatch($token->accessToken);
+
+        return $token;
     }
 
     /**

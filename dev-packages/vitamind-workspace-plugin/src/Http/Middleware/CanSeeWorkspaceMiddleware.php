@@ -2,8 +2,8 @@
 
 namespace VitaminD\Plugins\Workspace\Http\Middleware;
 
-use App\Models\PersonalAccessToken;
-use App\Models\User;
+use VitaminD\Core\Models\PersonalAccessToken;
+use VitaminD\Core\Models\User;
 use VitaminD\Plugins\Workspace\Models\Workspace;
 use Closure;
 use Illuminate\Http\Request;

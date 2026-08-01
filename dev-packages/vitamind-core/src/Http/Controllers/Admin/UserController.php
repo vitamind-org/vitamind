@@ -3,10 +3,12 @@
 namespace VitaminD\Core\Http\Controllers\Admin;
 
 use VitaminD\Core\Actions\User\CreateUser;
+use VitaminD\Core\Actions\User\DeleteUser;
 use VitaminD\Core\Actions\User\UpdateUser;
 use VitaminD\Core\Http\Controllers\Controller;
 use VitaminD\Core\Http\Resources\UserResource;
-use App\Models\User;
+use VitaminD\Core\Models\User;
+use function VitaminD\Core\Support\authUserModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
@@ -28,9 +30,11 @@ class UserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
+        $userModel = authUserModel();
+
         return Inertia::render('users/index', [
             'users' => UserResource::collection(
-                User::query()->simplePaginate(config('web.pagination_size', 10))
+                $userModel::query()->simplePaginate(config('web.pagination_size', 10))
             ),
         ]);
     }
@@ -47,7 +51,9 @@ class UserController extends Controller
             ],
         ]);
 
-        $users = User::query()->where('name', 'like', "%{$request->input('query')}%")
+        $userModel = authUserModel();
+
+        $users = $userModel::query()->where('name', 'like', "%{$request->input('query')}%")
             ->orWhere('email', 'like', "%{$request->input('query')}%")
             ->take(10)
             ->get();
@@ -80,7 +86,7 @@ class UserController extends Controller
     {
         $this->authorize('delete', $user);
 
-        $user->delete();
+        app(DeleteUser::class)->delete($user);
 
         return to_route('users')->with('success', 'User was successfully deleted.');
     }

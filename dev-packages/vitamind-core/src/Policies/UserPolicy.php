@@ -2,7 +2,7 @@
 
 namespace VitaminD\Core\Policies;
 
-use App\Models\User;
+use VitaminD\Core\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class UserPolicy

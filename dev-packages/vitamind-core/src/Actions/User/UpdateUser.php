@@ -3,7 +3,9 @@
 namespace VitaminD\Core\Actions\User;
 
 use VitaminD\Core\Enums\UserRole;
-use App\Models\User;
+use VitaminD\Core\Events\UserChanged;
+use VitaminD\Core\Events\UserChanging;
+use VitaminD\Core\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -16,6 +18,8 @@ class UpdateUser
     {
         $this->validate($user, $input);
 
+        UserChanging::dispatch($user, $input);
+
         $user->name = $input['name'];
         $user->email = $input['email'];
         $user->is_admin = $input['role'] === UserRole::ADMIN->value;
@@ -25,6 +29,8 @@ class UpdateUser
         }
 
         $user->save();
+
+        UserChanged::dispatch($user);
 
         return $user;
     }

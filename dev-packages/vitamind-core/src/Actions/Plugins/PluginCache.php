@@ -66,7 +66,7 @@ final class PluginCache
         $mtimeHash = substr(md5((string) File::lastModified($composerJsonPath)), 0, 8);
         $key = "plugin_meta:{$source}_{$name}_{$mtimeHash}";
 
-        return Cache::remember($key, now()->addDays(self::METADATA_TTL_DAYS), function () use ($composerJsonPath, $path, $source) {
+        $resolve = function () use ($composerJsonPath, $path, $source) {
             $composer = json_decode(File::get($composerJsonPath), true) ?? [];
             $psr4 = $composer['autoload']['psr-4'] ?? [];
 
@@ -89,7 +89,13 @@ final class PluginCache
             }
 
             return null;
-        });
+        };
+
+        try {
+            return Cache::remember($key, now()->addDays(self::METADATA_TTL_DAYS), $resolve);
+        } catch (Throwable) {
+            return $resolve();
+        }
     }
 
     /**

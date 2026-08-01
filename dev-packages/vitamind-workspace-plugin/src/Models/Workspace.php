@@ -2,8 +2,8 @@
 
 namespace VitaminD\Plugins\Workspace\Models;
 
-use App\Models\User;
 use VitaminD\Core\Enums\UserRole;
+use VitaminD\Core\Models\User;
 use VitaminD\Core\Models\AbstractModel;
 use VitaminD\Core\Traits\HasTimezoneTimestamps;
 use Carbon\Carbon;
@@ -34,7 +34,7 @@ class Workspace extends AbstractModel
 
     public function registeredUsers(): HasManyThrough
     {
-        return $this->hasManyThrough(User::class, UserWorkspace::class, 'workspace_id', 'id', 'id', 'user_id');
+        return $this->hasManyThrough(config('auth.providers.users.model'), UserWorkspace::class, 'workspace_id', 'id', 'id', 'user_id');
     }
 
     public function hasRoles(User $user, array $roles): bool

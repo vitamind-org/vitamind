@@ -1,6 +1,7 @@
 ## 0. Gate Check (blocking — do not proceed until satisfied)
 
 - [ ] 0.1 Confirm `phase1-standalone-boilerplate` §1–13 (extraction, plugin system, docs) selesai secara struktural
+- [x] 0.2 `fix-pre-dogfooding-gaps` sudah selesai (33/33 tasks) — 5 gap konkret (migration duplikat, hardcode `App\Models\User`/`PersonalAccessToken`, config default yang hilang, gate manual usang, provider bangkai) sudah ditutup dan diverifikasi lewat instalasi `laravel new` + `composer require vitamind/core` (+ workspace-plugin) sungguhan di direktori terpisah — bukan cuma pembacaan kode. Dua bug tambahan ditemukan & diperbaiki selama verifikasi: `App\Models\PersonalAccessToken` juga wajib dibuat developer (didokumentasikan di `MIGRATION_GUIDE.md`), dan `PersonalAccessTokenPolicy` yang tidak pernah terdaftar di `Gate` (bug pra-existing, membuat `/settings/api-keys` selalu 403). Syarat mulai dogfooding ke BukuWarga/LembarUji/UangKas (§1 di bawah) terpenuhi.
 
 ---
 

@@ -3,7 +3,10 @@
 namespace VitaminD\Core\Actions\User;
 
 use VitaminD\Core\Enums\UserRole;
-use App\Models\User;
+use VitaminD\Core\Events\UserStored;
+use VitaminD\Core\Events\UserStoring;
+use VitaminD\Core\Models\User;
+use function VitaminD\Core\Support\authUserModel;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -24,14 +27,20 @@ class CreateUser
             ],
         ])->validate();
 
+        UserStoring::dispatch($input);
+
+        $userModel = authUserModel();
+
         /** @var User $user */
-        $user = User::query()->create([
+        $user = $userModel::query()->create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => bcrypt($input['password']),
             'timezone' => 'UTC',
             'is_admin' => $input['role'] === UserRole::ADMIN->value,
         ]);
+
+        UserStored::dispatch($user);
 
         return $user;
     }

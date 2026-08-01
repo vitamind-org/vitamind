@@ -7,6 +7,7 @@ use VitaminD\Core\Actions\Plugins\DiscoverPlugins;
 use VitaminD\Core\Actions\Plugins\GetPluginInstance;
 use VitaminD\Core\Console\Commands\EnablePluginCommand;
 use VitaminD\Core\Console\Commands\InstallGithubPluginCommand;
+use VitaminD\Core\Policies\PersonalAccessTokenPolicy;
 use VitaminD\Core\Policies\UserPolicy;
 use VitaminD\PluginSdk\RegisterCommand;
 use VitaminD\PluginSdk\RegisterViews;
@@ -18,12 +19,14 @@ use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
 use Spatie\RouteAttributes\RouteRegistrar;
 use App\Models\PersonalAccessToken;
-use App\Models\User;
+use VitaminD\Core\Models\User;
 
 class CoreServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->mergeConfigFrom(__DIR__.'/../../config/vitamin-d.php', 'vitamin-d');
+
         $this->app->scoped(GetPluginInstance::class, function () {
             return new GetPluginInstance;
         });
@@ -38,7 +41,12 @@ class CoreServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->app['router']->aliasMiddleware('must-be-admin', \VitaminD\Core\Http\Middleware\MustBeAdminMiddleware::class);
         Gate::policy(User::class, UserPolicy::class);
+        Gate::policy(PersonalAccessToken::class, PersonalAccessTokenPolicy::class);
         $this->registerRoutes();
+
+        $this->publishes([
+            __DIR__.'/../../config/vitamin-d.php' => config_path('vitamin-d.php'),
+        ], 'vitamin-d-config');
 
         $this->app->booted(function () {
             app(DiscoverPlugins::class)->handle();

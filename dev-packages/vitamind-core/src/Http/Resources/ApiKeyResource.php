@@ -2,7 +2,7 @@
 
 namespace VitaminD\Core\Http\Resources;
 
-use App\Models\PersonalAccessToken;
+use VitaminD\Core\Models\PersonalAccessToken;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 

@@ -3,8 +3,9 @@
 namespace VitaminD\Core\Http\Controllers;
 
 use VitaminD\Core\Actions\ApiKey\CreateApiKey;
+use VitaminD\Core\Actions\ApiKey\DeleteApiKey;
 use VitaminD\Core\Http\Resources\ApiKeyResource;
-use App\Models\PersonalAccessToken;
+use VitaminD\Core\Models\PersonalAccessToken;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -55,7 +56,7 @@ class ApiKeyController extends Controller
     {
         $this->authorize('delete', $apiKey);
 
-        $apiKey->delete();
+        app(DeleteApiKey::class)->delete($apiKey);
 
         return back()->with('success', 'Api Key deleted.');
     }

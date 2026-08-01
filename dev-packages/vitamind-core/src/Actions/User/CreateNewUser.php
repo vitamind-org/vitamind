@@ -2,7 +2,8 @@
 
 namespace VitaminD\Core\Actions\User;
 
-use App\Models\User;
+use VitaminD\Core\Models\User;
+use function VitaminD\Core\Support\authUserModel;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -34,7 +35,9 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        return User::create([
+        $userModel = authUserModel();
+
+        return $userModel::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),

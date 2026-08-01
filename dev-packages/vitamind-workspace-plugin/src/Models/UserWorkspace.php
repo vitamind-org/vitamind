@@ -2,8 +2,8 @@
 
 namespace VitaminD\Plugins\Workspace\Models;
 
-use App\Models\User;
 use VitaminD\Core\Enums\UserRole;
+use VitaminD\Core\Models\User;
 use VitaminD\Core\Models\AbstractModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -35,7 +35,7 @@ class UserWorkspace extends AbstractModel
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(config('auth.providers.users.model'), 'user_id');
     }
 
     public function workspace(): BelongsTo

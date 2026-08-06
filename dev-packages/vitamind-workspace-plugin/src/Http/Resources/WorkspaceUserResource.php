@@ -2,11 +2,12 @@
 
 namespace VitaminD\Plugins\Workspace\Http\Resources;
 
-use VitaminD\Core\Http\Resources\UserResource;
-use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
+use VitaminD\Core\Http\Resources\UserResource;
+use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 
 /**
  * @mixin UserWorkspace
@@ -19,6 +20,14 @@ class WorkspaceUserResource extends JsonResource
     public function toArray(Request $request): array
     {
         $isPending = $this->user_id === null && $this->email !== null;
+
+        // WorkspaceResource serializes this for every workspace member, not
+        // just the current viewer — without this check, every member would
+        // receive a valid signed accept link for invitations addressed to
+        // other people.
+        $isOwnInvite = $isPending
+            && $request->user()
+            && Str::lower((string) $this->email) === Str::lower($request->user()->email);
 
         return [
             'id' => $this->id,
@@ -35,7 +44,7 @@ class WorkspaceUserResource extends JsonResource
             // Signed, time-limited accept link for pending invitations — the
             // accept route requires a valid signature, so the frontend can no
             // longer construct this URL itself.
-            'accept_url' => $isPending
+            'accept_url' => $isOwnInvite
                 ? URL::temporarySignedRoute(
                     'workspaces.invitations.accept',
                     now()->addDays(7),

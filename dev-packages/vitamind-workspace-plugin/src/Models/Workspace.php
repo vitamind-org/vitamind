@@ -2,15 +2,15 @@
 
 namespace VitaminD\Plugins\Workspace\Models;
 
-use VitaminD\Core\Enums\UserRole;
-use VitaminD\Core\Models\User;
-use VitaminD\Core\Models\AbstractModel;
-use VitaminD\Core\Traits\HasTimezoneTimestamps;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Str;
+use VitaminD\Core\Enums\UserRole;
+use VitaminD\Core\Models\AbstractModel;
+use VitaminD\Core\Models\User;
+use VitaminD\Core\Traits\HasTimezoneTimestamps;
 
 /**
  * @property int $id
@@ -39,7 +39,8 @@ class Workspace extends AbstractModel
     {
         static::saving(function (Workspace $workspace): void {
             if (! $workspace->slug || $workspace->isDirty('name')) {
-                $workspace->slug = Str::slug($workspace->name);
+                $workspace->slug = Str::slug($workspace->name)
+                    ?: 'workspace-'.Str::lower(Str::random(8));
             }
         });
     }

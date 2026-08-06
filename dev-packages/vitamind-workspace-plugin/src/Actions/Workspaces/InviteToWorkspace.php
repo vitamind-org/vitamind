@@ -2,9 +2,6 @@
 
 namespace VitaminD\Plugins\Workspace\Actions\Workspaces;
 
-use VitaminD\Core\Enums\UserRole;
-use VitaminD\Plugins\Workspace\Mail\WorkspaceInvitation;
-use VitaminD\Plugins\Workspace\Models\Workspace;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
@@ -12,14 +9,21 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Throwable;
+use VitaminD\Core\Enums\UserRole;
+use VitaminD\Plugins\Workspace\Mail\WorkspaceInvitation;
+use VitaminD\Plugins\Workspace\Models\Workspace;
 
 class InviteToWorkspace
 {
     public function invite(Workspace $workspace, array $input): void
     {
+        if (isset($input['email']) && is_string($input['email'])) {
+            $input['email'] = Str::lower($input['email']);
+        }
+
         $this->validate($workspace, $input);
 
-        $email = Str::lower($input['email']);
+        $email = $input['email'];
 
         $userWorkspace = $workspace->users()->create([
             'email' => $email,

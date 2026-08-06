@@ -2,10 +2,12 @@
 
 namespace VitaminD\Plugins\Workspace\Actions\Workspaces;
 
-use VitaminD\Plugins\Workspace\Models\Workspace;
 use Closure;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use VitaminD\Plugins\Workspace\Models\Workspace;
 
 class UpdateWorkspace
 {
@@ -18,7 +20,12 @@ class UpdateWorkspace
 
         $workspace->name = $input['name'];
         $workspace->slug = Str::slug($input['name']);
-        $workspace->save();
+
+        try {
+            $workspace->save();
+        } catch (QueryException $exception) {
+            $this->rethrowAsValidationError($exception);
+        }
 
         return $workspace;
     }
@@ -65,5 +72,22 @@ class UpdateWorkspace
                 $fail(__('This workspace name is already in use.'));
             }
         };
+    }
+
+    /**
+     * The preflight `uniqueSlugRule()` check can't see a slug reserved by a
+     * concurrent request between the check and this `save()`. Convert that
+     * race into the same validation error rather than letting the unique
+     * constraint surface as a server error.
+     */
+    private function rethrowAsValidationError(QueryException $exception): never
+    {
+        if (! str_contains($exception->getMessage(), 'workspaces_slug_unique')) {
+            throw $exception;
+        }
+
+        throw ValidationException::withMessages([
+            'name' => __('This workspace name is already in use.'),
+        ]);
     }
 }

@@ -47,12 +47,13 @@ return new class extends Migration
         DB::table('workspaces')->orderBy('id')->select('id', 'name')
             ->chunkById(200, function ($workspaces): void {
                 foreach ($workspaces as $workspace) {
-                    $base = Str::slug($workspace->name) ?: 'workspace';
+                    $base = Str::substr(Str::slug($workspace->name) ?: 'workspace', 0, 255);
                     $slug = $base;
                     $suffix = 2;
 
                     while (DB::table('workspaces')->where('slug', $slug)->where('id', '!=', $workspace->id)->exists()) {
-                        $slug = "{$base}-{$suffix}";
+                        $suffixValue = "-{$suffix}";
+                        $slug = Str::substr($base, 0, 255 - strlen($suffixValue)).$suffixValue;
                         $suffix++;
                     }
 

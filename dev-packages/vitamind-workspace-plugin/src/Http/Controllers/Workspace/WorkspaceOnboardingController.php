@@ -2,10 +2,6 @@
 
 namespace VitaminD\Plugins\Workspace\Http\Controllers\Workspace;
 
-use VitaminD\Core\Http\Controllers\Controller;
-use VitaminD\Plugins\Workspace\Actions\Workspaces\AcceptWorkspaceInvite;
-use VitaminD\Plugins\Workspace\Http\Resources\WorkspaceUserResource;
-use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -14,6 +10,10 @@ use Spatie\RouteAttributes\Attributes\Get;
 use Spatie\RouteAttributes\Attributes\Middleware;
 use Spatie\RouteAttributes\Attributes\Post;
 use Spatie\RouteAttributes\Attributes\Prefix;
+use VitaminD\Core\Http\Controllers\Controller;
+use VitaminD\Plugins\Workspace\Actions\Workspaces\AcceptWorkspaceInvite;
+use VitaminD\Plugins\Workspace\Http\Resources\WorkspaceUserResource;
+use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 
 #[Prefix('settings/workspaces/onboarding')]
 #[Middleware(['auth'])]
@@ -32,7 +32,8 @@ class WorkspaceOnboardingController extends Controller
         return Inertia::render('workspaces/onboarding', [
             'invitations' => WorkspaceUserResource::collection(
                 UserWorkspace::query()
-                    ->where('email', user()->email)
+                    ->with(['user', 'workspace'])
+                    ->whereRaw('LOWER(email) = ?', [Str::lower(user()->email)])
                     ->whereNull('user_id')
                     ->get()
             ),
@@ -62,7 +63,7 @@ class WorkspaceOnboardingController extends Controller
      */
     private function suggestedWorkspaceName(string $userName): string
     {
-        $name = Str::ascii($userName) . ' Workspace';
+        $name = Str::ascii($userName).' Workspace';
         $name = preg_replace('/[^A-Za-z0-9\- ]+/', '', $name);
         $name = trim(preg_replace('/\s+/', ' ', $name));
 

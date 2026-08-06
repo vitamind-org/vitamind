@@ -72,7 +72,7 @@ Workspace Plugin SHALL provide complete CRUD (Create, Read, Update, Delete) oper
 - **AND** any previously issued invitation link for it stops working, regardless of whether the link's own signed expiry has passed
 
 #### Scenario: Admin resends a pending invitation
-- **WHEN** admin resends an invitation that is still pending (accepted or not, expired or not)
+- **WHEN** admin resends a pending invitation (`user_id` is `NULL`), expired or not
 - **THEN** the existing invitation record is reused (no duplicate record is created)
 - **AND** a new signed, time-limited link is generated and emailed
 - **AND** any previously issued link for the same invitation remains independently valid until its own expiry

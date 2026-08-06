@@ -2,6 +2,14 @@
 
 namespace VitaminD\Plugins\Workspace\Providers;
 
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
+use Spatie\RouteAttributes\RouteRegistrar;
 use VitaminD\Core\Events\UserRemoving;
 use VitaminD\Core\Support\InertiaSharedData;
 use VitaminD\Plugins\Workspace\Actions\Workspaces\AcceptWorkspaceInvite;
@@ -10,13 +18,6 @@ use VitaminD\Plugins\Workspace\Http\Middleware\EnsureWorkspaceOnboarded;
 use VitaminD\Plugins\Workspace\Http\Middleware\HasWorkspaceMiddleware;
 use VitaminD\Plugins\Workspace\Http\Resources\WorkspaceResource;
 use VitaminD\Plugins\Workspace\Models\UserWorkspace;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
-use Spatie\RouteAttributes\RouteRegistrar;
 
 class WorkspaceServiceProvider extends ServiceProvider
 {
@@ -56,7 +57,7 @@ class WorkspaceServiceProvider extends ServiceProvider
         // realpath() matters here — see CoreServiceProvider::registerRoutes()
         // for why: `vendor/vitamind/workspace-plugin` is a symlink under the
         // dev-packages/ path-repository setup, and __DIR__ resolves through it.
-        $controllersPath = realpath(__DIR__ . '/../Http/Controllers');
+        $controllersPath = realpath(__DIR__.'/../Http/Controllers');
 
         if (! $controllersPath) {
             return;
@@ -67,7 +68,7 @@ class WorkspaceServiceProvider extends ServiceProvider
             ->useMiddleware([SubstituteBindings::class])
             ->useRootNamespace('VitaminD\\Plugins\\Workspace\\Http\\Controllers')
             ->useBasePath($controllersPath)
-            ->group(['middleware' => 'web'], fn() => $registrar->registerDirectory($controllersPath, ['*Controller.php']));
+            ->group(['middleware' => 'web'], fn () => $registrar->registerDirectory($controllersPath, ['*Controller.php']));
     }
 
     protected function registerMiddlewareAliases(): void
@@ -90,7 +91,7 @@ class WorkspaceServiceProvider extends ServiceProvider
 
     protected function registerMigrations(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
     }
 
     /**
@@ -135,7 +136,38 @@ class WorkspaceServiceProvider extends ServiceProvider
                 // WorkspaceOnboardingController on its next render.
                 session()->put('invite_email_mismatch', [
                     'email' => $invite->email,
-                    'workspace_name' => $invite->workspace->name,
+                    'workspace_name' => $invite->workspace?->name,
+                ]);
+
+                return;
+            }
+
+            app(AcceptWorkspaceInvite::class)->accept($invite, $event->user);
+        });
+
+        // Mirrors the Registered listener above, for the guest-with-an-
+        // existing-account path: AcceptWorkspaceInviteController sends that
+        // visitor to login (not register) but still stashes
+        // `pending_invite_id`, so the invite has to be consumed here too.
+        Event::listen(Login::class, function (Login $event): void {
+            $inviteId = session('pending_invite_id');
+            session()->forget('pending_invite_id');
+
+            if (! $inviteId) {
+                return;
+            }
+
+            /** @var ?UserWorkspace $invite */
+            $invite = UserWorkspace::query()->whereNull('user_id')->find($inviteId);
+
+            if (! $invite) {
+                return;
+            }
+
+            if (Str::lower((string) $invite->email) !== Str::lower($event->user->email)) {
+                session()->put('invite_email_mismatch', [
+                    'email' => $invite->email,
+                    'workspace_name' => $invite->workspace?->name,
                 ]);
 
                 return;
@@ -197,7 +229,7 @@ class WorkspaceServiceProvider extends ServiceProvider
         return [
             'pendingInvite' => [
                 'email' => $invite->email,
-                'workspaceName' => $invite->workspace->name,
+                'workspaceName' => $invite->workspace?->name,
             ],
         ];
     }

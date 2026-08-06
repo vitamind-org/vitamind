@@ -2,10 +2,11 @@
 
 namespace VitaminD\Plugins\Workspace\Models;
 
-use VitaminD\Core\Enums\UserRole;
-use VitaminD\Core\Models\User;
-use VitaminD\Core\Models\AbstractModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
+use VitaminD\Core\Enums\UserRole;
+use VitaminD\Core\Models\AbstractModel;
+use VitaminD\Core\Models\User;
 
 /**
  * @property int $id
@@ -51,16 +52,25 @@ class UserWorkspace extends AbstractModel
      * default for the given user. Shared by every removal path
      * (`LeaveWorkspaceController`, `WorkspaceUserController::destroy()`) so
      * "at most one default, oldest remaining wins" stays in one place.
+     *
+     * Callers are expected to run the preceding membership deletion and
+     * this call inside the same `DB::transaction()` — the `lockForUpdate()`
+     * here only holds for the life of that transaction, and is what
+     * prevents a concurrent workspace creation or invitation acceptance
+     * from assigning a second default between the delete and this read.
      */
     public static function promoteOldestDefaultFor(int $userId): void
     {
-        /** @var ?self $next */
-        $next = static::query()
-            ->where('user_id', $userId)
-            ->orderBy('created_at')
-            ->orderBy('id')
-            ->first();
+        DB::transaction(function () use ($userId): void {
+            /** @var ?self $next */
+            $next = static::query()
+                ->where('user_id', $userId)
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->first();
 
-        $next?->update(['is_default' => true]);
+            $next?->update(['is_default' => true]);
+        });
     }
 }

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property ?int $user_id
  * @property ?string $email
  * @property UserRole $role
+ * @property bool $is_default
  * @property ?User $user
  * @property Workspace $workspace
  */
@@ -25,12 +26,14 @@ class UserWorkspace extends AbstractModel
         'user_id',
         'email',
         'role',
+        'is_default',
     ];
 
     protected $casts = [
         'workspace_id' => 'integer',
         'user_id' => 'integer',
         'role' => UserRole::class,
+        'is_default' => 'boolean',
     ];
 
     public function user(): BelongsTo
@@ -41,5 +44,23 @@ class UserWorkspace extends AbstractModel
     public function workspace(): BelongsTo
     {
         return $this->belongsTo(Workspace::class, 'workspace_id');
+    }
+
+    /**
+     * Promotes the remaining membership with the earliest `created_at` to
+     * default for the given user. Shared by every removal path
+     * (`LeaveWorkspaceController`, `WorkspaceUserController::destroy()`) so
+     * "at most one default, oldest remaining wins" stays in one place.
+     */
+    public static function promoteOldestDefaultFor(int $userId): void
+    {
+        /** @var ?self $next */
+        $next = static::query()
+            ->where('user_id', $userId)
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->first();
+
+        $next?->update(['is_default' => true]);
     }
 }

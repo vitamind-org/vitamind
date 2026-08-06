@@ -5,6 +5,7 @@ namespace VitaminD\Plugins\Workspace\Http\Controllers\Workspace;
 use VitaminD\Core\Enums\UserRole;
 use VitaminD\Core\Http\Controllers\Controller;
 use VitaminD\Plugins\Workspace\Actions\Workspaces\InviteToWorkspace;
+use VitaminD\Plugins\Workspace\Actions\Workspaces\ResendWorkspaceInvitation;
 use VitaminD\Plugins\Workspace\Models\Workspace;
 use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use Illuminate\Http\RedirectResponse;
@@ -44,10 +45,34 @@ class WorkspaceUserController extends Controller
             return back()->with('error', __('You cannot remove yourself from the workspace.'));
         }
 
+        $wasDefault = (bool) $userWorkspace?->is_default;
+        $userId = $userWorkspace?->user_id;
+
         $workspace->users()
             ->where('id', $id)
             ->delete();
 
+        if ($wasDefault && $userId) {
+            UserWorkspace::promoteOldestDefaultFor($userId);
+        }
+
         return back()->with('success', __('The user has been removed.'));
+    }
+
+    #[Post('{id}/resend', name: 'workspaces.users.resend')]
+    public function resend(Workspace $workspace, int $id): RedirectResponse
+    {
+        $this->authorize('update', $workspace);
+
+        /** @var ?UserWorkspace $userWorkspace */
+        $userWorkspace = $workspace->users()->whereNull('user_id')->where('id', $id)->first();
+
+        if (! $userWorkspace) {
+            abort(404);
+        }
+
+        app(ResendWorkspaceInvitation::class)->resend($userWorkspace);
+
+        return back()->with('success', __('The invitation has been resent.'));
     }
 }

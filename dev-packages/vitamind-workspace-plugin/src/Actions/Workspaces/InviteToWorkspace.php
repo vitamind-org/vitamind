@@ -7,7 +7,9 @@ use VitaminD\Plugins\Workspace\Mail\WorkspaceInvitation;
 use VitaminD\Plugins\Workspace\Models\Workspace;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Throwable;
 
@@ -17,13 +19,21 @@ class InviteToWorkspace
     {
         $this->validate($workspace, $input);
 
-        $workspace->users()->create([
-            'email' => $input['email'],
+        $email = Str::lower($input['email']);
+
+        $userWorkspace = $workspace->users()->create([
+            'email' => $email,
             'role' => UserRole::from($input['role']),
         ]);
 
+        $acceptUrl = URL::temporarySignedRoute(
+            'workspaces.invitations.accept',
+            now()->addDays(7),
+            ['workspace' => $workspace->id, 'invite' => $userWorkspace->id],
+        );
+
         try {
-            Mail::to($input['email'])->send(new WorkspaceInvitation($workspace));
+            Mail::to($email)->send(new WorkspaceInvitation($workspace, $acceptUrl));
         } catch (Throwable) {
             //
         }

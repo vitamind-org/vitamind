@@ -26,7 +26,14 @@ class LeaveWorkspaceController extends Controller
             abort(404);
         }
 
+        $wasDefault = $userWorkspace->is_default;
+        $userId = $userWorkspace->user_id;
+
         $userWorkspace->delete();
+
+        if ($wasDefault && $userId) {
+            UserWorkspace::promoteOldestDefaultFor($userId);
+        }
 
         return back()->with('success', __('You left the workspace successfully.'));
     }

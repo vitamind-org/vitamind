@@ -4,14 +4,18 @@ namespace VitaminD\Plugins\Workspace\Providers;
 
 use VitaminD\Core\Events\UserRemoving;
 use VitaminD\Core\Support\InertiaSharedData;
+use VitaminD\Plugins\Workspace\Actions\Workspaces\AcceptWorkspaceInvite;
 use VitaminD\Plugins\Workspace\Http\Middleware\CanSeeWorkspaceMiddleware;
+use VitaminD\Plugins\Workspace\Http\Middleware\EnsureWorkspaceOnboarded;
 use VitaminD\Plugins\Workspace\Http\Middleware\HasWorkspaceMiddleware;
 use VitaminD\Plugins\Workspace\Http\Resources\WorkspaceResource;
 use VitaminD\Plugins\Workspace\Models\UserWorkspace;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Spatie\RouteAttributes\RouteRegistrar;
 
 class WorkspaceServiceProvider extends ServiceProvider
@@ -30,6 +34,7 @@ class WorkspaceServiceProvider extends ServiceProvider
         }
 
         $this->registerMiddlewareAliases();
+        $this->registerGlobalMiddleware();
         $this->registerMigrations();
         $this->registerInertiaSharedData();
         $this->registerRoutes();
@@ -71,6 +76,18 @@ class WorkspaceServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('can-see-workspace', CanSeeWorkspaceMiddleware::class);
     }
 
+    /**
+     * Applied globally to the `web` group (rather than per-route) so it
+     * catches every authenticated request site-wide, matching the "any
+     * request from a user with zero memberships is redirected" guard —
+     * the middleware itself no-ops for guests and for its own excepted
+     * routes.
+     */
+    protected function registerGlobalMiddleware(): void
+    {
+        $this->app['router']->pushMiddlewareToGroup('web', EnsureWorkspaceOnboarded::class);
+    }
+
     protected function registerMigrations(): void
     {
         $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
@@ -90,6 +107,42 @@ class WorkspaceServiceProvider extends ServiceProvider
         Event::listen(UserRemoving::class, function (UserRemoving $event): void {
             UserWorkspace::query()->where('user_id', $event->user->id)->delete();
         });
+
+        // Only the single invitation referenced by the signed link the visitor
+        // actually clicked (see AcceptWorkspaceInviteController) is ever
+        // auto-accepted here — never a bulk match against every pending
+        // invitation sharing the registrant's email.
+        Event::listen(Registered::class, function (Registered $event): void {
+            $inviteId = session('pending_invite_id');
+            session()->forget('pending_invite_id');
+
+            if (! $inviteId) {
+                return;
+            }
+
+            /** @var ?UserWorkspace $invite */
+            $invite = UserWorkspace::query()->whereNull('user_id')->find($inviteId);
+
+            if (! $invite) {
+                return;
+            }
+
+            if (Str::lower((string) $invite->email) !== Str::lower($event->user->email)) {
+                // Registrant used a different email than the one invited —
+                // stash what they need to know so the onboarding screen can
+                // explain why the invite wasn't auto-accepted, instead of
+                // failing silently. Read-and-cleared by
+                // WorkspaceOnboardingController on its next render.
+                session()->put('invite_email_mismatch', [
+                    'email' => $invite->email,
+                    'workspace_name' => $invite->workspace->name,
+                ]);
+
+                return;
+            }
+
+            app(AcceptWorkspaceInvite::class)->accept($invite, $event->user);
+        });
     }
 
     protected function registerInertiaSharedData(): void
@@ -98,7 +151,7 @@ class WorkspaceServiceProvider extends ServiceProvider
             $user = $request->user();
 
             if (! $user) {
-                return [];
+                return $this->pendingInviteSharedData();
             }
 
             $currentWorkspace = $user->currentWorkspace;
@@ -115,5 +168,37 @@ class WorkspaceServiceProvider extends ServiceProvider
                 ],
             ];
         });
+    }
+
+    /**
+     * Exposes the workspace/email a guest is about to join when they arrived
+     * via a signed invitation link (see AcceptWorkspaceInviteController),
+     * so the registration form can pre-fill and lock the email field rather
+     * than letting a typo/different-email registration silently miss the
+     * invite.
+     *
+     * @return array<string, mixed>
+     */
+    private function pendingInviteSharedData(): array
+    {
+        $inviteId = session('pending_invite_id');
+
+        if (! $inviteId) {
+            return [];
+        }
+
+        /** @var ?UserWorkspace $invite */
+        $invite = UserWorkspace::query()->whereNull('user_id')->find($inviteId);
+
+        if (! $invite) {
+            return [];
+        }
+
+        return [
+            'pendingInvite' => [
+                'email' => $invite->email,
+                'workspaceName' => $invite->workspace->name,
+            ],
+        ];
     }
 }

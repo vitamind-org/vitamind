@@ -3,30 +3,38 @@
 namespace VitaminD\Plugins\Workspace\Http\Controllers\Workspace;
 
 use VitaminD\Core\Http\Controllers\Controller;
+use VitaminD\Plugins\Workspace\Actions\Workspaces\AcceptWorkspaceInvite;
 use VitaminD\Plugins\Workspace\Models\Workspace;
 use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 use Spatie\RouteAttributes\Attributes\Get;
 use Spatie\RouteAttributes\Attributes\Middleware;
 use Spatie\RouteAttributes\Attributes\Prefix;
 
 #[Prefix('settings/workspaces')]
-#[Middleware(['auth'])]
+#[Middleware(['signed'])]
 class AcceptWorkspaceInviteController extends Controller
 {
-    #[Get('/{workspace}/invitations/accept', name: 'workspaces.invitations.accept')]
-    public function __invoke(Workspace $workspace): RedirectResponse
+    #[Get('/{workspace}/invitations/{invite}/accept', name: 'workspaces.invitations.accept')]
+    public function __invoke(Workspace $workspace, UserWorkspace $invite): RedirectResponse
     {
-        /** @var ?UserWorkspace $userWorkspace */
-        $userWorkspace = $workspace->users()->where('email', user()->email)->first();
-        if (! $userWorkspace) {
+        if ($invite->workspace_id !== $workspace->id) {
             abort(404);
         }
 
-        $userWorkspace->email = null;
-        $userWorkspace->user_id = user()->id;
-        $userWorkspace->save();
+        if (auth()->check()) {
+            if (Str::lower((string) $invite->email) !== Str::lower(user()->email)) {
+                abort(403);
+            }
 
-        return redirect()->route('workspaces')->with('success', __('You joined the workspace successfully.'));
+            app(AcceptWorkspaceInvite::class)->accept($invite, user());
+
+            return redirect()->route('workspaces')->with('success', __('You joined the workspace successfully.'));
+        }
+
+        session(['pending_invite_id' => $invite->id]);
+
+        return redirect()->route('register');
     }
 }

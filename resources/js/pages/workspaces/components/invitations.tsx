@@ -20,9 +20,12 @@ function Actions({ invitation }: { invitation: WorkspaceUser }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
+            disabled={!invitation.accept_url}
             onSelect={(e) => {
               e.preventDefault();
-              window.location.href = `/settings/workspaces/${invitation.workspace_id}/invitations/accept`;
+              if (invitation.accept_url) {
+                window.location.href = invitation.accept_url;
+              }
             }}
           >
             Accept & Join

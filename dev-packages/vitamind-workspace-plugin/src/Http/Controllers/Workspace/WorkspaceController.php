@@ -2,15 +2,6 @@
 
 namespace VitaminD\Plugins\Workspace\Http\Controllers\Workspace;
 
-use VitaminD\Plugins\Workspace\Actions\Workspaces\CreateWorkspace;
-use VitaminD\Plugins\Workspace\Actions\Workspaces\DeleteWorkspace;
-use VitaminD\Plugins\Workspace\Actions\Workspaces\GetWorkspaces;
-use VitaminD\Plugins\Workspace\Actions\Workspaces\UpdateWorkspace;
-use VitaminD\Core\Http\Controllers\Controller;
-use VitaminD\Plugins\Workspace\Http\Resources\WorkspaceResource;
-use VitaminD\Plugins\Workspace\Http\Resources\WorkspaceUserResource;
-use VitaminD\Plugins\Workspace\Models\Workspace;
-use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
@@ -22,6 +13,15 @@ use Spatie\RouteAttributes\Attributes\Middleware;
 use Spatie\RouteAttributes\Attributes\Patch;
 use Spatie\RouteAttributes\Attributes\Post;
 use Spatie\RouteAttributes\Attributes\Prefix;
+use VitaminD\Core\Http\Controllers\Controller;
+use VitaminD\Plugins\Workspace\Actions\Workspaces\CreateWorkspace;
+use VitaminD\Plugins\Workspace\Actions\Workspaces\DeleteWorkspace;
+use VitaminD\Plugins\Workspace\Actions\Workspaces\GetWorkspaces;
+use VitaminD\Plugins\Workspace\Actions\Workspaces\UpdateWorkspace;
+use VitaminD\Plugins\Workspace\Http\Resources\WorkspaceResource;
+use VitaminD\Plugins\Workspace\Http\Resources\WorkspaceUserResource;
+use VitaminD\Plugins\Workspace\Models\UserWorkspace;
+use VitaminD\Plugins\Workspace\Models\Workspace;
 
 #[Prefix('settings/workspaces')]
 #[Middleware(['auth'])]
@@ -36,11 +36,12 @@ class WorkspaceController extends Controller
             'workspaces' => WorkspaceResource::collection(
                 user()
                     ->allWorkspaces()
-                    ->with(['users'])
+                    ->with(['users.user', 'users.workspace'])
                     ->simplePaginate(20)
             ),
             'invitations' => WorkspaceUserResource::collection(
                 UserWorkspace::query()
+                    ->with(['user', 'workspace'])
                     ->where('email', user()->email)
                     ->whereNull('user_id')
                     ->simplePaginate(20)

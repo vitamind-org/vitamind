@@ -2,7 +2,6 @@
 
 namespace VitaminD\Plugins\Workspace\Concerns;
 
-use VitaminD\Core\Enums\UserRole;
 use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use VitaminD\Plugins\Workspace\Models\Workspace;
 use Illuminate\Database\Eloquent\Builder;
@@ -37,24 +36,27 @@ trait HasWorkspaces
         return $this->HasOne(Workspace::class, 'id', 'current_workspace_id');
     }
 
-    public function ensureHasDefaultWorkspace(): Workspace
+    /**
+     * Self-heals a stale `current_workspace_id` by repointing it at the
+     * user's default (anchor) membership. Never creates a workspace — a
+     * user's first-ever membership is only ever obtained by explicitly
+     * accepting an invitation or creating a workspace via the onboarding
+     * screen (see `EnsureWorkspaceOnboarded`).
+     */
+    public function ensureHasDefaultWorkspace(): ?Workspace
     {
-        /** @var ?Workspace $workspace */
-        $workspace = $this->workspaces()->first();
+        /** @var ?UserWorkspace $default */
+        $default = UserWorkspace::query()
+            ->where('user_id', $this->id)
+            ->where('is_default', true)
+            ->first();
 
-        if (! $workspace) {
-            $workspace = new Workspace;
-            $workspace->name = 'default';
-            $workspace->save();
+        $workspace = $default?->workspace;
 
-            $workspace->users()->create([
-                'user_id' => $this->id,
-                'role' => UserRole::OWNER,
-            ]);
+        if ($workspace) {
+            $this->current_workspace_id = $workspace->id;
+            $this->save();
         }
-
-        $this->current_workspace_id = $workspace->id;
-        $this->save();
 
         return $workspace;
     }

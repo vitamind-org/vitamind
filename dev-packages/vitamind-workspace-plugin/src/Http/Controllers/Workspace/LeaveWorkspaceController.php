@@ -2,13 +2,14 @@
 
 namespace VitaminD\Plugins\Workspace\Http\Controllers\Workspace;
 
-use VitaminD\Core\Http\Controllers\Controller;
-use VitaminD\Plugins\Workspace\Models\Workspace;
-use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Spatie\RouteAttributes\Attributes\Delete;
 use Spatie\RouteAttributes\Attributes\Middleware;
 use Spatie\RouteAttributes\Attributes\Prefix;
+use VitaminD\Core\Http\Controllers\Controller;
+use VitaminD\Plugins\Workspace\Models\UserWorkspace;
+use VitaminD\Plugins\Workspace\Models\Workspace;
 
 #[Prefix('settings/workspaces')]
 #[Middleware(['auth'])]
@@ -26,7 +27,16 @@ class LeaveWorkspaceController extends Controller
             abort(404);
         }
 
-        $userWorkspace->delete();
+        $wasDefault = $userWorkspace->is_default;
+        $userId = $userWorkspace->user_id;
+
+        DB::transaction(function () use ($userWorkspace, $wasDefault, $userId): void {
+            $userWorkspace->delete();
+
+            if ($wasDefault && $userId) {
+                UserWorkspace::promoteOldestDefaultFor($userId);
+            }
+        });
 
         return back()->with('success', __('You left the workspace successfully.'));
     }

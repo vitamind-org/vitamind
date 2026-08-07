@@ -6,4 +6,5 @@ export interface WorkspaceUser {
   email: string;
   role: string;
   type: 'user' | 'invitation';
+  accept_url?: string | null;
 }

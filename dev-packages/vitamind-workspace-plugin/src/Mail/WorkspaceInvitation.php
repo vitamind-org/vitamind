@@ -13,16 +13,19 @@ class WorkspaceInvitation extends Mailable
 
     public Workspace $workspace;
 
-    public function __construct(Workspace $workspace)
+    public string $acceptUrl;
+
+    public function __construct(Workspace $workspace, string $acceptUrl)
     {
         $this->workspace = $workspace;
+        $this->acceptUrl = $acceptUrl;
     }
 
     public function build(): static
     {
         return $this
             ->markdown('emails.workspace-invitation', [
-                'acceptUrl' => route('workspaces.invitations.accept', ['workspace' => $this->workspace]),
+                'acceptUrl' => $this->acceptUrl,
             ])
             ->subject(__('Workspace Invitation'));
     }

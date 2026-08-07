@@ -2,17 +2,19 @@
 
 namespace VitaminD\Plugins\Workspace\Http\Controllers\Workspace;
 
-use VitaminD\Core\Enums\UserRole;
-use VitaminD\Core\Http\Controllers\Controller;
-use VitaminD\Plugins\Workspace\Actions\Workspaces\InviteToWorkspace;
-use VitaminD\Plugins\Workspace\Models\Workspace;
-use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\RouteAttributes\Attributes\Delete;
 use Spatie\RouteAttributes\Attributes\Middleware;
 use Spatie\RouteAttributes\Attributes\Post;
 use Spatie\RouteAttributes\Attributes\Prefix;
+use VitaminD\Core\Enums\UserRole;
+use VitaminD\Core\Http\Controllers\Controller;
+use VitaminD\Plugins\Workspace\Actions\Workspaces\InviteToWorkspace;
+use VitaminD\Plugins\Workspace\Actions\Workspaces\ResendWorkspaceInvitation;
+use VitaminD\Plugins\Workspace\Models\UserWorkspace;
+use VitaminD\Plugins\Workspace\Models\Workspace;
 
 #[Prefix('settings/workspaces/{workspace}/users')]
 #[Middleware(['auth'])]
@@ -36,6 +38,10 @@ class WorkspaceUserController extends Controller
         /** @var ?UserWorkspace $userWorkspace */
         $userWorkspace = $workspace->users()->where('id', $id)->first();
 
+        if (! $userWorkspace) {
+            abort(404);
+        }
+
         if ($userWorkspace?->user && $workspace->role($userWorkspace->user) === UserRole::OWNER) {
             return back()->with('error', __('You cannot remove the workspace owner.'));
         }
@@ -44,10 +50,36 @@ class WorkspaceUserController extends Controller
             return back()->with('error', __('You cannot remove yourself from the workspace.'));
         }
 
-        $workspace->users()
-            ->where('id', $id)
-            ->delete();
+        $wasDefault = (bool) $userWorkspace?->is_default;
+        $userId = $userWorkspace?->user_id;
+
+        DB::transaction(function () use ($workspace, $id, $wasDefault, $userId): void {
+            $workspace->users()
+                ->where('id', $id)
+                ->delete();
+
+            if ($wasDefault && $userId) {
+                UserWorkspace::promoteOldestDefaultFor($userId);
+            }
+        });
 
         return back()->with('success', __('The user has been removed.'));
+    }
+
+    #[Post('{id}/resend', name: 'workspaces.users.resend')]
+    public function resend(Workspace $workspace, int $id): RedirectResponse
+    {
+        $this->authorize('update', $workspace);
+
+        /** @var ?UserWorkspace $userWorkspace */
+        $userWorkspace = $workspace->users()->whereNull('user_id')->where('id', $id)->first();
+
+        if (! $userWorkspace) {
+            abort(404);
+        }
+
+        app(ResendWorkspaceInvitation::class)->resend($userWorkspace);
+
+        return back()->with('success', __('The invitation has been resent.'));
     }
 }

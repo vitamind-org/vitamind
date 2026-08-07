@@ -102,6 +102,7 @@ export interface SharedData {
   csrf_token: string;
   bootstrap_version: string;
   pluginPages?: Array<{ key: string; title: string; icon: string; admin_only: boolean }>;
+  pendingInvite?: { email: string; workspaceName: string } | null;
   flash?: {
     status: string;
     success: string;

@@ -2,10 +2,16 @@
 
 namespace VitaminD\Plugins\Workspace\Actions\Workspaces;
 
-use VitaminD\Core\Enums\UserRole;
-use VitaminD\Plugins\Workspace\Models\Workspace;
-use VitaminD\Core\Models\User;
+use Closure;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use VitaminD\Core\Enums\UserRole;
+use VitaminD\Core\Models\User;
+use VitaminD\Plugins\Workspace\Models\UserWorkspace;
+use VitaminD\Plugins\Workspace\Models\Workspace;
 
 class CreateWorkspace
 {
@@ -13,20 +19,36 @@ class CreateWorkspace
     {
         $this->validate($input);
 
-        $workspace = new Workspace([
-            'name' => $input['name'],
-        ]);
-        $workspace->save();
+        return DB::transaction(function () use ($user, $input) {
+            $workspace = new Workspace([
+                'name' => $input['name'],
+            ]);
+            $workspace->slug = Str::slug($input['name']);
 
-        $workspace->users()->create([
-            'user_id' => $user->id,
-            'role' => UserRole::OWNER,
-        ]);
+            try {
+                $workspace->save();
+            } catch (QueryException $exception) {
+                $this->rethrowAsValidationError($exception);
+            }
 
-        $user->current_workspace_id = $workspace->id;
-        $user->save();
+            // A self-created workspace always supersedes the user's previous
+            // default membership.
+            UserWorkspace::query()
+                ->where('user_id', $user->id)
+                ->where('is_default', true)
+                ->update(['is_default' => false]);
 
-        return $workspace;
+            $workspace->users()->create([
+                'user_id' => $user->id,
+                'role' => UserRole::OWNER,
+                'is_default' => true,
+            ]);
+
+            $user->current_workspace_id = $workspace->id;
+            $user->save();
+
+            return $workspace;
+        });
     }
 
     private function validate(array $input): void
@@ -36,9 +58,52 @@ class CreateWorkspace
                 'required',
                 'string',
                 'max:255',
-                'unique:workspaces,name',
-                'lowercase',
+                'regex:/^[A-Za-z0-9- ]+$/',
+                $this->uniqueSlugRule(),
             ],
+        ], [
+            'name.regex' => __('Workspace name may only contain letters, numbers, dashes, and spaces.'),
         ])->validate();
+    }
+
+    /**
+     * Names are free-text, but uniqueness is enforced on the normalized
+     * slug so names differing only by case, whitespace, or punctuation
+     * can't coexist. Kept on the `name` attribute (rather than a separate
+     * `slug` rule) so any failure surfaces under the field the user
+     * actually sees and edited.
+     */
+    private function uniqueSlugRule(): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail): void {
+            $slug = Str::slug((string) $value);
+
+            if ($slug === '') {
+                $fail(__('Workspace name must contain at least one letter or number.'));
+
+                return;
+            }
+
+            if (Workspace::query()->where('slug', $slug)->exists()) {
+                $fail(__('This workspace name is already in use.'));
+            }
+        };
+    }
+
+    /**
+     * The preflight `uniqueSlugRule()` check can't see a slug reserved by a
+     * concurrent request between the check and this `save()`. Convert that
+     * race into the same validation error rather than letting the unique
+     * constraint surface as a server error.
+     */
+    private function rethrowAsValidationError(QueryException $exception): never
+    {
+        if (! str_contains($exception->getMessage(), 'workspaces_slug_unique')) {
+            throw $exception;
+        }
+
+        throw ValidationException::withMessages([
+            'name' => __('This workspace name is already in use.'),
+        ]);
     }
 }

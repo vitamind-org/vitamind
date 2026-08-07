@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use VitaminD\Core\Actions\User\DeleteUser;
+use VitaminD\Plugins\Workspace\Actions\Workspaces\CreateWorkspace;
 use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 
 class WorkspaceUserCleanupTest extends TestCase
@@ -15,7 +16,7 @@ class WorkspaceUserCleanupTest extends TestCase
     public function test_deleting_a_user_removes_their_workspace_membership(): void
     {
         $user = User::factory()->create();
-        $workspace = $user->ensureHasDefaultWorkspace();
+        $workspace = app(CreateWorkspace::class)->create($user, ['name' => 'acme-corp']);
 
         $this->assertDatabaseHas('user_workspace', [
             'user_id' => $user->id,
@@ -30,7 +31,7 @@ class WorkspaceUserCleanupTest extends TestCase
     public function test_deleting_a_user_does_not_delete_the_workspace_itself(): void
     {
         $user = User::factory()->create();
-        $workspace = $user->ensureHasDefaultWorkspace();
+        $workspace = app(CreateWorkspace::class)->create($user, ['name' => 'acme-corp']);
 
         app(DeleteUser::class)->delete($user);
 
@@ -40,7 +41,7 @@ class WorkspaceUserCleanupTest extends TestCase
     public function test_deleting_a_user_only_removes_their_own_membership(): void
     {
         $owner = User::factory()->create();
-        $workspace = $owner->ensureHasDefaultWorkspace();
+        $workspace = app(CreateWorkspace::class)->create($owner, ['name' => 'acme-corp']);
         $member = User::factory()->create();
         UserWorkspace::create(['workspace_id' => $workspace->id, 'user_id' => $member->id, 'role' => 'user']);
 

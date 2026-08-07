@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    // `waini-provisioner`'s control-plane API (create/status/delete a
+    // workspace's GoWA instance), fronted by Caddy's basicauth + remote_ip
+    // matcher (wakuwaku-provisioner's internal/provisioner/caddy.go) —
+    // base_url must include the `/provisioner` path prefix Caddy strips
+    // before proxying, e.g. https://wagw.nugrahadi.com/provisioner.
+    'waini_provisioner' => [
+        'base_url' => env('WAINI_PROVISIONER_BASE_URL'),
+        'username' => env('WAINI_PROVISIONER_USERNAME'),
+        'password' => env('WAINI_PROVISIONER_PASSWORD'),
+    ],
+
 ];

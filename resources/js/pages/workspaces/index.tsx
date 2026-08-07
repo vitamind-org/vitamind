@@ -18,6 +18,11 @@ export default function Workspaces() {
     invitations: PaginatedData<WorkspaceUser>;
   }>>();
 
+  // WakuWaku restricts each user to a single workspace: once they have one,
+  // creating another or accepting a further invitation is rejected
+  // server-side, so these affordances are hidden rather than left to error.
+  const hasWorkspace = page.props.auth?.hasWorkspace ?? false;
+
   return (
     <SettingsLayout>
       <Head title="Workspaces" />
@@ -25,18 +30,20 @@ export default function Workspaces() {
       <Container className="max-w-5xl">
         <div className="flex items-start justify-between">
           <Heading title="Workspaces" description="Here you can manage your workspaces" />
-          <div className="flex items-center gap-2">
-            <WorkspaceForm>
-              <Button>
-                <PlusIcon />
-                Create workspace
-              </Button>
-            </WorkspaceForm>
-          </div>
+          {!hasWorkspace && (
+            <div className="flex items-center gap-2">
+              <WorkspaceForm>
+                <Button>
+                  <PlusIcon />
+                  Create workspace
+                </Button>
+              </WorkspaceForm>
+            </div>
+          )}
         </div>
         <DataTable columns={workspaceColumns} paginatedData={page.props.workspaces} />
 
-        {page.props.invitations && page.props.invitations.data && page.props.invitations.data.length > 0 && (
+        {!hasWorkspace && page.props.invitations && page.props.invitations.data && page.props.invitations.data.length > 0 && (
           <div className="mt-8 space-y-4">
             <Heading title="Invitations" description="Here you can see the workspaces you're invited to" />
             <DataTable columns={invitationColumns} paginatedData={page.props.invitations} />

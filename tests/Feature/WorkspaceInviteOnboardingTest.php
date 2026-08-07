@@ -240,7 +240,18 @@ class WorkspaceInviteOnboardingTest extends TestCase
         $this->get($tamperedUrl)->assertForbidden();
     }
 
-    public function test_authenticated_user_with_active_workspace_accepts_invite_via_signed_link(): void
+    /**
+     * At the plugin level, an already-active workspace member accepting a
+     * second invite via a signed link works fine (the plugin itself defaults
+     * to multi-workspace-per-user). In this app, though, WakuWaku's own
+     * `App\Http\Middleware\PreventMultipleWorkspaces` (registered in
+     * `bootstrap/app.php`, not in the plugin) enforces single-workspace
+     * tenancy on top of it — see `tests/Feature/SingleWorkspaceTenancyTest.php`
+     * for the app-level coverage of that gate. This test now asserts the
+     * gated (403) outcome so it reflects this app's actual end-to-end
+     * behavior rather than the plugin's own permissive default.
+     */
+    public function test_authenticated_user_with_active_workspace_is_blocked_from_accepting_another_invite_via_signed_link(): void
     {
         $user = User::factory()->create();
         app(CreateWorkspace::class)->create($user, ['name' => 'own-workspace']);
@@ -256,8 +267,8 @@ class WorkspaceInviteOnboardingTest extends TestCase
 
         $response = $this->actingAs($user)->get($signedUrl);
 
-        $response->assertRedirect(route('workspaces'));
-        $this->assertSame($otherWorkspace->id, $user->fresh()->current_workspace_id);
+        $response->assertForbidden();
+        $this->assertNotSame($otherWorkspace->id, $user->fresh()->current_workspace_id);
 
         $this->actingAs($user)->get('/dashboard')->assertOk();
     }

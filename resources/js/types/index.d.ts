@@ -7,6 +7,7 @@ import { DynamicFieldConfig } from './dynamic-field-config';
 export interface Auth {
   user: User;
   currentWorkspace?: Workspace;
+  hasWorkspace?: boolean;
 }
 
 export interface BreadcrumbItem {

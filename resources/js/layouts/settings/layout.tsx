@@ -1,5 +1,5 @@
 import { type NavItem, SharedData } from '@/types';
-import { UserIcon, ListIcon, KeyIcon } from 'lucide-react';
+import { UserIcon, ListIcon, KeyIcon, PhoneIcon } from 'lucide-react';
 import { ReactNode, useMemo } from 'react';
 import { usePage } from '@inertiajs/react';
 import Layout from '@/layouts/app/layout';
@@ -27,6 +27,11 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
         title: 'Workspaces',
         href: route('workspaces'),
         icon: ListIcon,
+      });
+      items.push({
+        title: 'WhatsApp Numbers',
+        href: route('whatsapp-numbers'),
+        icon: PhoneIcon,
       });
     }
 

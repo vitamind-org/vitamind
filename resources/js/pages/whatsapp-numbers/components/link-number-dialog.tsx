@@ -4,9 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WaNumber } from '@/types/wa-number';
+import { router } from '@inertiajs/react';
 import axios from 'axios';
 import { LoaderCircleIcon } from 'lucide-react';
 import { FormEvent, useEffect, useState } from 'react';
+
+const CONNECTED_STATUSES = ['connected', 'logged_in'];
 
 export default function LinkNumberDialog({ number, onOpenChange }: { number: WaNumber | null; onOpenChange: (open: boolean) => void }) {
   const [qr, setQr] = useState<string | null>(null);
@@ -28,6 +31,28 @@ export default function LinkNumberDialog({ number, onOpenChange }: { number: WaN
       .get(`/settings/whatsapp-numbers/${number.id}/qr`)
       .then((response) => setQr(response.data.qr))
       .finally(() => setQrLoading(false));
+  }, [number]);
+
+  // Neither QR scanning nor pairing-code entry happens over this connection
+  // - the phone talks to WhatsApp directly, GoWA just observes the result -
+  // so there is no request/response moment to react to here. Poll the
+  // number's live status while the dialog is open and close it once the
+  // phone has actually finished connecting.
+  useEffect(() => {
+    if (!number) return;
+
+    const poll = () => {
+      axios.get(`/settings/whatsapp-numbers/${number.id}/status`).then((response) => {
+        if (CONNECTED_STATUSES.includes(response.data.status)) {
+          router.reload({ only: ['numbers'] });
+          onOpenChange(false);
+        }
+      });
+    };
+
+    const interval = setInterval(poll, 3000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [number]);
 
   const requestPairingCode = (e: FormEvent) => {

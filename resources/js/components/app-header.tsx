@@ -18,11 +18,10 @@ export function AppHeader({ socketStatus, socketReconnect }: { socketStatus: Soc
     return !!(features && features.workspaces);
   }, [page.props.features]);
 
-  // Safely check if events.token route exists (meaning WS is enabled)
   const isWebSocketEnabled = useMemo(() => {
-    // @ts-ignore
-    return typeof route !== 'undefined' && typeof route().has === 'function' && route().has('events.token');
-  }, []);
+    const features = page.props.features as Record<string, boolean> | undefined;
+    return !!(features && features.websocket);
+  }, [page.props.features]);
 
   return (
     <header className="bg-background -ml-1 flex h-12 shrink-0 items-center justify-between gap-2 border-b p-4 md:-ml-2">

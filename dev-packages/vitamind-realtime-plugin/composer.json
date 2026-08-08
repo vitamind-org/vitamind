@@ -1,0 +1,39 @@
+{
+    "name": "vitamind/realtime-plugin",
+    "description": "VitaminD Realtime Plugin - Optional WebSocket broadcasting (Laravel Reverb) infrastructure for VitaminD Core, with an optional workspace-scoped channel-authorization helper.",
+    "type": "library",
+    "license": "MIT",
+    "version": "dev-master",
+    "authors": [
+        {
+            "name": "Wuri Nugrahadi",
+            "email": "wuri.nugrahadi@gmail.com",
+            "homepage": "https://nugrahadi.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2|^8.3|^8.4",
+        "laravel/framework": "^11.0|^12.0|^13.0",
+        "laravel/reverb": "^1.0",
+        "vitamind/core": "dev-master",
+        "vitamind/plugin-sdk": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "VitaminD\\Plugins\\Realtime\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "VitaminD\\Plugins\\Realtime\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "VitaminD\\Plugins\\Realtime\\Providers\\RealtimeServiceProvider"
+            ]
+        }
+    }
+}

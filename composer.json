@@ -23,6 +23,7 @@
         "tightenco/ziggy": "^2.0",
         "vitamind/core": "dev-master",
         "vitamind/plugin-sdk": "dev-master",
+        "vitamind/realtime-plugin": "dev-master",
         "vitamind/workspace-plugin": "dev-master"
     },
     "require-dev": {
@@ -48,7 +49,8 @@
             "Tests\\": "tests/",
             "VitaminD\\PluginSdk\\Tests\\": "dev-packages/vitamind-plugin-sdk/tests/",
             "VitaminD\\Core\\Tests\\": "dev-packages/vitamind-core/tests/",
-            "VitaminD\\Plugins\\Workspace\\Tests\\": "dev-packages/vitamind-workspace-plugin/tests/"
+            "VitaminD\\Plugins\\Workspace\\Tests\\": "dev-packages/vitamind-workspace-plugin/tests/",
+            "VitaminD\\Plugins\\Realtime\\Tests\\": "dev-packages/vitamind-realtime-plugin/tests/"
         }
     },
     "scripts": {
@@ -123,6 +125,13 @@
         {
             "type": "path",
             "url": "dev-packages/vitamind-workspace-plugin",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "dev-packages/vitamind-realtime-plugin",
             "options": {
                 "symlink": true
             }

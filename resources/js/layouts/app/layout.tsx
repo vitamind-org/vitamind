@@ -1,18 +1,31 @@
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppHeader } from '@/components/app-header';
 import { NavItem, SharedData } from '@/types';
-import { type PropsWithChildren, useCallback, useEffect, useState } from 'react';
+import { type PropsWithChildren, useEffect, useState } from 'react';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { usePage } from '@inertiajs/react';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { type SocketEventData, useSocketEvents, useSocketListener } from '@/hooks/use-socket-events';
+import { useSocketEvents } from '@/hooks/use-socket-events';
+import { useBroadcastChannel } from '@/hooks/use-broadcast-channel';
 import { useBootstrapStore } from '@/stores/bootstrap-store';
 import { Button } from '@/components/ui/button';
 import { AlertCircleIcon } from 'lucide-react';
 import DialogHost from '@/components/dialogs/dialog-host';
+
+/**
+ * Public channel: bootstrap config (server_provider/dns_provider/plugin
+ * views) is app-wide, not tenant-scoped, so vitamind-realtime-plugin
+ * broadcasts it without private-channel authorization (design.md's D6).
+ * Rendered as a child of QueryClientProvider because useBroadcastChannel
+ * needs useQueryClient() in context.
+ */
+function BootstrapBroadcastListener({ fetchBootstrap }: { fetchBootstrap: () => void }) {
+  useBroadcastChannel('bootstrap', { 'bootstrap.invalidated': fetchBootstrap }, { private: false });
+  return null;
+}
 
 export default function Layout({
   children,
@@ -40,17 +53,6 @@ export default function Layout({
     }
   }, [socketStatus, serverBootstrapVersion, syncBootstrap]);
 
-  useSocketListener(
-    useCallback(
-      (event: SocketEventData) => {
-        if (event.type === 'bootstrap.invalidated') {
-          fetchBootstrap();
-        }
-      },
-      [fetchBootstrap],
-    ),
-  );
-
   useEffect(() => {
     if (page.props.flash && page.props.flash.success) {
       toast.success(<div className="flex items-center gap-2">{page.props.flash.success}</div>);
@@ -72,6 +74,7 @@ export default function Layout({
 
   return (
     <QueryClientProvider client={queryClient}>
+      <BootstrapBroadcastListener fetchBootstrap={fetchBootstrap} />
       <TooltipProvider>
         <SidebarProvider defaultOpen={!!(secondNavItems && secondNavItems.length > 0)}>
           <AppSidebar secondNavItems={secondNavItems} secondNavTitle={secondNavTitle} />

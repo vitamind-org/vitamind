@@ -1,180 +1,77 @@
+import { disconnectEcho, getEcho } from '@/lib/echo';
 import { create } from 'zustand';
-
-export type SocketEventData = {
-  workspace_id: number;
-  type: string;
-  data: Record<string, unknown>;
-};
-
-export const SOCKET_EVENT = 'vitamind:socket-event' as const;
-
-declare global {
-  interface WindowEventMap {
-    [SOCKET_EVENT]: CustomEvent<SocketEventData>;
-  }
-}
-
-export type WebSocketMessage =
-  | { type: 'connected'; workspace_id: number }
-  | { type: 'subscribed'; workspace_id: number }
-  | { type: 'event'; data: SocketEventData }
-  | { type: 'error'; message: string };
 
 export type SocketStatus = 'connecting' | 'connected' | 'disconnected';
 
-const RECONNECT_BASE_DELAY = 1000;
-const RECONNECT_MAX_DELAY = 30000;
-const MAX_FAST_RECONNECT_ATTEMPTS = 3;
-const SLOW_RECONNECT_INTERVAL = 30000;
-
-let ws: WebSocket | null = null;
-let reconnectAttempt = 0;
-let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-
 type SocketStore = {
   status: SocketStatus;
-  currentWorkspaceId: number | null;
-  connect: (csrfToken: string) => Promise<void>;
+  connect: () => void;
   disconnect: () => void;
-  reconnect: (csrfToken: string) => void;
-  switchWorkspace: (workspaceId: number) => void;
+  reconnect: () => void;
 };
 
-async function requestEventsToken(csrfToken: string): Promise<{ token: string; url: string } | null> {
-  try {
-    // Check if the route exists before calling it to prevent Ziggy throwing errors
-    // @ts-ignore
-    const hasRoute = typeof route !== 'undefined' && typeof route().has === 'function' && route().has('events.token');
-    if (!hasRoute) return null;
-
-    const response = await fetch(route('events.token'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': csrfToken,
-      },
-    });
-    if (!response.ok) return null;
-    return await response.json();
-  } catch {
-    return null;
-  }
+function mapPusherState(pusherState: string): SocketStatus {
+  if (pusherState === 'connected') return 'connected';
+  if (pusherState === 'connecting' || pusherState === 'unavailable') return 'connecting';
+  return 'disconnected';
 }
 
-function scheduleReconnect(csrfToken: string): void {
-  // If the route doesn't exist, don't try to reconnect
-  // @ts-ignore
-  const hasRoute = typeof route !== 'undefined' && typeof route().has === 'function' && route().has('events.token');
-  if (!hasRoute) {
-    useSocketStore.setState({ status: 'disconnected' });
-    return;
-  }
+type EchoInstance = NonNullable<ReturnType<typeof getEcho>>;
+type PusherConnection = EchoInstance['connector']['pusher']['connection'];
 
-  if (reconnectTimer) {
-    clearTimeout(reconnectTimer);
-    reconnectTimer = null;
-  }
-  reconnectAttempt++;
-  if (reconnectAttempt > MAX_FAST_RECONNECT_ATTEMPTS) {
-    useSocketStore.setState({ status: 'disconnected' });
-    reconnectTimer = setTimeout(() => useSocketStore.getState().connect(csrfToken), SLOW_RECONNECT_INTERVAL);
-    return;
-  }
-  useSocketStore.setState({ status: 'connecting' });
-  const delay = Math.min(RECONNECT_BASE_DELAY * Math.pow(2, reconnectAttempt - 1), RECONNECT_MAX_DELAY);
-  reconnectTimer = setTimeout(() => useSocketStore.getState().connect(csrfToken), delay);
-}
+// Tracked outside the store (not reactive state) so repeated connect()
+// calls — e.g. from use-socket-events.ts's effect re-running on every
+// Inertia navigation — can detect they're already bound to the current
+// connection instead of stacking a new `state_change` handler each time.
+let boundConnection: PusherConnection | null = null;
+let boundHandler: ((event: { current: string }) => void) | null = null;
 
-export const useSocketStore = create<SocketStore>((set, get) => ({
-  status: 'disconnected', // Default to disconnected
-  currentWorkspaceId: null,
+/**
+ * Connection status only — legitimately client-only UI state (design.md's
+ * D4 keeps *data* out of Zustand, not connection bookkeeping). Sourced from
+ * the Echo/Reverb connection's own Pusher-protocol connection state, so
+ * reconnection itself is handled by pusher-js internally rather than the
+ * hand-rolled backoff loop this store used to implement (design.md's D6).
+ */
+export const useSocketStore = create<SocketStore>((set) => ({
+  status: 'disconnected',
 
-  connect: async (csrfToken: string) => {
-    // If the route doesn't exist, we don't try to connect
-    // @ts-ignore
-    const hasRoute = typeof route !== 'undefined' && typeof route().has === 'function' && route().has('events.token');
-    if (!hasRoute) {
+  connect: () => {
+    const echo = getEcho();
+
+    if (!echo) {
       set({ status: 'disconnected' });
       return;
     }
 
-    if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN)) {
-      return;
-    }
+    const { connection } = echo.connector.pusher;
 
-    set({ status: 'connecting' });
+    set({ status: mapPusherState(connection.state) });
 
-    const tokenData = await requestEventsToken(csrfToken);
-    if (!tokenData) {
-      scheduleReconnect(csrfToken);
-      return;
-    }
+    if (boundConnection === connection) return;
 
-    const socket = new WebSocket(`${tokenData.url}?token=${tokenData.token}`);
-    ws = socket;
-
-    socket.onmessage = (event) => {
-      try {
-        const msg: WebSocketMessage = JSON.parse(event.data);
-
-        switch (msg.type) {
-          case 'connected':
-            reconnectAttempt = 0;
-            set({ status: 'connected', currentWorkspaceId: msg.workspace_id });
-            break;
-
-          case 'subscribed':
-            set({ currentWorkspaceId: msg.workspace_id });
-            break;
-
-          case 'event':
-            window.dispatchEvent(new CustomEvent(SOCKET_EVENT, { detail: msg.data }));
-            break;
-
-          case 'error':
-            console.warn('[WS Events]', msg.message);
-            break;
-        }
-      } catch {
-        // ignore non-JSON messages
-      }
+    const handler = ({ current }: { current: string }) => {
+      set({ status: mapPusherState(current) });
     };
 
-    socket.onclose = () => {
-      ws = null;
-      scheduleReconnect(csrfToken);
-    };
-
-    socket.onerror = () => {
-      // onclose will fire after onerror, reconnection handled there
-    };
+    connection.bind('state_change', handler);
+    boundConnection = connection;
+    boundHandler = handler;
   },
 
   disconnect: () => {
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer);
-      reconnectTimer = null;
+    if (boundConnection && boundHandler) {
+      boundConnection.unbind('state_change', boundHandler);
     }
-    if (ws) {
-      ws.onclose = null;
-      ws.onerror = null;
-      ws.onmessage = null;
-      ws.close();
-      ws = null;
-    }
+    boundConnection = null;
+    boundHandler = null;
+
+    disconnectEcho();
     set({ status: 'disconnected' });
   },
 
-  reconnect: (csrfToken: string) => {
-    reconnectAttempt = 0;
-    get().disconnect();
-    get().connect(csrfToken);
-  },
-
-  switchWorkspace: (workspaceId: number) => {
-    const { currentWorkspaceId } = get();
-    if (ws && ws.readyState === WebSocket.OPEN && workspaceId !== currentWorkspaceId) {
-      ws.send(JSON.stringify({ type: 'subscribe', workspace_id: workspaceId }));
-    }
+  reconnect: () => {
+    useSocketStore.getState().disconnect();
+    useSocketStore.getState().connect();
   },
 }));

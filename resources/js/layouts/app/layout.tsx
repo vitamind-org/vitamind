@@ -15,6 +15,18 @@ import { Button } from '@/components/ui/button';
 import { AlertCircleIcon } from 'lucide-react';
 import DialogHost from '@/components/dialogs/dialog-host';
 
+/**
+ * Public channel: bootstrap config (server_provider/dns_provider/plugin
+ * views) is app-wide, not tenant-scoped, so vitamind-realtime-plugin
+ * broadcasts it without private-channel authorization (design.md's D6).
+ * Rendered as a child of QueryClientProvider because useBroadcastChannel
+ * needs useQueryClient() in context.
+ */
+function BootstrapBroadcastListener({ fetchBootstrap }: { fetchBootstrap: () => void }) {
+  useBroadcastChannel('bootstrap', { 'bootstrap.invalidated': fetchBootstrap }, { private: false });
+  return null;
+}
+
 export default function Layout({
   children,
   secondNavItems,
@@ -41,11 +53,6 @@ export default function Layout({
     }
   }, [socketStatus, serverBootstrapVersion, syncBootstrap]);
 
-  // Public channel: bootstrap config (server_provider/dns_provider/plugin
-  // views) is app-wide, not tenant-scoped, so vitamind-realtime-plugin
-  // broadcasts it without private-channel authorization (design.md's D6).
-  useBroadcastChannel('bootstrap', { 'bootstrap.invalidated': fetchBootstrap }, { private: false });
-
   useEffect(() => {
     if (page.props.flash && page.props.flash.success) {
       toast.success(<div className="flex items-center gap-2">{page.props.flash.success}</div>);
@@ -67,6 +74,7 @@ export default function Layout({
 
   return (
     <QueryClientProvider client={queryClient}>
+      <BootstrapBroadcastListener fetchBootstrap={fetchBootstrap} />
       <TooltipProvider>
         <SidebarProvider defaultOpen={!!(secondNavItems && secondNavItems.length > 0)}>
           <AppSidebar secondNavItems={secondNavItems} secondNavTitle={secondNavTitle} />

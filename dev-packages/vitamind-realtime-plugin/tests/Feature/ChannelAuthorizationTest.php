@@ -50,7 +50,7 @@ class ChannelAuthorizationTest extends TestCase
 
         Broadcast::channel('workspace.{workspaceId}.ping', function ($user, $workspaceId): bool {
             return WorkspaceChannelAuthorization::check($user, $workspaceId);
-        });
+        }, ['guards' => ['web', 'sanctum']]);
     }
 
     public function test_unauthenticated_request_is_rejected(): void
@@ -90,5 +90,28 @@ class ChannelAuthorizationTest extends TestCase
         ]);
 
         $response->assertForbidden();
+    }
+
+    /**
+     * Without the `guards => ['web', 'sanctum']` option on the channel
+     * registration, Laravel only tries the app's default (`web`, session)
+     * guard, so a request authenticated purely via a Sanctum bearer token —
+     * no session cookie at all — would never reach the authorization
+     * callback above and would 403 even for a genuine member.
+     */
+    public function test_workspace_member_is_authorized_via_sanctum_bearer_token(): void
+    {
+        $user = User::factory()->create();
+        $workspace = Workspace::create(['name' => 'acme']);
+        $workspace->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+
+        $token = $user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders(['Authorization' => "Bearer {$token}"])->postJson('/broadcasting/auth', [
+            'channel_name' => "private-workspace.{$workspace->id}.ping",
+            'socket_id' => '1234.1234',
+        ]);
+
+        $response->assertOk();
     }
 }

@@ -30,6 +30,15 @@ final class WorkspaceChannelAuthorization
      */
     public static function check(?Authenticatable $user, int|string $workspaceId): bool
     {
+        $workspaceId = (string) $workspaceId;
+
+        // A channel name is a wildcard-matched string, so "1x", "1.0", and
+        // "01" would otherwise silently cast to (int) 1 below and check
+        // membership for the wrong, distinct channel.
+        if (! preg_match('/^[1-9][0-9]*$/', $workspaceId) || (string) (int) $workspaceId !== $workspaceId) {
+            return false;
+        }
+
         if (! Config::get('vitamin-d.features.workspaces', false)) {
             return false;
         }

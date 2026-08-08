@@ -86,3 +86,4 @@ Realtime Plugin SHALL include at least one complete, working example — a broad
 - **WHEN** the plugin's test suite is run
 - **THEN** a test asserts that the example channel's authorization callback grants access to an authorized user
 - **AND** a test asserts that it denies access to an unauthorized user
+- **AND** a test asserts that broadcasting the example event delivers the correct event name and payload to that authorized user's channel

@@ -16,6 +16,16 @@ function mapPusherState(pusherState: string): SocketStatus {
   return 'disconnected';
 }
 
+type EchoInstance = NonNullable<ReturnType<typeof getEcho>>;
+type PusherConnection = EchoInstance['connector']['pusher']['connection'];
+
+// Tracked outside the store (not reactive state) so repeated connect()
+// calls — e.g. from use-socket-events.ts's effect re-running on every
+// Inertia navigation — can detect they're already bound to the current
+// connection instead of stacking a new `state_change` handler each time.
+let boundConnection: PusherConnection | null = null;
+let boundHandler: ((event: { current: string }) => void) | null = null;
+
 /**
  * Connection status only — legitimately client-only UI state (design.md's
  * D4 keeps *data* out of Zustand, not connection bookkeeping). Sourced from
@@ -38,18 +48,30 @@ export const useSocketStore = create<SocketStore>((set) => ({
 
     set({ status: mapPusherState(connection.state) });
 
-    connection.bind('state_change', ({ current }: { current: string }) => {
+    if (boundConnection === connection) return;
+
+    const handler = ({ current }: { current: string }) => {
       set({ status: mapPusherState(current) });
-    });
+    };
+
+    connection.bind('state_change', handler);
+    boundConnection = connection;
+    boundHandler = handler;
   },
 
   disconnect: () => {
+    if (boundConnection && boundHandler) {
+      boundConnection.unbind('state_change', boundHandler);
+    }
+    boundConnection = null;
+    boundHandler = null;
+
     disconnectEcho();
     set({ status: 'disconnected' });
   },
 
   reconnect: () => {
-    disconnectEcho();
+    useSocketStore.getState().disconnect();
     useSocketStore.getState().connect();
   },
 }));

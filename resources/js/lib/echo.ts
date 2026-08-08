@@ -29,7 +29,10 @@ export function getEcho(): Echo<'reverb'> | null {
   echo = new Echo<'reverb'>({
     broadcaster: 'reverb',
     key,
-    wsHost: import.meta.env.VITE_REVERB_HOST as string,
+    // Falls back to the server's own default (dev-packages/vitamind-realtime-plugin/config/broadcasting.php)
+    // rather than a bare `as string` cast, which would silently hand pusher-js
+    // `undefined` and make it fall back to its own SaaS cluster host instead.
+    wsHost: (import.meta.env.VITE_REVERB_HOST as string | undefined) ?? '127.0.0.1',
     wsPort: Number(import.meta.env.VITE_REVERB_PORT ?? 8080),
     wssPort: Number(import.meta.env.VITE_REVERB_PORT ?? 8080),
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME as string | undefined) === 'https',
@@ -49,4 +52,5 @@ export function getEcho(): Echo<'reverb'> | null {
 export function disconnectEcho(): void {
   echo?.disconnect();
   echo = null;
+  delete (window as Partial<Window>).Echo;
 }

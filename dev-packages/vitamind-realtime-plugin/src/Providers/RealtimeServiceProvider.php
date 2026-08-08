@@ -87,12 +87,17 @@ class RealtimeServiceProvider extends ServiceProvider
      * only channel this package itself defines — see
      * VitaminD\Plugins\Realtime\Events\WorkspacePing's docblock for why it
      * exists as a worked example rather than production surface.
+     *
+     * Explicit `guards` because Laravel's broadcaster otherwise only tries
+     * the app's *default* auth guard (`web`, session-based) — a request
+     * authenticated via a Sanctum API token would never reach the closure
+     * below without `sanctum` listed here too.
      */
     protected function registerChannels(): void
     {
         Broadcast::channel('workspace.{workspaceId}.ping', function ($user, $workspaceId): bool {
             return WorkspaceChannelAuthorization::check($user, $workspaceId);
-        });
+        }, ['guards' => ['web', 'sanctum']]);
     }
 
     /**

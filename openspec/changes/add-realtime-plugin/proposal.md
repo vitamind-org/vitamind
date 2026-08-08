@@ -14,7 +14,7 @@ Building this as a one-off inside WakuWaku would bake channel-naming and authori
 - One end-to-end example event/channel within the plugin (or its test suite) proving the pattern actually works, not just infra scaffolding.
 - Implementor-facing docs: wiring a broadcast event, local dev (`php artisan reverb:start`), and production process-supervision notes (documentation only — no new deployment infrastructure is built as part of this change).
 
-No breaking changes: fully additive, opt-in via a flag that already defaults to `false`.
+No breaking changes for any in-repository consumer: fully additive to the host app, opt-in via a flag that already defaults to `false`. This does remove frontend APIs from the pre-existing, inert Phase 3 socket scaffold — `SOCKET_EVENT`, `useSocketListener`, `useRealtime`, `useRealtimeRecord`, and the `events.token` protocol (see D6/Impact below) — but a repo-wide search found no page-level caller of any of them, so nothing in this codebase breaks. An external consumer that had already started building against those specific symbols would need to migrate to `useBroadcastChannel`.
 
 ## Capabilities
 

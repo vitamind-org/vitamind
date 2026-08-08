@@ -8,7 +8,7 @@ import { useEffect, useRef } from 'react';
  * populates). A plain callback is the escape hatch for state that isn't
  * TanStack-Query-owned, e.g. VitaminD core's own `useBootstrapStore`.
  */
-export type BroadcastEventTarget = QueryKey | (() => void);
+export type BroadcastEventTarget = QueryKey | ((payload: unknown) => void);
 
 export type BroadcastEventMap = Record<string, BroadcastEventTarget>;
 
@@ -36,7 +36,10 @@ function isQueryKey(target: BroadcastEventTarget): target is QueryKey {
 export function useBroadcastChannel(channelName: string | null | undefined, events: BroadcastEventMap, options?: { private?: boolean }): void {
   const queryClient = useQueryClient();
   const eventsRef = useRef(events);
-  eventsRef.current = events;
+
+  useEffect(() => {
+    eventsRef.current = events;
+  });
 
   const isPrivate = options?.private ?? true;
 
@@ -48,21 +51,31 @@ export function useBroadcastChannel(channelName: string | null | undefined, even
 
     const channel = isPrivate ? echo.private(channelName) : echo.channel(channelName);
 
-    Object.keys(eventsRef.current).forEach((eventName) => {
-      channel.listen(eventName, () => {
+    // Bound per event name so cleanup can unbind exactly these listeners
+    // (channel.stopListening) rather than echo.leave(channelName), which
+    // would unsubscribe the whole channel — including any other hook
+    // instance still listening on the same channel name.
+    const listeners = Object.keys(eventsRef.current).map((eventName) => {
+      const listener = (payload: unknown) => {
         const target = eventsRef.current[eventName];
         if (!target) return;
 
         if (isQueryKey(target)) {
           queryClient.invalidateQueries({ queryKey: target });
         } else {
-          target();
+          target(payload);
         }
-      });
+      };
+
+      channel.listen(eventName, listener);
+
+      return { eventName, listener };
     });
 
     return () => {
-      echo.leave(channelName);
+      listeners.forEach(({ eventName, listener }) => {
+        channel.stopListening(eventName, listener);
+      });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channelName, isPrivate, queryClient]);

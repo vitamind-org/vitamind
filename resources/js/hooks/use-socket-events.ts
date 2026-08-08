@@ -1,4 +1,5 @@
 import { type SocketStatus, useSocketStore } from '@/stores/socket-store';
+import { useFeature } from '@/hooks/use-feature';
 import { SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { useCallback, useEffect } from 'react';
@@ -13,22 +14,23 @@ export type { SocketStatus } from '@/stores/socket-store';
  * connection.
  */
 export function useSocketEvents(): { status: SocketStatus; reconnect: () => void } {
-  const { auth, features } = usePage<SharedData>().props;
+  const { auth } = usePage<SharedData>().props;
 
   const status = useSocketStore((s) => s.status);
   const connect = useSocketStore((s) => s.connect);
   const disconnect = useSocketStore((s) => s.disconnect);
   const storeReconnect = useSocketStore((s) => s.reconnect);
 
-  const websocketEnabled = !!(features as Record<string, boolean> | undefined)?.websocket;
+  const websocketEnabled = useFeature('websocket');
+  const isAuthenticated = !!auth?.user;
 
   useEffect(() => {
-    if (auth && websocketEnabled) {
+    if (isAuthenticated && websocketEnabled) {
       connect();
     } else {
       disconnect();
     }
-  }, [auth, websocketEnabled, connect, disconnect]);
+  }, [isAuthenticated, websocketEnabled, connect, disconnect]);
 
   const reconnect = useCallback(() => {
     storeReconnect();

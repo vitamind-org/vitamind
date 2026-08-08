@@ -58,6 +58,11 @@ class WaNumberStatusUpdated implements ShouldBroadcastNow // or ShouldBroadcast
     {
         return [new PrivateChannel("workspace.{$this->number->workspace_id}.wa-number.{$this->number->id}")];
     }
+
+    public function broadcastAs(): string
+    {
+        return 'status.updated';
+    }
 }
 
 // In the channel's authorization callback, wherever you register it:
@@ -81,7 +86,7 @@ See `VitaminD\Plugins\Realtime\Events\WorkspacePing` and `RealtimeServiceProvide
 
 Laravel's `broadcastOn()` can return more than one channel, so this isn't even an app-wide either/or — it's a per-event choice:
 
-- **Per-resource** (`workspace.{id}.wa-number.{id}`): precise authorization (can check "is this user allowed to see *this* number," not just "are they in the workspace"), no client-side filtering needed, but a component subscribes/unsubscribes as it mounts/unmounts. Good fit for a focused UI like a single QR-login dialog that only cares about one resource.
+- **Per-resource** (`workspace.{workspaceId}.wa-number.{numberId}`): precise authorization (can check "is this user allowed to see *this* number," not just "are they in the workspace"), no client-side filtering needed, but a component subscribes/unsubscribes as it mounts/unmounts. Good fit for a focused UI like a single QR-login dialog that only cares about one resource.
 - **Public / workspace-wide** (one channel, every relevant event multiplexed onto it): a single subscription serves an entire session regardless of which page is open — good for cross-cutting notifications. This package's own `BootstrapInvalidated` event (see `RealtimeServiceProvider::registerEventListeners()`, consumed by `resources/js/layouts/app/layout.tsx`) is a real, shipped example: it's broadcast on a **public** channel (`bootstrap`) rather than a workspace-scoped private one, because the config it signals a change to is app-wide, not tenant-scoped — a deliberate choice made by the *implementor* (`vitamind/core`, via this plugin), not something the plugin enforced.
 
 Nothing stops a single event from doing both — return a per-resource channel *and* a workspace-wide one from the same `broadcastOn()` if you want a focused UI update and a cross-cutting notification from one occurrence.

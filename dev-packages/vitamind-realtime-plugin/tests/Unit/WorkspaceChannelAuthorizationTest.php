@@ -54,4 +54,35 @@ class WorkspaceChannelAuthorizationTest extends TestCase
 
         $this->assertFalse(WorkspaceChannelAuthorization::check(null, $workspace->id));
     }
+
+    /**
+     * `(int) $workspaceId` alone would silently accept these as the real
+     * workspace ID below — e.g. `workspace.{$id}x.ping` and
+     * `workspace.0{$id}.ping` would both check membership for workspace
+     * `$id` instead of being rejected as malformed channel parameters.
+     */
+    public function test_denied_for_non_canonical_workspace_id(): void
+    {
+        $user = User::factory()->create();
+        $workspace = Workspace::create(['name' => 'acme']);
+        $workspace->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+
+        $id = (string) $workspace->id;
+
+        $malformedIds = [
+            $id.'x',
+            $id.'.0',
+            '0'.$id,
+            '-'.$id,
+            '0',
+            '',
+        ];
+
+        foreach ($malformedIds as $malformed) {
+            $this->assertFalse(
+                WorkspaceChannelAuthorization::check($user, $malformed),
+                "Expected workspace ID \"{$malformed}\" to be rejected."
+            );
+        }
+    }
 }

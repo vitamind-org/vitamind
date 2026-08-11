@@ -1,4 +1,4 @@
-import { disconnectEcho, getEcho } from '@/lib/echo';
+import { disconnectEcho, getEcho } from '../lib/echo';
 import { create } from 'zustand';
 
 export type SocketStatus = 'connecting' | 'connected' | 'disconnected';

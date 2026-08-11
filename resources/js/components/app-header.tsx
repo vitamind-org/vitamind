@@ -4,7 +4,7 @@ import { HeartIcon, SlashIcon, WifiIcon, WifiOffIcon } from 'lucide-react';
 import AppCommand from '@/components/app-command';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { type SocketStatus } from '@/hooks/use-socket-events';
+import { type SocketStatus } from '@/types/realtime-plugin';
 import { useFeature } from '@/hooks/use-feature';
 
 export function AppHeader({ socketStatus, socketReconnect }: { socketStatus: SocketStatus; socketReconnect: () => void }) {

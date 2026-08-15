@@ -6,13 +6,20 @@
 // module can't carry precise named types, only opaque/any-shaped values).
 // Keeping the contract here also matches design.md (D3): the host defines
 // the shape it depends on, independent of the plugin's internal types.
+import type { QueryKey } from '@tanstack/react-query';
+
 export type SocketStatus = 'connecting' | 'connected' | 'disconnected';
+
+// Mirrors the plugin's own BroadcastEventTarget (query-key array to
+// invalidate, or a plain callback) so a wrongly-typed event target — e.g. a
+// number or plain object — can't slip through and be called as a function.
+export type BroadcastEventTarget = QueryKey | ((payload: unknown) => void);
 
 export type RealtimePlugin = {
   useSocketEvents?: () => { status: SocketStatus; reconnect: () => void };
   useBroadcastChannel?: (
     channelName: string | null | undefined,
-    events: Record<string, unknown>,
+    events: Record<string, BroadcastEventTarget>,
     options?: { private?: boolean },
   ) => void;
 };

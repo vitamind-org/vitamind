@@ -24,7 +24,7 @@ Struktural extraction VitaminD dari monolithic boilerplate menjadi reusable pack
 - Namespace core/workspace berubah dari `App\*` ke `VitaminD\Core\*` / `VitaminD\Plugins\Workspace\*`.
 
 ### Belum dilakukan (deferred, tracked di change terpisah)
-- **Publishing ke Packagist** — ditunda sampai stability gate terpenuhi, lihat `stabilize-vitamind-packages` (dogfooding di 3 proyek konsumen: BukuWarga, LembarUji, UangKas) dan dieksekusi di `publish-vitamind-packages`.
+- **Publishing ke Packagist** — ditunda sampai stability gate terpenuhi, lihat `stabilize-vitamind-packages` (dogfooding di 4 proyek konsumen: BukuWarga, LembarUji, UangKas, wakuwaku) dan dieksekusi di `publish-vitamind-packages`.
 - Sampai gate lulus, repo `vitamind-org` di GitHub berfungsi sebagai mirror kode saja (tanpa tag/release).
 
 ---

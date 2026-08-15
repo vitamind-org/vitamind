@@ -29,7 +29,7 @@ class WorkspaceOnboardingController extends Controller
         $emailMismatch = session('invite_email_mismatch');
         session()->forget('invite_email_mismatch');
 
-        return Inertia::render('workspaces/onboarding', [
+        return Inertia::render('@plugin/workspace-plugin/onboarding', [
             'invitations' => WorkspaceUserResource::collection(
                 UserWorkspace::query()
                     ->with(['user', 'workspace'])

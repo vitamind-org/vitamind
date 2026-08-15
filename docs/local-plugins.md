@@ -76,6 +76,95 @@ into `vendor/vitamind/*` via a Composer path repository while in development).
 Once published, they're consumed exactly like any other Composer dependency, at
 `vendor/vitamind/{package}/`.
 
+## Frontend
+
+Local plugins have no dedicated frontend mechanism — there is no alias, no
+glob, nothing plugin-specific to configure. If a Local plugin needs a custom
+Inertia page or component, write it directly under the host's
+`resources/js/pages/...` (or wherever it fits among the host's existing
+`resources/js` conventions), exactly as you would for any other host
+feature. It gets compiled as part of the host's normal Vite build — no
+extra step, no extra alias.
+
+This is a deliberate consequence of Local plugins being application code:
+since they never leave this repo, there's no boundary for a dedicated
+frontend mechanism to enforce. Contrast this with GitHub and Composer
+plugins below, which *are* distributed and do have one (see
+[`@plugin/{name}` and `usePlugin()`](#distributed-plugin-frontend) further
+down).
+
+For the CRUD-style admin UI most Local plugins actually need, prefer the
+backend-driven `dynamic-page` system (`RegisterPage`, `RegisterDataTable`,
+`Column`, `Filter` in `vitamind-plugin-sdk`) over a custom page — it needs
+no frontend code at all, distributed or otherwise.
+
+## Distributed plugin frontend
+
+GitHub and Composer plugins *can* ship custom Inertia pages, hooks, and
+components, resolved through a build-time `@plugin/{kebab-name}` alias
+(`vite.config.ts`'s `getPluginAliases()`, scanning `vendor/vitamind/*`) —
+compiled together with the host in the same Vite build, so there's no
+separate build step and no risk of bundling a second copy of React.
+
+Put frontend source under the plugin's own `resources/js/`, mirroring the
+host's own layout:
+
+```
+vendor/vitamind/my-plugin/          (or dev-packages/vitamind-my-plugin/
+resources/js/                        in this monorepo's dev setup)
+├── pages/
+│   └── index.tsx                   → resolved as `@plugin/my-plugin/index`
+├── hooks/
+├── lib/
+└── stores/
+```
+
+**Pages** (anything under `pages/`) are rendered from PHP with
+`Inertia::render('@plugin/my-plugin/index', [...])`, resolved lazily by
+`resources/js/app.tsx`'s `resolve()` — same code-splitting behavior as any
+host page.
+
+**Hooks and other non-page exports** (`hooks/`, `lib/`, `stores/`) are
+consumed by host code through `usePlugin('my-plugin')`
+(`resources/js/lib/use-plugin.ts`), never imported by their file path
+directly:
+
+```tsx
+const { useMyHook } = usePlugin('my-plugin');
+```
+
+`usePlugin()` returns an empty object — never throws — if the plugin isn't
+installed, so host code that optionally depends on a plugin (like
+`resources/js/layouts/app/layout.tsx` does for `vitamind/realtime-plugin`)
+should fall back to a no-op rather than assume the hook exists. Define the
+type contract for what you expect from the plugin in your own host-side
+types file (see `resources/js/types/realtime-plugin.ts` for an example) —
+`import type` directly from `@plugin/{name}/...` doesn't type-check (the
+alias is an ambient wildcard module, which can't carry precise named
+types), and reaching into a plugin's internal types would recouple the
+"stable interface" this indirection exists to avoid anyway.
+
+Tailwind classes used in plugin components are picked up automatically
+(`resources/css/app.css`'s `@source '../../vendor/vitamind';`) and
+generate real CSS from the *host's* design tokens — plugins never ship
+their own stylesheet.
+
+When writing feature tests against a plugin page, pass `shouldExist: false`
+to Inertia's testing assertion — `assertInertia(fn ($page) => $page
+->component('@plugin/my-plugin/index', false))`. By default that assertion
+also checks the component file exists on disk, but it only knows about
+`resources/js/pages/` (`config('inertia.testing.ensure_pages_exist')`), not
+the `@plugin/` alias — without the explicit `false` it fails with "Inertia
+page component file [...] does not exist" even though the page renders
+correctly.
+
+This mechanism only works for Composer plugins and for GitHub plugins
+whose source existed at the host's last `npm run build` — a GitHub plugin
+installed at runtime through the admin UI isn't reachable this way until
+the host rebuilds. Until a rebuild-on-install (or self-contained bundle)
+mechanism exists, runtime-installed GitHub plugins are limited to the
+`dynamic-page` system above for their UI.
+
 ## Extracting a local plugin into a standalone package
 
 Once a local plugin is generic enough to reuse across projects (or you want to
@@ -100,11 +189,19 @@ standalone package:
    ```
 4. Update the namespace in every moved file from `App\Plugins\MyPlugin\*` to the
    new PSR-4 prefix (e.g. `VitaminD\Plugins\YourVendor\MyPlugin\*`).
-5. Delete the original `app/Plugins/MyPlugin/` folder — `DiscoverPlugins` will stop
+5. If the local plugin had any custom frontend (pages under
+   `resources/js/pages/`, or hooks/components living anywhere else in the
+   host's `resources/js/`), move that into a `resources/js/` folder inside
+   the new package instead — see [Distributed plugin
+   frontend](#distributed-plugin-frontend) above for the layout and how
+   host code should consume it (`@plugin/{name}` for pages, `usePlugin()`
+   for everything else). Update any host code that referenced the old
+   `@/pages/...`/`@/hooks/...` path to go through those instead.
+6. Delete the original `app/Plugins/MyPlugin/` folder — `DiscoverPlugins` will stop
    finding it there and pick it up from `vendor/{vendor}/{package}` (if required
    via Composer) or `storage/plugins/{package}` (if installed via
    `php artisan plugin:install-github` or the admin UI) instead.
-6. Run `composer require your-vendor/my-plugin` (or `plugin:install-github`) in
+7. Run `composer require your-vendor/my-plugin` (or `plugin:install-github`) in
    any project that wants to use it.
 
 There's no in-place "convert" command — the `src/` restructuring only happens

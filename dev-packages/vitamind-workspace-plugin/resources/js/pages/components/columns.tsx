@@ -2,15 +2,15 @@ import DateTime from '@/components/date-time';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import DeleteWorkspace from '@/pages/workspaces/components/delete-workspace';
-import Users from '@/pages/workspaces/components/users';
-import WorkspaceForm from '@/pages/workspaces/components/workspace-form';
+import DeleteWorkspace from './delete-workspace';
+import Users from './users';
+import WorkspaceForm from './workspace-form';
 import { SharedData } from '@/types';
 import type { Workspace } from '@/types/workspace';
 import { usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreVerticalIcon } from 'lucide-react';
-import LeaveWorkspace from '@/pages/workspaces/components/leave-workspace';
+import LeaveWorkspace from './leave-workspace';
 
 const CurrentWorkspace = ({ workspace }: { workspace: Workspace }) => {
   const page = usePage<SharedData>();

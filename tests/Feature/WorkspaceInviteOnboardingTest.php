@@ -171,7 +171,12 @@ class WorkspaceInviteOnboardingTest extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
-            ->component('workspaces/onboarding')
+            // shouldExist=false: Inertia's testing helper only looks under
+            // resources/js/pages/ for on-disk verification, which doesn't
+            // know about the @plugin/{name} alias (dev-packages/vitamind-
+            // workspace-plugin/resources/js/pages/onboarding.tsx, resolved
+            // via vite.config.ts's getPluginAliases()).
+            ->component('@plugin/workspace-plugin/onboarding', false)
             ->where('invitations', [])
             ->where('suggestedWorkspaceName', 'Solo Signup Workspace')
         );

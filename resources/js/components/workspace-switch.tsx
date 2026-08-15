@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronsUpDownIcon, PlusIcon } from 'lucide-react';
 import { useInitials } from '@/hooks/use-initials';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import WorkspaceForm from '@/pages/workspaces/components/workspace-form';
+import WorkspaceForm from '@plugin/workspace-plugin/pages/components/workspace-form';
 import { WorkspaceSelect } from '@/components/workspace-select';
 import { CommandGroup, CommandItem } from '@/components/ui/command';
 

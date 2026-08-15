@@ -32,7 +32,7 @@ class WorkspaceController extends Controller
     {
         $this->authorize('viewAny', Workspace::class);
 
-        return Inertia::render('workspaces/index', [
+        return Inertia::render('@plugin/workspace-plugin/index', [
             'workspaces' => WorkspaceResource::collection(
                 user()
                     ->allWorkspaces()

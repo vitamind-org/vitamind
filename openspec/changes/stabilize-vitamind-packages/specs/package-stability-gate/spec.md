@@ -10,7 +10,8 @@
 - **AND** `publish-vitamind-packages` SHALL NOT be executed
 
 #### Scenario: At least 2 projects have integrated successfully
-- **WHEN** at least 2 of the 4 named consumer projects have completed integration (via `composer require vitamind/core`, plus the workspace plugin if used) without requiring a breaking change
+- **WHEN** at least 2 of the 4 named consumer projects have completed integration — each configuring a `dev-packages/`-pointing path repository in its own `composer.json` and running `composer require vitamind/core` (plus `vitamind/workspace-plugin` where applicable) against it, not against Packagist — without requiring a breaking change
+- **AND** at least one of those integrations exercises `vitamind/workspace-plugin`, not `vitamind/core` alone
 - **THEN** the gate is satisfied
 - **AND** `publish-vitamind-packages` is unblocked for execution
 

@@ -6,10 +6,10 @@ Change ini memisahkan validasi stabilitas dari `phase1-standalone-boilerplate`, 
 
 ## What Changes
 
-- Memindahkan §16 (Stability Validation / Dogfooding) dari `phase1-standalone-boilerplate/tasks.md` ke change ini, tanpa mengubah isi task (BukuWarga, LembarUji, UangKas, gate check).
+- Memindahkan §16 (Stability Validation / Dogfooding) dari `phase1-standalone-boilerplate/tasks.md` ke change ini, tanpa mengubah isi task (BukuWarga, LembarUji, UangKas, gate check) — wakuwaku ditambahkan belakangan sebagai proyek ke-4, lihat §Impact.
 - Mendefinisikan gate stabilitas sebagai capability tersendiri (`package-stability-gate`) sehingga change lain bisa merujuk ke sini alih-alih ke `phase1-standalone-boilerplate §16`.
 - Update rujukan di `publish-vitamind-packages` (proposal.md "Gate Masuk" dan spec `package-distribution`) dari "`phase1-standalone-boilerplate` §16" menjadi "`stabilize-vitamind-packages`" (dieksekusi sebagai bagian dari pemisahan ini, di luar change ini sendiri).
-- Tidak ada perubahan kode aplikasi — change ini murni proses validasi dogfooding via 3 proyek konsumen nyata di luar repo ini.
+- Tidak ada perubahan kode aplikasi — change ini murni proses validasi dogfooding via 4 proyek konsumen nyata di luar repo ini.
 
 ## Capabilities
 

@@ -26,11 +26,18 @@ export default function Invite({ workspace, onInviteSent, children }: { workspac
     role: 'user',
   });
 
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      form.resetAndClearErrors();
+    }
+    setOpen(isOpen);
+  };
+
   const submit = (e: FormEvent) => {
     e.preventDefault();
     form.post(`/settings/workspaces/${workspace.id}/users`, {
       onSuccess: () => {
-        setOpen(false);
+        handleOpenChange(false);
         if (onInviteSent) {
           onInviteSent();
         }
@@ -38,7 +45,7 @@ export default function Invite({ workspace, onInviteSent, children }: { workspac
     });
   };
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
@@ -49,12 +56,18 @@ export default function Invite({ workspace, onInviteSent, children }: { workspac
           <FormFields>
             <FormField>
               <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" onChange={(e) => form.setData('email', e.target.value)} />
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={form.data.email}
+                onChange={(e) => form.setData('email', e.target.value)}
+              />
               <InputError message={form.errors.email} />
             </FormField>
             <FormField>
               <Label htmlFor="role">Role</Label>
-              <Select defaultValue={form.data.role} onValueChange={(value) => form.setData('role', value)}>
+              <Select value={form.data.role} onValueChange={(value) => form.setData('role', value)}>
                 <SelectTrigger id="role" name="role" className="w-full">
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>

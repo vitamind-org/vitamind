@@ -100,16 +100,24 @@ no frontend code at all, distributed or otherwise.
 
 ## Distributed plugin frontend
 
-GitHub and Composer plugins *can* ship custom Inertia pages, hooks, and
-components, resolved through a build-time `@plugin/{kebab-name}` alias
+Composer plugins can ship custom Inertia pages, hooks, and components,
+resolved through a build-time `@plugin/{kebab-name}` alias
 (`vite.config.ts`'s `getPluginAliases()`, scanning `vendor/vitamind/*`) —
 compiled together with the host in the same Vite build, so there's no
 separate build step and no risk of bundling a second copy of React.
 
+GitHub plugins do **not** get this — `getPluginAliases()`, the page glob in
+`app.tsx`, `usePlugin()`, the Tailwind `@source`, and the Blade manifest
+lookup all scan `vendor/vitamind/*` only, never `storage/plugins/*` (where
+GitHub plugins actually install). This isn't a timing issue a rebuild would
+fix — `storage/plugins` isn't a scanned root at all. GitHub plugins are
+limited to the `dynamic-page` system above for their UI until that's
+addressed as its own piece of work.
+
 Put frontend source under the plugin's own `resources/js/`, mirroring the
 host's own layout:
 
-```
+```text
 vendor/vitamind/my-plugin/          (or dev-packages/vitamind-my-plugin/
 resources/js/                        in this monorepo's dev setup)
 ├── pages/
@@ -158,12 +166,9 @@ the `@plugin/` alias — without the explicit `false` it fails with "Inertia
 page component file [...] does not exist" even though the page renders
 correctly.
 
-This mechanism only works for Composer plugins and for GitHub plugins
-whose source existed at the host's last `npm run build` — a GitHub plugin
-installed at runtime through the admin UI isn't reachable this way until
-the host rebuilds. Until a rebuild-on-install (or self-contained bundle)
-mechanism exists, runtime-installed GitHub plugins are limited to the
-`dynamic-page` system above for their UI.
+See the note above: this is Composer-only today. A GitHub plugin needs
+either a scanned `storage/plugins` root or a self-contained bundle
+mechanism before it can use any of this — neither exists yet.
 
 ## Extracting a local plugin into a standalone package
 

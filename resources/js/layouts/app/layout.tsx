@@ -8,12 +8,23 @@ import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { useSocketEvents } from '@/hooks/use-socket-events';
-import { useBroadcastChannel } from '@/hooks/use-broadcast-channel';
+import { usePlugin } from '@/lib/use-plugin';
+import type { RealtimePlugin } from '@/types/realtime-plugin';
+import { useFeature } from '@/hooks/use-feature';
 import { useBootstrapStore } from '@/stores/bootstrap-store';
 import { Button } from '@/components/ui/button';
 import { AlertCircleIcon } from 'lucide-react';
 import DialogHost from '@/components/dialogs/dialog-host';
+
+// Stable module-level fallbacks (not recreated per render) for forks that
+// don't have vitamind/realtime-plugin installed under vendor/vitamind/ —
+// see usePlugin() in resources/js/lib/use-plugin.ts and design.md (D3) in
+// openspec/changes/fix-plugin-frontend-distribution.
+const noopUseSocketEvents: NonNullable<RealtimePlugin['useSocketEvents']> = () => ({
+  status: 'disconnected',
+  reconnect: () => {},
+});
+const noopUseBroadcastChannel: NonNullable<RealtimePlugin['useBroadcastChannel']> = () => {};
 
 /**
  * Public channel: bootstrap config (server_provider/dns_provider/plugin
@@ -23,7 +34,11 @@ import DialogHost from '@/components/dialogs/dialog-host';
  * needs useQueryClient() in context.
  */
 function BootstrapBroadcastListener({ fetchBootstrap }: { fetchBootstrap: () => void }) {
-  useBroadcastChannel('bootstrap', { 'bootstrap.invalidated': fetchBootstrap }, { private: false });
+  const plugin = usePlugin('realtime-plugin') as RealtimePlugin;
+  const useBroadcastChannel = plugin.useBroadcastChannel ?? noopUseBroadcastChannel;
+  const isWebSocketEnabled = useFeature('websocket');
+
+  useBroadcastChannel(isWebSocketEnabled ? 'bootstrap' : null, { 'bootstrap.invalidated': fetchBootstrap }, { private: false });
   return null;
 }
 
@@ -36,6 +51,9 @@ export default function Layout({
   secondNavTitle?: string;
 }>) {
   const page = usePage<SharedData>();
+  const plugin = usePlugin('realtime-plugin') as RealtimePlugin;
+  const isRealtimePluginAvailable = plugin.useSocketEvents !== undefined;
+  const useSocketEvents = plugin.useSocketEvents ?? noopUseSocketEvents;
   const { status: socketStatus, reconnect: socketReconnect } = useSocketEvents();
   const syncBootstrap = useBootstrapStore((s) => s.syncWithServerVersion);
   const fetchBootstrap = useBootstrapStore((s) => s.fetch);
@@ -79,7 +97,11 @@ export default function Layout({
         <SidebarProvider defaultOpen={!!(secondNavItems && secondNavItems.length > 0)}>
           <AppSidebar secondNavItems={secondNavItems} secondNavTitle={secondNavTitle} />
           <SidebarInset>
-            <AppHeader socketStatus={socketStatus} socketReconnect={socketReconnect} />
+            <AppHeader
+              socketStatus={socketStatus}
+              socketReconnect={socketReconnect}
+              isRealtimePluginAvailable={isRealtimePluginAvailable}
+            />
             <div className="flex flex-1 flex-col">
               {showBootstrapError ? (
                 <div className="flex flex-1 items-center justify-center p-6">

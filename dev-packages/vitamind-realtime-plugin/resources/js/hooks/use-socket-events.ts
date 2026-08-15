@@ -1,10 +1,10 @@
-import { type SocketStatus, useSocketStore } from '@/stores/socket-store';
+import { type SocketStatus, useSocketStore } from '../stores/socket-store';
 import { useFeature } from '@/hooks/use-feature';
 import { SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { useCallback, useEffect } from 'react';
 
-export type { SocketStatus } from '@/stores/socket-store';
+export type { SocketStatus } from '../stores/socket-store';
 
 /**
  * Connects/disconnects the shared Echo connection to match auth + the

@@ -4,12 +4,20 @@ import { HeartIcon, SlashIcon, WifiIcon, WifiOffIcon } from 'lucide-react';
 import AppCommand from '@/components/app-command';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { type SocketStatus } from '@/hooks/use-socket-events';
+import { type SocketStatus } from '@/types/realtime-plugin';
 import { useFeature } from '@/hooks/use-feature';
 
-export function AppHeader({ socketStatus, socketReconnect }: { socketStatus: SocketStatus; socketReconnect: () => void }) {
+export function AppHeader({
+  socketStatus,
+  socketReconnect,
+  isRealtimePluginAvailable,
+}: {
+  socketStatus: SocketStatus;
+  socketReconnect: () => void;
+  isRealtimePluginAvailable: boolean;
+}) {
   const isWorkspacesEnabled = useFeature('workspaces');
-  const isWebSocketEnabled = useFeature('websocket');
+  const isWebSocketEnabled = useFeature('websocket') && isRealtimePluginAvailable;
 
   return (
     <header className="bg-background -ml-1 flex h-12 shrink-0 items-center justify-between gap-2 border-b p-4 md:-ml-2">

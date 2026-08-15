@@ -109,6 +109,16 @@ Core does **not** ship views/frontend assets — it's a backend package. If you
 want the full Inertia + React experience, use the `vitamin-d` boilerplate
 itself as a starting point instead of requiring the packages piecemeal.
 
+> This reflects how `vitamind/core` and `vitamind/workspace-plugin`
+> specifically came to be: they were extracted from an existing boilerplate
+> whose frontend had already been forked wholesale alongside them, so
+> neither package ever needed to ship its own frontend. It is **not** a
+> permanent policy for every plugin — GitHub and Composer plugins created
+> after that extraction (e.g. `vitamind/realtime-plugin`) do ship custom
+> frontend, resolved via the `@plugin/{name}` alias and `usePlugin()`. See
+> [`docs/local-plugins.md`](docs/local-plugins.md#distributed-plugin-frontend)
+> for how that mechanism works.
+
 ### Optional: workspace plugin
 
 Multi-tenancy is a separate, optional package. Skip this entirely for

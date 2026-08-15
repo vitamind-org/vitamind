@@ -1,4 +1,4 @@
-import { getEcho } from '@/lib/echo';
+import { getEcho } from '../lib/echo';
 import { type QueryKey, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 

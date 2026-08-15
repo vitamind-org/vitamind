@@ -15,8 +15,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./resources/js/*"],
-      "ziggy-js": ["./vendor/tightenco/ziggy"],
-      "@plugin/*": ["./app/Plugins/Local/*"]
+      "ziggy-js": ["./vendor/tightenco/ziggy"]
     }
   },
   "include": [

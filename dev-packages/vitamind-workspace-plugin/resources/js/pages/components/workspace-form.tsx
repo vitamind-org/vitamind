@@ -51,7 +51,7 @@ export default function WorkspaceForm({
     if (workspace) {
       form.patch(`/settings/workspaces/${workspace.id}`, {
         onSuccess() {
-          setOpen(false);
+          handleOpenChange(false);
         },
       });
       return;

@@ -1,18 +1,46 @@
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppHeader } from '@/components/app-header';
 import { NavItem, SharedData } from '@/types';
-import { type PropsWithChildren, useCallback, useEffect, useState } from 'react';
+import { type PropsWithChildren, useEffect, useState } from 'react';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { usePage } from '@inertiajs/react';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { type SocketEventData, useSocketEvents, useSocketListener } from '@/hooks/use-socket-events';
+import { usePlugin } from '@/lib/use-plugin';
+import type { RealtimePlugin } from '@/types/realtime-plugin';
+import { useFeature } from '@/hooks/use-feature';
 import { useBootstrapStore } from '@/stores/bootstrap-store';
 import { Button } from '@/components/ui/button';
 import { AlertCircleIcon } from 'lucide-react';
 import DialogHost from '@/components/dialogs/dialog-host';
+
+// Stable module-level fallbacks (not recreated per render) for forks that
+// don't have vitamind/realtime-plugin installed under vendor/vitamind/ —
+// see usePlugin() in resources/js/lib/use-plugin.ts and design.md (D3) in
+// openspec/changes/fix-plugin-frontend-distribution.
+const noopUseSocketEvents: NonNullable<RealtimePlugin['useSocketEvents']> = () => ({
+  status: 'disconnected',
+  reconnect: () => {},
+});
+const noopUseBroadcastChannel: NonNullable<RealtimePlugin['useBroadcastChannel']> = () => {};
+
+/**
+ * Public channel: bootstrap config (server_provider/dns_provider/plugin
+ * views) is app-wide, not tenant-scoped, so vitamind-realtime-plugin
+ * broadcasts it without private-channel authorization (design.md's D6).
+ * Rendered as a child of QueryClientProvider because useBroadcastChannel
+ * needs useQueryClient() in context.
+ */
+function BootstrapBroadcastListener({ fetchBootstrap }: { fetchBootstrap: () => void }) {
+  const plugin = usePlugin('realtime-plugin') as RealtimePlugin;
+  const useBroadcastChannel = plugin.useBroadcastChannel ?? noopUseBroadcastChannel;
+  const isWebSocketEnabled = useFeature('websocket');
+
+  useBroadcastChannel(isWebSocketEnabled ? 'bootstrap' : null, { 'bootstrap.invalidated': fetchBootstrap }, { private: false });
+  return null;
+}
 
 export default function Layout({
   children,
@@ -23,6 +51,9 @@ export default function Layout({
   secondNavTitle?: string;
 }>) {
   const page = usePage<SharedData>();
+  const plugin = usePlugin('realtime-plugin') as RealtimePlugin;
+  const isRealtimePluginAvailable = plugin.useSocketEvents !== undefined;
+  const useSocketEvents = plugin.useSocketEvents ?? noopUseSocketEvents;
   const { status: socketStatus, reconnect: socketReconnect } = useSocketEvents();
   const syncBootstrap = useBootstrapStore((s) => s.syncWithServerVersion);
   const fetchBootstrap = useBootstrapStore((s) => s.fetch);
@@ -39,17 +70,6 @@ export default function Layout({
       syncBootstrap(serverBootstrapVersion);
     }
   }, [socketStatus, serverBootstrapVersion, syncBootstrap]);
-
-  useSocketListener(
-    useCallback(
-      (event: SocketEventData) => {
-        if (event.type === 'bootstrap.invalidated') {
-          fetchBootstrap();
-        }
-      },
-      [fetchBootstrap],
-    ),
-  );
 
   useEffect(() => {
     if (page.props.flash && page.props.flash.success) {
@@ -72,11 +92,16 @@ export default function Layout({
 
   return (
     <QueryClientProvider client={queryClient}>
+      <BootstrapBroadcastListener fetchBootstrap={fetchBootstrap} />
       <TooltipProvider>
         <SidebarProvider defaultOpen={!!(secondNavItems && secondNavItems.length > 0)}>
           <AppSidebar secondNavItems={secondNavItems} secondNavTitle={secondNavTitle} />
           <SidebarInset>
-            <AppHeader socketStatus={socketStatus} socketReconnect={socketReconnect} />
+            <AppHeader
+              socketStatus={socketStatus}
+              socketReconnect={socketReconnect}
+              isRealtimePluginAvailable={isRealtimePluginAvailable}
+            />
             <div className="flex flex-1 flex-col">
               {showBootstrapError ? (
                 <div className="flex flex-1 items-center justify-center p-6">

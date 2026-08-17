@@ -2,27 +2,22 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { WorkspaceSwitch } from '@/components/workspace-switch';
 import { HeartIcon, SlashIcon, WifiIcon, WifiOffIcon } from 'lucide-react';
 import AppCommand from '@/components/app-command';
-import { usePage } from '@inertiajs/react';
-import { SharedData } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { type SocketStatus } from '@/hooks/use-socket-events';
-import { useMemo } from 'react';
+import { type SocketStatus } from '@/types/realtime-plugin';
+import { useFeature } from '@/hooks/use-feature';
 
-export function AppHeader({ socketStatus, socketReconnect }: { socketStatus: SocketStatus; socketReconnect: () => void }) {
-  const page = usePage<SharedData>();
-
-  // Safely check if workspaces feature is enabled
-  const isWorkspacesEnabled = useMemo(() => {
-    const features = page.props.features as Record<string, boolean> | undefined;
-    return !!(features && features.workspaces);
-  }, [page.props.features]);
-
-  // Safely check if events.token route exists (meaning WS is enabled)
-  const isWebSocketEnabled = useMemo(() => {
-    // @ts-ignore
-    return typeof route !== 'undefined' && typeof route().has === 'function' && route().has('events.token');
-  }, []);
+export function AppHeader({
+  socketStatus,
+  socketReconnect,
+  isRealtimePluginAvailable,
+}: {
+  socketStatus: SocketStatus;
+  socketReconnect: () => void;
+  isRealtimePluginAvailable: boolean;
+}) {
+  const isWorkspacesEnabled = useFeature('workspaces');
+  const isWebSocketEnabled = useFeature('websocket') && isRealtimePluginAvailable;
 
   return (
     <header className="bg-background -ml-1 flex h-12 shrink-0 items-center justify-between gap-2 border-b p-4 md:-ml-2">

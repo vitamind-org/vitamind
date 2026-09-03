@@ -2,8 +2,8 @@
 
 namespace App\Plugins\HelloWorld;
 
-use VitaminD\PluginSdk\AbstractPlugin;
 use Illuminate\Support\Facades\Log;
+use VitaminD\PluginSdk\AbstractPlugin;
 
 class Plugin extends AbstractPlugin
 {
@@ -13,7 +13,7 @@ class Plugin extends AbstractPlugin
 
     public function boot(): void
     {
-        Log::info('Hello World plugin booted!');
+        // Log::info('Hello World plugin booted!');
     }
 
     public function enable(): void

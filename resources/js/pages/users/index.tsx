@@ -1,4 +1,4 @@
-import AdminLayout from '@/layouts/admin/layout';
+import SectionLayout from '@/layouts/section/layout';
 import { Head } from '@inertiajs/react';
 import Container from '@/components/container';
 import Heading from '@/components/heading';
@@ -8,7 +8,7 @@ import UserForm from '@/pages/users/components/user-form';
 
 export default function Users() {
   return (
-    <AdminLayout>
+    <SectionLayout title="Admin" groupKey="admin">
       <Head title="Users" />
 
       <Container className="max-w-5xl">
@@ -20,6 +20,6 @@ export default function Users() {
         </div>
         <UsersList />
       </Container>
-    </AdminLayout>
+    </SectionLayout>
   );
 }

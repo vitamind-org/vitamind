@@ -1,4 +1,4 @@
-import AdminLayout from '@/layouts/admin/layout';
+import SectionLayout from '@/layouts/section/layout';
 import { Head, router, useForm } from '@inertiajs/react';
 import Container from '@/components/container';
 import Heading from '@/components/heading';
@@ -331,10 +331,10 @@ export default function DynamicPluginPage({ page, activeTab, tableData, options 
 
   if (page.admin_only) {
     return (
-      <AdminLayout>
+      <SectionLayout title="Admin" groupKey="admin">
         <Head title={page.title} />
         {pageContent}
-      </AdminLayout>
+      </SectionLayout>
     );
   }
 

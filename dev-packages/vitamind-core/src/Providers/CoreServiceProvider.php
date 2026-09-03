@@ -2,15 +2,7 @@
 
 namespace VitaminD\Core\Providers;
 
-use VitaminD\Core\Actions\Plugins\BootPlugins;
-use VitaminD\Core\Actions\Plugins\DiscoverPlugins;
-use VitaminD\Core\Actions\Plugins\GetPluginInstance;
-use VitaminD\Core\Console\Commands\EnablePluginCommand;
-use VitaminD\Core\Console\Commands\InstallGithubPluginCommand;
-use VitaminD\Core\Policies\PersonalAccessTokenPolicy;
-use VitaminD\Core\Policies\UserPolicy;
-use VitaminD\PluginSdk\RegisterCommand;
-use VitaminD\PluginSdk\RegisterViews;
+use App\Models\PersonalAccessToken;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Gate;
@@ -18,8 +10,18 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
 use Spatie\RouteAttributes\RouteRegistrar;
-use App\Models\PersonalAccessToken;
+use VitaminD\Core\Actions\Nav\RegisterNativeNav;
+use VitaminD\Core\Actions\Plugins\BootPlugins;
+use VitaminD\Core\Actions\Plugins\DiscoverPlugins;
+use VitaminD\Core\Actions\Plugins\GetPluginInstance;
+use VitaminD\Core\Console\Commands\EnablePluginCommand;
+use VitaminD\Core\Console\Commands\InstallGithubPluginCommand;
+use VitaminD\Core\Http\Middleware\MustBeAdminMiddleware;
 use VitaminD\Core\Models\User;
+use VitaminD\Core\Policies\PersonalAccessTokenPolicy;
+use VitaminD\Core\Policies\UserPolicy;
+use VitaminD\PluginSdk\RegisterCommand;
+use VitaminD\PluginSdk\RegisterViews;
 
 class CoreServiceProvider extends ServiceProvider
 {
@@ -39,7 +41,7 @@ class CoreServiceProvider extends ServiceProvider
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
 
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
-        $this->app['router']->aliasMiddleware('must-be-admin', \VitaminD\Core\Http\Middleware\MustBeAdminMiddleware::class);
+        $this->app['router']->aliasMiddleware('must-be-admin', MustBeAdminMiddleware::class);
         Gate::policy(User::class, UserPolicy::class);
         Gate::policy(PersonalAccessToken::class, PersonalAccessTokenPolicy::class);
         $this->registerRoutes();
@@ -49,6 +51,7 @@ class CoreServiceProvider extends ServiceProvider
         ], 'vitamin-d-config');
 
         $this->app->booted(function () {
+            app(RegisterNativeNav::class)->handle();
             app(DiscoverPlugins::class)->handle();
             app(BootPlugins::class)->handle();
 

@@ -2,12 +2,13 @@
 
 namespace VitaminD\Core\Http\Middleware;
 
-use VitaminD\Core\Actions\Bootstrap\GetBootstrap;
-use VitaminD\Core\Http\Resources\UserResource;
-use VitaminD\Core\Support\InertiaSharedData;
-use VitaminD\Core\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use VitaminD\Core\Actions\Bootstrap\GetBootstrap;
+use VitaminD\Core\Actions\Plugins\ResolvePluginPages;
+use VitaminD\Core\Http\Resources\UserResource;
+use VitaminD\Core\Models\User;
+use VitaminD\Core\Support\InertiaSharedData;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -44,7 +45,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => UserResource::make($user),
             ] : null,
             'features' => $features,
-            'pluginPages' => array_map(fn($p) => $p->toArray(), array_values(\VitaminD\PluginSdk\RegisterPage::get())),
+            'pluginPages' => app(ResolvePluginPages::class)->handle(),
             'csrf_token' => csrf_token(),
             'bootstrap_version' => app(GetBootstrap::class)->version(),
             'flash' => [

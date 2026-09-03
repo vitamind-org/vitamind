@@ -14,22 +14,15 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem, SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import {
-  LayoutDashboardIcon,
-  CogIcon,
-  Settings2Icon,
-  Folder,
-  BookOpen,
-  ChevronRightIcon,
-  ListEndIcon,
-  LogsIcon,
-} from 'lucide-react';
-import * as Icons from 'lucide-react';
+import { ChevronRightIcon } from 'lucide-react';
 import AppLogo from './app-logo';
 import { Icon } from '@/components/icon';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMemo } from 'react';
+import { getPluginIconComponent } from '@/lib/plugin-icon';
+
+const byOrder = (a: { order: number }, b: { order: number }) => a.order - b.order;
 
 export function AppSidebar({ secondNavItems, secondNavTitle }: { secondNavItems?: NavItem[]; secondNavTitle?: string }) {
   const page = usePage<SharedData>();
@@ -41,113 +34,39 @@ export function AppSidebar({ secondNavItems, secondNavTitle }: { secondNavItems?
     return typeof route !== 'undefined' && typeof route().has === 'function' && route().has(name);
   };
 
-  const mainNavItems = useMemo(() => {
-    const items: NavItem[] = [];
+  /**
+   * Dashboard, Settings, and Admin are themselves `pluginPages` entries
+   * (registered by core — see docs/plugin-development/menu-registration.md)
+   * with `placement: 'main'` and `group: null`, exactly like a flat plugin
+   * page or a plugin's own group-landing entry — the main rail renders
+   * every such entry generically, with no native item hardcoded here.
+   */
+  const mainNavItems = useMemo((): NavItem[] => {
+    return pluginPages
+      .filter((p) => p.placement === 'main' && p.group === null)
+      .sort(byOrder)
+      .map((p) => ({
+        title: p.title,
+        href: p.href,
+        icon: getPluginIconComponent(p.icon),
+      }));
+  }, [pluginPages]);
 
-    if (hasRoute('dashboard')) {
-      items.push({
-        title: 'Dashboard',
-        href: route('dashboard'),
-        icon: LayoutDashboardIcon,
-      });
-    }
-
-    // Dynamic user-level plugin pages
-    const getIconComponent = (iconName: string) => {
-      if (!iconName) return Icons.PackageIcon;
-      const pascalName = iconName
-        .split('-')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join('');
-      return (Icons as any)[pascalName] || (Icons as any)[`${pascalName}Icon`] || Icons.PackageIcon;
-    };
-
-    pluginPages.forEach((p) => {
-      if (p.placement === 'main') {
-        items.push({
-          title: p.title,
-          href: p.href,
-          icon: getIconComponent(p.icon),
-        });
-      }
-    });
-
-    if (hasRoute('settings')) {
-      items.push({
-        title: 'Settings',
-        href: route('settings'),
-        icon: CogIcon,
-      });
-    } else if (hasRoute('profile')) {
-      items.push({
-        title: 'Settings',
-        href: route('profile'),
-        icon: CogIcon,
-      });
-    } else if (hasRoute('profile.edit')) {
-      items.push({
-        title: 'Settings',
-        href: route('profile.edit'),
-        icon: CogIcon,
-      });
-    }
-
-    if (hasRoute('admin')) {
-      items.push({
-        title: 'Admin',
-        href: route('admin'),
-        icon: Settings2Icon,
-        hidden: !page.props.auth.user?.is_admin,
-      });
-    } else if (hasRoute('users')) {
-      items.push({
-        title: 'Admin',
-        href: route('users'),
-        icon: Settings2Icon,
-        hidden: !page.props.auth.user?.is_admin,
-      });
-    }
-
-    return items;
-  }, [page.props.auth.user?.is_admin, pluginPages]);
-
-  const footerNavItems = useMemo(() => {
-    const items: NavItem[] = [];
-
-    if (hasRoute('horizon.index')) {
-      items.push({
-        title: 'Horizon Dashboard',
-        href: route('horizon.index'),
-        icon: ListEndIcon,
-        hidden: !page.props.auth.user?.is_admin,
-      });
-    }
-
-    if (hasRoute('log-viewer.index')) {
-      items.push({
-        title: 'Logs',
-        href: route('log-viewer.index'),
-        icon: LogsIcon,
-        hidden: !page.props.auth.user?.is_admin,
-      });
-    }
-
-    items.push({
-      title: 'Repository',
-      href: 'https://github.com/vitodeploy/vitamin-d',
-      icon: Folder,
-      external: true,
-    });
-
-    items.push({
-      title: 'Documentation',
-      href: 'https://github.com/vitodeploy/vitamin-d',
-      icon: BookOpen,
-      external: true,
-    });
-
-    return items;
-  }, [page.props.auth.user?.is_admin]);
+  /**
+   * Horizon Dashboard, Logs, Repository, and Documentation are likewise
+   * `pluginPages` entries with `placement: 'footer'`, registered by core.
+   */
+  const footerNavItems = useMemo((): NavItem[] => {
+    return pluginPages
+      .filter((p) => p.placement === 'footer')
+      .sort(byOrder)
+      .map((p) => ({
+        title: p.title,
+        href: p.href,
+        icon: getPluginIconComponent(p.icon),
+        external: p.external,
+      }));
+  }, [pluginPages]);
 
   const logoHref = useMemo(() => {
     if (hasRoute('dashboard')) return route('dashboard');

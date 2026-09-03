@@ -22,6 +22,14 @@ class RegisterPage
 
     private ?string $href = null;
 
+    private ?string $group = null;
+
+    private ?\Closure $hidden = null;
+
+    private int $order = 0;
+
+    private bool $external = false;
+
     public function __construct(
         private readonly string $key,
     ) {}
@@ -79,6 +87,62 @@ class RegisterPage
     }
 
     /**
+     * Joins this page to a `RegisterPageGroup`, collapsing it (and any
+     * sibling page in the same group) under one main-sidebar entry that owns
+     * its own second-nav. Unlike the `placement('settings')`/`placement('admin')`
+     * sugar (which resolves to the built-in `settings`/`admin` groups without
+     * requiring them to be pre-registered, for backward compatibility), an
+     * explicit `group()` call here is validated against
+     * `RegisterPageGroup`'s registry at `toArray()` time — a typo'd or
+     * never-registered group key throws rather than silently rendering an
+     * orphaned entry.
+     */
+    public function group(string $key): self
+    {
+        $this->group = $key;
+
+        return $this;
+    }
+
+    /**
+     * A no-arg closure, evaluated lazily once per request (same timing as
+     * `route()` in `resolveHref()`) — call `auth()->user()`, `request()`,
+     * etc. inside it. When it returns `true`, this entry is excluded
+     * entirely from the `pluginPages` payload for that request (see
+     * `HandleInertiaRequests`), not merely flagged hidden for the client to
+     * skip rendering.
+     */
+    public function hidden(\Closure $callback): self
+    {
+        $this->hidden = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Sort key within whichever region this entry renders in (main rail,
+     * footer, or a group's second-nav). Defaults to `0`, so entries that
+     * never call this sort in registration order relative to each other.
+     */
+    public function order(int $order): self
+    {
+        $this->order = $order;
+
+        return $this;
+    }
+
+    /**
+     * Marks this entry as an outbound link — the footer region renders it as
+     * a plain anchor (`target="_blank"`) instead of an Inertia navigation.
+     */
+    public function external(bool $external = true): self
+    {
+        $this->external = $external;
+
+        return $this;
+    }
+
+    /**
      * Points this page's link at a named route the plugin owns, instead of
      * the built-in `plugins.page` destination. Mutually exclusive with
      * `href()` — the two are just different ways of expressing the same
@@ -116,9 +180,9 @@ class RegisterPage
      */
     public function placement(string $target): self
     {
-        if (! in_array($target, ['main', 'admin', 'settings'], true)) {
+        if (! in_array($target, ['main', 'admin', 'settings', 'footer'], true)) {
             throw new \InvalidArgumentException(
-                "Invalid RegisterPage placement [{$target}]. Expected one of: main, admin, settings."
+                "Invalid RegisterPage placement [{$target}]. Expected one of: main, admin, settings, footer."
             );
         }
 
@@ -178,9 +242,56 @@ class RegisterPage
         return route('plugins.page', $this->key);
     }
 
-    private function resolvePlacement(): string
+    /**
+     * Resolves the group this page's entry belongs to, if any.
+     *
+     * An explicit `group()` call is validated against `RegisterPageGroup`'s
+     * registry — anything else here is the pre-existing, unvalidated
+     * `placement()`/`adminOnly()` sugar, preserved verbatim for backward
+     * compatibility (a page can call `placement('settings')` without core
+     * ever having registered a `settings` `RegisterPageGroup`, exactly as it
+     * always could).
+     */
+    private function resolveGroup(): ?string
     {
-        return $this->placement ?? ($this->adminOnly ? 'admin' : 'main');
+        if ($this->group !== null) {
+            if (RegisterPageGroup::find($this->group) === null) {
+                throw new \InvalidArgumentException(
+                    "RegisterPage [{$this->key}]: group [{$this->group}] has no corresponding RegisterPageGroup registration."
+                );
+            }
+
+            return $this->group;
+        }
+
+        if ($this->placement === 'settings' || $this->placement === 'admin') {
+            return $this->placement;
+        }
+
+        if ($this->placement === null && $this->adminOnly) {
+            return 'admin';
+        }
+
+        return null;
+    }
+
+    private function resolvePlacement(?string $group): string
+    {
+        if ($this->placement === 'footer') {
+            return 'footer';
+        }
+
+        return in_array($group, ['settings', 'admin'], true) ? $group : 'main';
+    }
+
+    public function isHidden(): bool
+    {
+        return $this->hidden !== null && (bool) ($this->hidden)();
+    }
+
+    public function getOrder(): int
+    {
+        return $this->order;
     }
 
     public function toArray(): array
@@ -190,6 +301,11 @@ class RegisterPage
             $tabsData[$tabKey] = $table->toArray();
         }
 
+        // Footer entries are flat (see menu-registration.md) — they never
+        // participate in group membership even if `group()` was mistakenly
+        // called alongside `placement('footer')`.
+        $group = $this->placement === 'footer' ? null : $this->resolveGroup();
+
         return [
             'key' => $this->key,
             'title' => $this->title,
@@ -197,8 +313,11 @@ class RegisterPage
             'admin_only' => $this->adminOnly,
             'tabs' => $tabsData,
             'description' => $this->description,
-            'placement' => $this->resolvePlacement(),
+            'placement' => $this->resolvePlacement($group),
             'href' => $this->resolveHref(),
+            'group' => $group,
+            'order' => $this->order,
+            'external' => $this->external,
         ];
     }
 }

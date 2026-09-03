@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import SettingsLayout from '@/layouts/settings/layout';
+import SectionLayout from '@/layouts/section/layout';
 import Container from '@/components/container';
 import UpdatePassword from '@/pages/profile/components/update-password';
 import UpdateProfile from '@/pages/profile/components/update-profile';
@@ -14,7 +14,7 @@ export default function Profile() {
   const [tab, setTab] = useState('info');
 
   return (
-    <SettingsLayout>
+    <SectionLayout title="Settings" groupKey="settings">
       <Head title="Profile settings" />
       <Container className="max-w-5xl">
         <div className="flex items-start justify-between">
@@ -37,6 +37,6 @@ export default function Profile() {
           </TabsContent>
         </Tabs>
       </Container>
-    </SettingsLayout>
+    </SectionLayout>
   );
 }

@@ -2,13 +2,13 @@
 
 namespace VitaminD\Core\Models;
 
-use VitaminD\Core\Traits\HasTimezoneTimestamps;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use VitaminD\Core\Traits\HasTimezoneTimestamps;
 
 /**
  * @property int $id
@@ -56,8 +56,16 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Casts defensively: `Model::create()` never re-fetches the row it just
+     * inserted, so an in-memory instance built without explicitly setting
+     * `is_admin` never sees the column's DB-level `default(false)` — the
+     * attribute is simply absent, and the `boolean` cast on a missing
+     * attribute resolves to `null` rather than `false`. A bare `$this->is_admin`
+     * would then violate this method's `bool` return type.
+     */
     public function isAdmin(): bool
     {
-        return $this->is_admin;
+        return (bool) $this->is_admin;
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use VitaminD\Core\Actions\Plugins\BootPlugins;
 use VitaminD\Core\Actions\Plugins\DiscoverPlugins;
 use VitaminD\PluginSdk\RegisterPage;
+use VitaminD\PluginSdk\RegisterPageGroup;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -49,18 +50,34 @@ abstract class TestCase extends BaseTestCase
      * cross-test leak this whole flush exists to prevent. Those must keep
      * flowing only through the `PluginInterface`/`BootPlugins` path above,
      * which runs solely for tests that opted into `RefreshDatabase`.
+     *
+     * `RegisterPageGroup` carries the same process-static-registry leak risk
+     * as `RegisterPage`, so it gets the identical flush-then-restore
+     * treatment here — but unconditionally, since a group carries only
+     * static title/icon/order plus an optional `hidden()` closure (evaluated
+     * against `auth()`/`request()`, never captured database state the way a
+     * `tabs()` page's `RegisterDataTable` closures can), so replaying every
+     * group is always safe, with no tabs()-style filtering needed.
      */
     protected function setUp(): void
     {
         parent::setUp();
 
         $alwaysOnPages = RegisterPage::get();
+        $alwaysOnGroups = RegisterPageGroup::get();
 
         RegisterPage::flush();
+        RegisterPageGroup::flush();
 
         if (isset(class_uses_recursive(static::class)[RefreshDatabase::class])) {
             app(DiscoverPlugins::class)->handle();
             app(BootPlugins::class)->handle();
+        }
+
+        foreach ($alwaysOnGroups as $key => $group) {
+            if (RegisterPageGroup::find($key) === null) {
+                $group->register();
+            }
         }
 
         foreach ($alwaysOnPages as $key => $page) {

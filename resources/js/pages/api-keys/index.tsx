@@ -1,4 +1,4 @@
-import SettingsLayout from '@/layouts/settings/layout';
+import SectionLayout from '@/layouts/section/layout';
 import { Head, usePage } from '@inertiajs/react';
 import Container from '@/components/container';
 import Heading from '@/components/heading';
@@ -21,7 +21,7 @@ export default function ApiKeys() {
   const columns = useMemo(() => getColumns(page.props.workspaces || []), [page.props.workspaces]);
 
   return (
-    <SettingsLayout>
+    <SectionLayout title="Settings" groupKey="settings">
       <Head title="API Keys" />
       <Container className="max-w-5xl">
         <div className="flex items-start justify-between">
@@ -43,6 +43,6 @@ export default function ApiKeys() {
         </div>
         <DataTable columns={columns} paginatedData={page.props.apiKeys} />
       </Container>
-    </SettingsLayout>
+    </SectionLayout>
   );
 }

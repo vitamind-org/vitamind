@@ -4,6 +4,7 @@ namespace VitaminD\PluginSdk\Tests;
 
 use VitaminD\PluginSdk\RegisterDataTable;
 use VitaminD\PluginSdk\RegisterPage;
+use VitaminD\PluginSdk\RegisterPageGroup;
 
 class RegisterPageTest extends TestCase
 {
@@ -14,6 +15,8 @@ class RegisterPageTest extends TestCase
         $reflection = new \ReflectionClass(RegisterPage::class);
         $property = $reflection->getProperty('registry');
         $property->setValue([]);
+
+        RegisterPageGroup::flush();
     }
 
     public function test_page_creation_and_fluent_methods(): void
@@ -149,5 +152,97 @@ class RegisterPageTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
 
         RegisterPage::make('bad_placement_page')->placement('sidebar');
+    }
+
+    public function test_placement_accepts_footer(): void
+    {
+        $page = RegisterPage::make('footer_page')->placement('footer');
+
+        $this->assertEquals('footer', $page->toArray()['placement']);
+        $this->assertNull($page->toArray()['group']);
+    }
+
+    public function test_placement_settings_and_admin_do_not_require_a_registered_group(): void
+    {
+        // Backward compatibility: placement('settings')/placement('admin')
+        // (and the adminOnly()-implied default) must keep working exactly
+        // as before, with no RegisterPageGroup ever registered — this is
+        // what HandleInertiaRequestsPluginPagesTest already relies on.
+        $settingsPage = RegisterPage::make('settings_sugar_page')->placement('settings');
+        $adminPage = RegisterPage::make('admin_sugar_page')->adminOnly(true);
+
+        $this->assertEquals('settings', $settingsPage->toArray()['group']);
+        $this->assertEquals('settings', $settingsPage->toArray()['placement']);
+        $this->assertEquals('admin', $adminPage->toArray()['group']);
+        $this->assertEquals('admin', $adminPage->toArray()['placement']);
+    }
+
+    public function test_group_resolves_when_registered(): void
+    {
+        RegisterPageGroup::make('whatsapp')->title('WhatsApp')->icon('message-circle')->register();
+
+        $page = RegisterPage::make('whatsapp_numbers')->group('whatsapp')->adminOnly(false);
+
+        $this->assertEquals('whatsapp', $page->toArray()['group']);
+        $this->assertEquals('main', $page->toArray()['placement']);
+    }
+
+    public function test_group_throws_when_not_registered(): void
+    {
+        $page = RegisterPage::make('orphan_page')->group('nonexistent')->adminOnly(false);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $page->toArray();
+    }
+
+    public function test_order_defaults_to_zero(): void
+    {
+        $page = RegisterPage::make('unordered_page');
+
+        $this->assertEquals(0, $page->toArray()['order']);
+        $this->assertEquals(0, $page->getOrder());
+    }
+
+    public function test_order_can_be_set(): void
+    {
+        $page = RegisterPage::make('ordered_page')->order(50);
+
+        $this->assertEquals(50, $page->toArray()['order']);
+        $this->assertEquals(50, $page->getOrder());
+    }
+
+    public function test_external_defaults_to_false(): void
+    {
+        $page = RegisterPage::make('internal_page');
+
+        $this->assertFalse($page->toArray()['external']);
+    }
+
+    public function test_external_can_be_set(): void
+    {
+        $page = RegisterPage::make('external_page')
+            ->href('https://example.com')
+            ->placement('footer')
+            ->external(true);
+
+        $this->assertTrue($page->toArray()['external']);
+    }
+
+    public function test_hidden_defaults_to_visible(): void
+    {
+        $page = RegisterPage::make('visible_page');
+
+        $this->assertFalse($page->isHidden());
+    }
+
+    public function test_hidden_closure_is_evaluated_lazily(): void
+    {
+        $state = (object) ['hidden' => false];
+        $page = RegisterPage::make('conditionally_hidden_page')->hidden(fn () => $state->hidden);
+
+        $this->assertFalse($page->isHidden());
+
+        $state->hidden = true;
+        $this->assertTrue($page->isHidden());
     }
 }

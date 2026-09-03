@@ -1,4 +1,4 @@
-import AdminLayout from '@/layouts/admin/layout';
+import SectionLayout from '@/layouts/section/layout';
 import { Head, usePage } from '@inertiajs/react';
 import Heading from '@/components/heading';
 import { useState } from 'react';
@@ -31,7 +31,7 @@ export default function Plugins() {
   const [tab, setTab] = useState('installed');
 
   return (
-    <AdminLayout>
+    <SectionLayout title="Admin" groupKey="admin">
       <Head title="Plugins" />
 
       <Container className="max-w-5xl">
@@ -86,6 +86,6 @@ export default function Plugins() {
           )}
         </Tabs>
       </Container>
-    </AdminLayout>
+    </SectionLayout>
   );
 }

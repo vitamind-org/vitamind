@@ -29,6 +29,7 @@ export interface NavItem {
   children?: NavItem[];
   hidden?: boolean;
   external?: boolean;
+  order?: number;
 }
 
 export interface Configs {
@@ -108,7 +109,10 @@ export interface SharedData {
     admin_only: boolean;
     href: string;
     description?: string | null;
-    placement: 'main' | 'admin' | 'settings';
+    placement: 'main' | 'admin' | 'settings' | 'footer';
+    group: string | null;
+    order: number;
+    external?: boolean;
   }>;
   pendingInvite?: { email: string; workspaceName: string } | null;
   flash?: {

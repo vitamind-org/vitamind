@@ -2,7 +2,7 @@ import Container from '@/components/container';
 import { DataTable } from '@/components/data-table';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
-import SettingsLayout from '@/layouts/settings/layout';
+import SectionLayout from '@/layouts/section/layout';
 import { columns as workspaceColumns } from './components/columns';
 import { columns as invitationColumns } from './components/invitations';
 import WorkspaceForm from './components/workspace-form';
@@ -19,7 +19,7 @@ export default function Workspaces() {
   }>>();
 
   return (
-    <SettingsLayout>
+    <SectionLayout title="Settings" groupKey="settings">
       <Head title="Workspaces" />
 
       <Container className="max-w-5xl">
@@ -43,6 +43,6 @@ export default function Workspaces() {
           </div>
         )}
       </Container>
-    </SettingsLayout>
+    </SectionLayout>
   );
 }

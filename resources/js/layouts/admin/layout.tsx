@@ -45,18 +45,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       return (Icons as any)[pascalName] || (Icons as any)[`${pascalName}Icon`] || Icons.PackageIcon;
     };
 
-    if (hasRoute('plugins.page')) {
-      pluginPages.forEach((p) => {
-        if (p.admin_only) {
-          items.push({
-            title: p.title,
-            // @ts-ignore
-            href: route('plugins.page', p.key),
-            icon: getIconComponent(p.icon),
-          });
-        }
-      });
-    }
+    pluginPages.forEach((p) => {
+      if (p.placement === 'admin') {
+        items.push({
+          title: p.title,
+          href: p.href,
+          icon: getIconComponent(p.icon),
+        });
+      }
+    });
 
     if (hasRoute('settings')) {
       items.push({

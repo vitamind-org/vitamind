@@ -33,6 +33,7 @@ type PageConfig = {
   title: string;
   icon: string;
   admin_only: boolean;
+  description?: string | null;
   tabs: Record<string, {
     key: string;
     model: string;
@@ -258,7 +259,7 @@ export default function DynamicPluginPage({ page, activeTab, tableData, options 
     <Container className="max-w-5xl py-6">
       <Heading
         title={page.title}
-        description={`Manage plugin database records for ${page.title}.`}
+        description={page.description || `Manage plugin database records for ${page.title}.`}
       />
 
       <Tabs defaultValue={activeTab} onValueChange={handleTabChange} className="mt-6 w-full">

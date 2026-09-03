@@ -10,6 +10,7 @@ use VitaminD\Plugins\Archive\Models\File;
 use VitaminD\Plugins\Archive\Models\Folder;
 use VitaminD\Plugins\Archive\Policies\FilePolicy;
 use VitaminD\Plugins\Archive\Policies\FolderPolicy;
+use VitaminD\PluginSdk\RegisterPage;
 
 /**
  * Unlike WorkspaceServiceProvider/RealtimeServiceProvider, nothing here is
@@ -30,12 +31,31 @@ class ArchiveServiceProvider extends ServiceProvider
         $this->registerMigrations();
         $this->registerPolicies();
         $this->registerRoutes();
+        $this->registerMenu();
     }
 
     protected function registerPolicies(): void
     {
         Gate::policy(Folder::class, FolderPolicy::class);
         Gate::policy(File::class, FilePolicy::class);
+    }
+
+    /**
+     * Registers the "Archive" main-sidebar entry via the SDK's custom-link
+     * `RegisterPage` mode — the plugin's own `archive.index` route and its
+     * own Inertia page, not the generic `tabs()`/`plugins.page` CRUD screen
+     * (the folder/file hierarchy has no `RegisterDataTable`-representable
+     * shape). This is the plugin's only means of reaching the sidebar; see
+     * docs/plugin-development/menu-registration.md.
+     */
+    protected function registerMenu(): void
+    {
+        RegisterPage::make('archive')
+            ->title('Archive')
+            ->icon('archive')
+            ->route('archive.index')
+            ->adminOnly(false)
+            ->register();
     }
 
     protected function registerMigrations(): void

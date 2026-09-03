@@ -76,6 +76,16 @@ into `vendor/vitamind/*` via a Composer path repository while in development).
 Once published, they're consumed exactly like any other Composer dependency, at
 `vendor/vitamind/{package}/`.
 
+## Menu registration
+
+A plugin adds itself to the app's navigation (main sidebar, Admin
+second-nav, or Settings second-nav) through `RegisterPage`, called from its
+own `boot()` — never by editing `app-sidebar.tsx`, `admin/layout.tsx`, or
+`settings/layout.tsx` directly. See
+[`docs/plugin-development/menu-registration.md`](plugin-development/menu-registration.md)
+for the full API (`tabs()` vs. `route()`/`href()`, `placement()`,
+`description()`).
+
 ## Frontend
 
 Local plugins have no dedicated frontend mechanism — there is no alias, no

@@ -101,7 +101,15 @@ export interface SharedData {
   ziggy?: Config & { location: string };
   csrf_token: string;
   bootstrap_version: string;
-  pluginPages?: Array<{ key: string; title: string; icon: string; admin_only: boolean }>;
+  pluginPages?: Array<{
+    key: string;
+    title: string;
+    icon: string;
+    admin_only: boolean;
+    href: string;
+    description?: string | null;
+    placement: 'main' | 'admin' | 'settings';
+  }>;
   pendingInvite?: { email: string; workspaceName: string } | null;
   flash?: {
     status: string;

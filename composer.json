@@ -21,6 +21,7 @@
         "spatie/laravel-typescript-transformer": "^3.3",
         "symfony/yaml": "^8.1",
         "tightenco/ziggy": "^2.0",
+        "vitamind/archive-plugin": "dev-master",
         "vitamind/core": "dev-master",
         "vitamind/plugin-sdk": "dev-master",
         "vitamind/realtime-plugin": "dev-master",
@@ -50,7 +51,8 @@
             "VitaminD\\PluginSdk\\Tests\\": "dev-packages/vitamind-plugin-sdk/tests/",
             "VitaminD\\Core\\Tests\\": "dev-packages/vitamind-core/tests/",
             "VitaminD\\Plugins\\Workspace\\Tests\\": "dev-packages/vitamind-workspace-plugin/tests/",
-            "VitaminD\\Plugins\\Realtime\\Tests\\": "dev-packages/vitamind-realtime-plugin/tests/"
+            "VitaminD\\Plugins\\Realtime\\Tests\\": "dev-packages/vitamind-realtime-plugin/tests/",
+            "VitaminD\\Plugins\\Archive\\Tests\\": "dev-packages/vitamind-archive-plugin/tests/"
         }
     },
     "scripts": {
@@ -132,6 +134,13 @@
         {
             "type": "path",
             "url": "dev-packages/vitamind-realtime-plugin",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "dev-packages/vitamind-archive-plugin",
             "options": {
                 "symlink": true
             }

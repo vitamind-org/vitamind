@@ -23,6 +23,9 @@
         <testsuite name="Realtime">
             <directory>dev-packages/vitamind-realtime-plugin/tests</directory>
         </testsuite>
+        <testsuite name="Archive">
+            <directory>dev-packages/vitamind-archive-plugin/tests</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
@@ -31,6 +34,7 @@
             <directory>dev-packages/vitamind-workspace-plugin/src</directory>
             <directory>dev-packages/vitamind-plugin-sdk/src</directory>
             <directory>dev-packages/vitamind-realtime-plugin/src</directory>
+            <directory>dev-packages/vitamind-archive-plugin/src</directory>
         </include>
     </source>
     <php>

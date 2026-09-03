@@ -1,6 +1,6 @@
 ## Context
 
-`desain-modul-arsip.md` specifies the domain design for a simple file/folder storage feature: folders and files, four visibility tiers per item (`user`/`workspace`/`app`/`public`), UUID-named physical storage on a non-web-exposed disk, and a single authorization-checking controller for all access including public links.
+`desain-modul-arsip.md` specifies the domain design for a simple file/folder storage feature: folders and files, visibility tiers per item (originally `user`/`workspace`/`app`/`public`; `app` and `public` are deferred out of this change — see Non-Goals), UUID-named physical storage on a non-web-exposed disk, and a single authorization-checking controller for all access.
 
 This change turns that design into `vitamind/archive-plugin`, a first-party Composer plugin, adapted to conventions already locked in this repo:
 - Composer 1st-party plugin placement (`dev-packages/vitamind-archive-plugin/` → `vendor/vitamind/archive-plugin`), per `phase1_namespace_architecture`.
@@ -13,12 +13,13 @@ This change turns that design into `vitamind/archive-plugin`, a first-party Comp
 ## Goals / Non-Goals
 
 **Goals:**
-- Folders and files, each independently visibility-scoped (`user`/`workspace`/`app`/`public`), with per-request authorization for every access, download included.
+- Folders and files, each independently visibility-scoped (`user`/`workspace`), with per-request authorization for every access, download included.
 - Physical storage that is never web-reachable directly: UUID-named files on a disk without `serve => true`/`public` visibility, sharded to avoid huge flat directories.
 - A custom Inertia listing UI (folder/file browser) distinct from a rigid generic data table — no drag-drop upload, no nested cascading tree view; a flat-per-folder listing with basic navigation (breadcrumb via `parent_id` walk) is sufficient.
 - Clean install and operation with no `vitamind/workspace-plugin` present (single-tenant mode): `workspace` visibility becomes unreachable/unavailable rather than erroring.
 
 **Non-Goals:**
+- No `app` (any authenticated user) or `public` (unauthenticated) visibility tiers in this change — **deferred**. They're deliberately workspace-independent (reachable from any workspace, or with no auth at all), which cuts against the "browsing = this workspace's archive" scoping the rest of the plugin relies on (see `ArchiveScope::scopeToCurrentWorkspace()`), and `public` additionally needs a guest-reachable download path the `user`/`workspace`-only design doesn't. Only `user` and `workspace` ship now; revisit as a dedicated follow-up change.
 - No online editing, versioning, or sync.
 - No drag-drop upload UI, no complex nested folder-tree component — plain forms and a simple listing view.
 - No public-link expiry (`expires_at`) — visibility change is the only revocation mechanism, per the original design doc.
@@ -42,13 +43,13 @@ No `->constrained('workspaces')`, per `plugin-workspace-scoping`. The plugin nev
 `FolderPolicy`/`FilePolicy::view()` (shared logic factored into a small trait or base class, since folders and files use identical visibility semantics):
 ```php
 return match ($item->visibility) {
-    'user'      => $user?->id === $item->owner_id,
     'workspace' => $item->workspace_id !== null
                     && WorkspaceMembership::check($user, $item->workspace_id),
-    'app'       => (bool) $user,
-    'public'    => true,
+    default     => false,
 };
 ```
+(`user` visibility isn't a separate arm: it's handled entirely by the owner short-circuit above this match, and falls to `default => false` for anyone else. `app`/`public` are deferred — see Non-Goals — so there's no arm for either.)
+
 `WorkspaceMembership::check()` (from `add-workspace-membership-check`) already returns `false` when the workspaces feature is disabled or `$user` is null, so no separate feature-flag branch is needed here — a `workspace`-visibility item simply becomes unreachable by anyone when the feature is off, which is the correct behavior (there's no membership to have).
 
 *Alternative considered*: checking `$item->workspace_id === $user->current_workspace_id` (matching `BelongsToWorkspace`'s convention). Rejected per the earlier exploration: that only proves the workspace matches the viewer's *currently active* workspace, not that they're a genuine member of the file's workspace — a user could switch away and back, or the file could belong to a workspace they're not even in, depending on how `workspace_id` was set at creation.
@@ -63,7 +64,7 @@ The plugin reads its target disk from a plugin-owned config value (e.g. `config(
 ```php
 Route::get('/archive/f/{file:uuid}', [FileDownloadController::class, 'show']);
 ```
-The controller loads the `File` by `uuid`, runs `Gate::authorize('view', $file)` (or the policy directly), then returns `Storage::disk($file->disk)->response($file->path, $file->original_name)`. This is a request-time policy check on every access, including `public` — matching the design doc's principle that changing visibility away from `public` kills existing links immediately, which Laravel's built-in signed-URL serving mechanism (D-context above) cannot guarantee.
+The controller loads the `File` by `uuid`, runs `Gate::authorize('view', $file)` (or the policy directly), then returns `Storage::disk($file->disk)->response($file->path, $file->original_name)`. This is a request-time policy check on every access — matching the design doc's principle that changing an item's visibility kills existing links immediately, which Laravel's built-in signed-URL serving mechanism (D-context above) cannot guarantee. With `app`/`public` deferred, both remaining tiers (`user`, `workspace`) require an authenticated user, so the route sits behind the `auth` middleware like the rest of the plugin — no guest-reachable download path exists in this change.
 
 **D7: Upload validation order: whitelist extension → validate `max` size → detect real MIME from content → cross-check claimed extension against detected MIME → reject on mismatch.**
 Extension whitelist is a plugin config array (denies `php`, `phtml`, `phar`, `exe`, `sh`, `htaccess`, and anything not explicitly allowed), enforced in addition to, not instead of, storing outside any served disk (defense in depth per the design doc).
@@ -85,6 +86,7 @@ Matches the design doc's "cheap safety net" recommendation — `SoftDeletes` tra
 - [Empty-folder-only delete (D8) is less convenient than recursive delete for users with deep hierarchies] → Accepted trade-off per explicit simplicity preference; revisit as a separate change if it becomes a real pain point.
 - [`workspace` visibility becomes fully inert when `vitamind/workspace-plugin` is absent, with no user-facing explanation beyond "you can't see this"] → Mitigation: the folder/file creation UI SHOULD only offer the `workspace` visibility option when `config('vitamin-d.features.workspaces')` is enabled, so the dead option isn't presented as choosable in single-tenant installs. (Follow-up detail, not a blocking risk.)
 - [Depends on `add-workspace-membership-check` landing first] → Mitigation: that change is small, self-contained, and behavior-preserving for its existing consumer (realtime-plugin), so it's low-risk to land ahead of this one.
+- [Deferring `app`/`public` means a single-tenant install (no `vitamind/workspace-plugin`) has no way to share an item with all users — every item is effectively `user`-only there, since `workspace` is unreachable without a workspace] → Accepted trade-off; `ArchiveScope::defaultVisibility()` falls back to `user` (not `app`) when the workspaces feature is off. Revisit once `app`/`public` are reintroduced.
 
 ## Migration Plan
 
@@ -101,4 +103,5 @@ No production data migration involved (net-new tables); rollback is dropping the
 ## Open Questions
 
 - Whether `workspace` visibility should be hidden from the creation UI when the workspaces feature is off (noted as a mitigation above) — deferred to implementation-time UI polish, not blocking.
-- Whether a future change should add recursive folder delete or an expiring public-link token (`public_token` column) — both explicitly deferred by the original design doc and not reopened here.
+- Whether a future change should add recursive folder delete — explicitly deferred by the original design doc and not reopened here.
+- When `app`/`public` are reintroduced (separate change): how the workspace-independence they require interacts with `ArchiveScope::scopeToCurrentWorkspace()` — e.g. whether an `app`/`public` item should surface in every workspace's browse listing (it's reachable from all of them) or only in the workspace it was created under, with direct links still working everywhere either way. Not resolved here; the two-tier (`user`/`workspace`) model in this change sidesteps the question entirely.

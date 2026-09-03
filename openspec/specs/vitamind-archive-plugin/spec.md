@@ -1,8 +1,16 @@
-## ADDED Requirements
+# vitamind-archive-plugin Specification
 
-### Requirement: Folders and files support four independent visibility tiers
+## Purpose
 
-Each folder and file SHALL carry its own `visibility` value, independently of its parent folder's visibility: `user` (owner only), `workspace` (members of the item's `workspace_id`), `app` (any authenticated user), or `public` (anyone, including unauthenticated requests). Visibility SHALL default to the visibility of the destination folder at creation time as a UI convenience, but SHALL remain independently editable per item thereafter.
+Archive Plugin (`vitamind/archive-plugin`) is the first-party plugin that provides simple, secure folder/file storage — upload, organize into folders, download, delete — with per-item visibility control. Each folder and file carries its own `user` (owner-only) or `workspace` (genuine workspace members only) visibility, enforced by a single authorization check evaluated fresh on every access. Physical file content is stored under a server-generated name on a disk that is never directly web-reachable, and all downloads are served through one authorized controller rather than signed or predictable URLs. The plugin does not depend on `vitamind/workspace-plugin` and functions correctly, with `workspace` visibility simply inaccessible, on single-tenant installs where workspaces are absent.
+
+## Requirements
+
+### Requirement: Folders and files support independent visibility tiers
+
+Each folder and file SHALL carry its own `visibility` value, independently of its parent folder's visibility: `user` (owner only) or `workspace` (genuine members of the item's `workspace_id`). Visibility SHALL default to the visibility of the destination folder at creation time as a UI convenience, but SHALL remain independently editable per item thereafter.
+
+`app` (any authenticated user) and `public` (anyone, including unauthenticated requests) are **deferred** — not part of this capability. Workspace-independent visibility (reachable regardless of which workspace is being browsed, or without authentication at all) needs deliberate design against the workspace-scoped browsing model this capability establishes, and is left to a dedicated future change.
 
 #### Scenario: New item defaults to its destination folder's visibility
 - **WHEN** a user uploads a file into a folder with visibility `workspace`
@@ -14,7 +22,7 @@ Each folder and file SHALL carry its own `visibility` value, independently of it
 
 ### Requirement: Per-visibility-tier authorization is enforced on every access
 
-A single authorization check SHALL govern every read of a folder or file, evaluated fresh on each request — including requests for `public`-visibility items.
+A single authorization check SHALL govern every read of a folder or file, evaluated fresh on each request — never cached or determined once at link-generation time.
 
 #### Scenario: `user`-visibility item is accessible only to its owner
 - **WHEN** a user other than the owner requests a folder or file with `visibility = user`
@@ -28,17 +36,9 @@ A single authorization check SHALL govern every read of a folder or file, evalua
 - **WHEN** a folder or file has `visibility = workspace` but a null `workspace_id`
 - **THEN** access is denied to everyone except through the owner's `user`-level access, if applicable
 
-#### Scenario: `app`-visibility item is accessible to any authenticated user
-- **WHEN** any logged-in user requests a folder or file with `visibility = app`
-- **THEN** access is granted regardless of ownership or workspace membership
-
-#### Scenario: `public`-visibility item is accessible without authentication
-- **WHEN** an unauthenticated request is made for a folder or file with `visibility = public`
-- **THEN** access is granted
-
-#### Scenario: Changing visibility away from `public` immediately revokes access
-- **WHEN** a `public` file's visibility is changed to any other tier
-- **THEN** subsequent requests for that file (including via a previously shared link) are denied, with no separate revocation step required
+#### Scenario: Changing visibility away from `workspace` immediately revokes access
+- **WHEN** a `workspace` file's visibility is changed to `user`
+- **THEN** subsequent requests for that file (including via a previously shared link) are denied to non-owners, with no separate revocation step required
 
 ### Requirement: Physical file storage is never directly web-reachable
 
@@ -104,6 +104,6 @@ Requests to create or update a folder or file SHALL NOT be able to set `owner_id
 - **WHEN** the workspaces feature is disabled and a `workspace`-visibility item is requested
 - **THEN** access is denied cleanly (as no membership can exist), with no exception thrown
 
-#### Scenario: `user`, `app`, and `public` tiers work fully without the workspace plugin
+#### Scenario: `user` tier works fully without the workspace plugin
 - **WHEN** the workspaces feature is disabled
-- **THEN** folders and files with `user`, `app`, or `public` visibility behave exactly as on a workspace-enabled install
+- **THEN** folders and files with `user` visibility behave exactly as on a workspace-enabled install

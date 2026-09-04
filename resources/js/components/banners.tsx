@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { ChevronDownIcon, TriangleAlertIcon } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@vitamind/ui/collapsible';
 
 export interface BannerItem {
   key: string;

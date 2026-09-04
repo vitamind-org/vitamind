@@ -1,5 +1,5 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@vitamind/ui/tooltip';
+import { Badge } from '@vitamind/ui/badge';
 import { useClipboard } from '@/hooks/use-clipboard';
 
 export default function CopyableBadge({ text, tooltip }: { text: string | null | undefined; tooltip?: boolean }) {

@@ -1,7 +1,7 @@
 import Container from '@/components/container';
 import { DataTable } from '@/components/data-table';
 import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import SectionLayout from '@/layouts/section/layout';
 import { columns as workspaceColumns } from './components/columns';
 import { columns as invitationColumns } from './components/invitations';

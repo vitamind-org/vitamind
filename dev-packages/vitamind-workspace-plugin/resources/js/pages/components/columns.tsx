@@ -1,7 +1,7 @@
 import DateTime from '@/components/date-time';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Badge } from '@vitamind/ui/badge';
+import { Button } from '@vitamind/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@vitamind/ui/dropdown-menu';
 import DeleteWorkspace from './delete-workspace';
 import Users from './users';
 import WorkspaceForm from './workspace-form';

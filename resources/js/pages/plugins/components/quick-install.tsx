@@ -1,8 +1,8 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import { useForm, usePage } from '@inertiajs/react';
 import { LoaderCircleIcon } from 'lucide-react';
 import { Plugin } from '@/types/plugin';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@vitamind/ui/tooltip';
 import { PageProps } from '@/types';
 
 export default function QuickInstall({ url }: { url: string }) {

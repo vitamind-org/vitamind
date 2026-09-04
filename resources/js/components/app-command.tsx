@@ -1,6 +1,6 @@
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@vitamind/ui/command';
 import { useEffect, useState, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import { CommandIcon, SearchIcon, UserIcon, SettingsIcon, UsersIcon, MoonIcon, SunIcon, MonitorIcon } from 'lucide-react';
 import { usePage, router } from '@inertiajs/react';
 import { useAppearance } from '@/hooks/use-appearance';

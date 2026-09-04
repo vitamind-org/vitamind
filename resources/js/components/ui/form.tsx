@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@vitamind/ui/cn';
 
 export function Form({ className, children, ...props }: React.ComponentProps<'form'>) {
   return (

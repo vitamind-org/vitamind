@@ -1,6 +1,6 @@
 import { User } from '@/types/user';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@vitamind/ui/dropdown-menu';
+import { Button } from '@vitamind/ui/button';
 import { MoreVerticalIcon } from 'lucide-react';
 import DeleteUser from '@/pages/users/components/delete-user';
 import UserForm from '@/pages/users/components/user-form';

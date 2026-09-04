@@ -1,8 +1,8 @@
 import { FormEvent } from 'react';
 import { useForm } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import InputError from '@/components/ui/input-error';
+import { Button } from '@vitamind/ui/button';
+import { Input } from '@vitamind/ui/input';
+import InputError from '@vitamind/ui/input-error';
 import { CheckIcon, FolderPenIcon, XIcon } from 'lucide-react';
 import VisibilitySelect, { Visibility } from './visibility-select';
 

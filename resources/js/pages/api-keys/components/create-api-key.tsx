@@ -1,5 +1,5 @@
 import { ClipboardCheckIcon, ClipboardIcon, LoaderCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -9,14 +9,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from '@vitamind/ui/dialog';
 import { useForm } from '@inertiajs/react';
 import React, { FormEventHandler, ReactNode, useRef, useState } from 'react';
-import { Label } from '@/components/ui/label';
-import InputError from '@/components/ui/input-error';
-import { Form, FormField, FormFields } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@vitamind/ui/label';
+import InputError from '@vitamind/ui/input-error';
+import { Form, FormField, FormFields } from '@vitamind/ui/form';
+import { Input } from '@vitamind/ui/input';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@vitamind/ui/select';
 import { Workspace } from '@/types/workspace';
 import { MultiSelect } from '@/components/multi-select';
 

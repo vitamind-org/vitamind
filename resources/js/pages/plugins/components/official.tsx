@@ -2,11 +2,11 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Repo } from '@/types/repo';
 import { BadgeCheckIcon, LoaderCircleIcon, StarIcon } from 'lucide-react';
-import { CardRow } from '@/components/ui/card';
+import { CardRow } from '@vitamind/ui/card';
 import { Fragment } from 'react';
 import Install from '@/pages/plugins/components/quick-install';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import { Button } from '@vitamind/ui/button';
+import { Separator } from '@vitamind/ui/separator';
 
 interface MarketplaceConfig {
   enabled: boolean;

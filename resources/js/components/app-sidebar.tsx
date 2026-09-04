@@ -11,14 +11,14 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubItem,
-} from '@/components/ui/sidebar';
+} from '@vitamind/ui/sidebar';
 import { type NavItem, SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronRightIcon } from 'lucide-react';
 import AppLogo from './app-logo';
 import { Icon } from '@/components/icon';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@vitamind/ui/collapsible';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@vitamind/ui/tooltip';
 import { useMemo } from 'react';
 import { getPluginIconComponent } from '@/lib/plugin-icon';
 

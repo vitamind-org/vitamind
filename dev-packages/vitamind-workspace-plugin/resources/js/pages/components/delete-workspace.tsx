@@ -8,15 +8,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from '@vitamind/ui/dialog';
+import { Button } from '@vitamind/ui/button';
 import { useForm } from '@inertiajs/react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import InputError from '@/components/ui/input-error';
+import { Label } from '@vitamind/ui/label';
+import { Input } from '@vitamind/ui/input';
+import InputError from '@vitamind/ui/input-error';
 import { LoaderCircleIcon } from 'lucide-react';
 import { Workspace } from '@/types/workspace';
-import { Form, FormField, FormFields } from '@/components/ui/form';
+import { Form, FormField, FormFields } from '@vitamind/ui/form';
 
 export default function DeleteWorkspace({ workspace, children }: { workspace: Workspace; children: ReactNode }) {
   const [open, setOpen] = useState(false);

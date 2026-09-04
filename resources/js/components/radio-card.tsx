@@ -1,5 +1,5 @@
-import { RadioGroupItem } from '@/components/ui/radio-group';
-import { cn } from '@/lib/utils';
+import { RadioGroupItem } from '@vitamind/ui/radio-group';
+import { cn } from '@vitamind/ui/cn';
 
 export default function RadioCard({
   value,

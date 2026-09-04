@@ -1,14 +1,14 @@
 import React, { InputHTMLAttributes, useEffect, useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { PasswordInput } from '@/components/ui/password-input';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@vitamind/ui/label';
+import { Input } from '@vitamind/ui/input';
+import { PasswordInput } from '@vitamind/ui/password-input';
+import { Switch } from '@vitamind/ui/switch';
+import { Textarea } from '@vitamind/ui/textarea';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@vitamind/ui/select';
 import { DynamicFieldConfig } from '@/types/dynamic-field-config';
-import InputError from '@/components/ui/input-error';
-import { FormField } from '@/components/ui/form';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import InputError from '@vitamind/ui/input-error';
+import { FormField } from '@vitamind/ui/form';
+import { Alert, AlertDescription, AlertTitle } from '@vitamind/ui/alert';
 import { TriangleAlertIcon } from 'lucide-react';
 
 type CustomFieldComponent = React.ComponentType<{

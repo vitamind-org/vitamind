@@ -1,10 +1,10 @@
 import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircleIcon } from 'lucide-react';
 import { FormEvent } from 'react';
-import InputError from '@/components/ui/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import InputError from '@vitamind/ui/input-error';
+import { Button } from '@vitamind/ui/button';
+import { Input } from '@vitamind/ui/input';
+import { Label } from '@vitamind/ui/label';
 import AuthLayout from '@/layouts/auth/layout';
 
 export default function ConfirmPassword() {

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Button } from '@vitamind/ui/button';
+import { cn } from '@vitamind/ui/cn';
 
 export default function CopyableField({ value, className, mono = true }: { value: string; className?: string; mono?: boolean }) {
   const [copied, setCopied] = useState(false);

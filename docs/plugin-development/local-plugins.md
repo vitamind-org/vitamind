@@ -167,6 +167,24 @@ Tailwind classes used in plugin components are picked up automatically
 generate real CSS from the *host's* design tokens — plugins never ship
 their own stylesheet.
 
+React UI primitives (`Button`, `Dialog`, `Popover`, `Command`, etc.) and the
+`cn()` class-merge helper are imported through `@vitamind/ui/*`, not the
+host's `@/components/ui/*` — e.g. `import { Button } from
+'@vitamind/ui/button'`, `import { cn } from '@vitamind/ui/cn'`. This keeps
+plugin source from statically depending on the host's own `@/` namespace,
+mirroring how `vitamind/plugin-sdk` is a leaf dependency on the backend
+side rather than something plugins reach for through `vitamind/core`. Host
+code uses the same `@vitamind/ui/*` alias for these primitives too, so
+there's one name for the shared components regardless of which side is
+importing them. **`@vitamind/ui` is a Vite/tsconfig alias today, not an
+independently versioned npm package** — it resolves to the same physical
+`resources/js/components/ui/` and `resources/js/lib/utils.ts` files, still
+compiled together with the host in one Vite process. Per-plugin
+`package.json` dependency declarations against a real `@vitamind/ui`
+package are a deferred, conditional follow-up (see
+`openspec/changes/add-per-plugin-npm-packages`), not something in place
+yet.
+
 When writing feature tests against a plugin page, pass `shouldExist: false`
 to Inertia's testing assertion — `assertInertia(fn ($page) => $page
 ->component('@plugin/my-plugin/index', false))`. By default that assertion

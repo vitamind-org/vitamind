@@ -1,13 +1,13 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { CheckCircle2Icon, LoaderCircleIcon } from 'lucide-react';
 import { FormEvent } from 'react';
-import InputError from '@/components/ui/input-error';
+import InputError from '@vitamind/ui/input-error';
 import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@vitamind/ui/button';
+import { Input } from '@vitamind/ui/input';
+import { Label } from '@vitamind/ui/label';
 import AuthLayout from '@/layouts/auth/layout';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@vitamind/ui/alert';
 import { SharedData } from '@/types';
 
 export default function ForgotPassword() {

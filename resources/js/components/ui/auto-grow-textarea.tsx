@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@vitamind/ui/cn';
 import { useInputFocus } from '@/stores/useInputFocus';
 
 type AutoGrowTextareaProps = React.ComponentProps<'textarea'>;

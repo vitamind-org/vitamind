@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { CircleIcon } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@vitamind/ui/cn';
 
 type RadioGroupContextValue = {
   name: string;

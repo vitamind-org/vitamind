@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -8,12 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Form, FormField, FormFields } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import InputError from '@/components/ui/input-error';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+} from '@vitamind/ui/dialog';
+import { Form, FormField, FormFields } from '@vitamind/ui/form';
+import { Input } from '@vitamind/ui/input';
+import InputError from '@vitamind/ui/input-error';
+import { Label } from '@vitamind/ui/label';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@vitamind/ui/select';
 import { Workspace } from '@/types/workspace';
 import { useForm } from '@inertiajs/react';
 import { LoaderCircleIcon } from 'lucide-react';

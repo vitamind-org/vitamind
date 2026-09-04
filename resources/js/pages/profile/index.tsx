@@ -5,10 +5,10 @@ import UpdatePassword from '@/pages/profile/components/update-password';
 import UpdateProfile from '@/pages/profile/components/update-profile';
 import Heading from '@/components/heading';
 import TwoFactor from '@/pages/profile/components/two-factor';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@vitamind/ui/tabs';
 import { useState } from 'react';
 import { BookOpenIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 
 export default function Profile() {
   const [tab, setTab] = useState('info');

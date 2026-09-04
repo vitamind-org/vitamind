@@ -1,11 +1,12 @@
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import { WorkspaceSwitch } from '@/components/workspace-switch';
+import { SidebarTrigger } from '@vitamind/ui/sidebar';
 import { HeartIcon, SlashIcon, WifiIcon, WifiOffIcon } from 'lucide-react';
 import AppCommand from '@/components/app-command';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '@vitamind/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@vitamind/ui/tooltip';
 import { type SocketStatus } from '@/types/realtime-plugin';
+import { type WorkspacePlugin } from '@/types/workspace-plugin';
 import { useFeature } from '@/hooks/use-feature';
+import { usePlugin } from '@/lib/use-plugin';
 
 export function AppHeader({
   socketStatus,
@@ -18,13 +19,14 @@ export function AppHeader({
 }) {
   const isWorkspacesEnabled = useFeature('workspaces');
   const isWebSocketEnabled = useFeature('websocket') && isRealtimePluginAvailable;
+  const { WorkspaceSwitch } = usePlugin('workspace-plugin') as WorkspacePlugin;
 
   return (
     <header className="bg-background -ml-1 flex h-12 shrink-0 items-center justify-between gap-2 border-b p-4 md:-ml-2">
       <div className="flex items-center">
         <SidebarTrigger className="-ml-1 md:hidden" />
         <div className="flex items-center space-x-2 text-xs">
-          {isWorkspacesEnabled && <WorkspaceSwitch />}
+          {isWorkspacesEnabled && WorkspaceSwitch && <WorkspaceSwitch />}
         </div>
       </div>
       <div className="flex items-center gap-2">

@@ -1,11 +1,11 @@
-import { CardRow } from '@/components/ui/card';
+import { CardRow } from '@vitamind/ui/card';
 import { Plugin } from '@/types/plugin';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Pip } from '@/components/ui/pip';
+import { Separator } from '@vitamind/ui/separator';
+import { Badge } from '@vitamind/ui/badge';
+import { Pip } from '@vitamind/ui/pip';
 import PluginDropdown from '@/pages/plugins/components/plugin-dropdown';
 import { TriangleAlert } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@vitamind/ui/tooltip';
 import { useDialog } from '@/hooks/use-dialog';
 
 export default function InstalledPlugins({ plugins }: { plugins: Plugin[] }) {

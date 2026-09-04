@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import { type BreadcrumbItem } from '@/types';
-import { cn } from '@/lib/utils';
+import { cn } from '@vitamind/ui/cn';
 import { Link } from '@inertiajs/react';
 import { ArrowLeftIcon } from 'lucide-react';
 import { type PropsWithChildren } from 'react';

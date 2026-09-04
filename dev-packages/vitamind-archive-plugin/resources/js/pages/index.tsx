@@ -2,7 +2,7 @@ import { useState } from 'react';
 import AppLayout from '@/layouts/app/layout';
 import Container from '@/components/container';
 import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { CornerLeftUpIcon, FolderPlus } from 'lucide-react';
 import CreateFolderForm from './components/create-folder-form';

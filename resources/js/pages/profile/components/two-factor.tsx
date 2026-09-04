@@ -1,8 +1,8 @@
 import { useForm, usePage } from '@inertiajs/react';
 import type { SharedData } from '@/types';
 import { FormEvent, ReactNode, useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@vitamind/ui/card';
+import { Button } from '@vitamind/ui/button';
 import { CheckCircle2Icon, LoaderCircleIcon, XCircleIcon } from 'lucide-react';
 import {
   Dialog,
@@ -13,12 +13,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import InputError from '@/components/ui/input-error';
+} from '@vitamind/ui/dialog';
+import { Input } from '@vitamind/ui/input';
+import { Label } from '@vitamind/ui/label';
+import { Textarea } from '@vitamind/ui/textarea';
+import { Alert, AlertDescription } from '@vitamind/ui/alert';
+import InputError from '@vitamind/ui/input-error';
 import axios from 'axios';
 
 function Enable({ show = true }: { show?: boolean }): ReactNode {

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@vitamind/ui/cn';
 import { useInputFocus } from '@/stores/useInputFocus';
 
 type PasswordInputProps = Omit<React.ComponentProps<'input'>, 'type'>;

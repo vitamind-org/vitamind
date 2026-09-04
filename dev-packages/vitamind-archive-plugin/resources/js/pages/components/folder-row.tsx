@@ -1,9 +1,9 @@
 import { FormEvent, useState } from 'react';
 import { Link, router, useForm } from '@inertiajs/react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import InputError from '@/components/ui/input-error';
+import { Button } from '@vitamind/ui/button';
+import { Input } from '@vitamind/ui/input';
+import InputError from '@vitamind/ui/input-error';
 import { CheckIcon, FolderIcon, SquarePenIcon, Trash2Icon, XIcon } from 'lucide-react';
 import VisibilitySelect, { Visibility } from './visibility-select';
 

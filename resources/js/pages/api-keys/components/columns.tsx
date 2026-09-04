@@ -1,10 +1,10 @@
 import { ColumnDef } from '@tanstack/react-table';
 import DateTime from '@/components/date-time';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@vitamind/ui/dropdown-menu';
+import { Button } from '@vitamind/ui/button';
 import { MoreVerticalIcon } from 'lucide-react';
 import { ApiKey } from '@/types/api-key';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@vitamind/ui/badge';
 import { Workspace } from '@/types/workspace';
 import { useDialog } from '@/hooks/use-dialog';
 

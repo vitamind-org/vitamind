@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Button } from '@vitamind/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@vitamind/ui/dropdown-menu';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreVerticalIcon } from 'lucide-react';
 import { WorkspaceUser } from '@/types/workspace-user';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@vitamind/ui/badge';
 import { useDialog } from '@/hooks/use-dialog';
 
 function Actions({ invitation }: { invitation: WorkspaceUser }) {

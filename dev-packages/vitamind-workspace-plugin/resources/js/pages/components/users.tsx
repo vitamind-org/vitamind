@@ -1,7 +1,7 @@
 import { DataTable } from '@/components/data-table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Badge } from '@vitamind/ui/badge';
+import { Button } from '@vitamind/ui/button';
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@vitamind/ui/sheet';
 import RemoveUser from './remove-user';
 import Invite from './invite';
 import { Workspace } from '@/types/workspace';

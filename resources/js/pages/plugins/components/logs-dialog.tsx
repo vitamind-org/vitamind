@@ -1,9 +1,9 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardRow } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@vitamind/ui/dialog';
+import { Button } from '@vitamind/ui/button';
+import { Card, CardContent, CardRow } from '@vitamind/ui/card';
 import { ChevronDownIcon, ChevronRightIcon, FileCodeIcon, AlertCircleIcon, TimerIcon } from 'lucide-react';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@vitamind/ui/cn';
 import DateTime from '@/components/date-time';
 import { PluginError } from '@/types/plugin';
 

@@ -1,9 +1,9 @@
 import { DragEvent, FormEvent, useRef, useState } from 'react';
 import { useForm } from '@inertiajs/react';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import InputError from '@/components/ui/input-error';
-import { cn } from '@/lib/utils';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@vitamind/ui/dialog';
+import { Button } from '@vitamind/ui/button';
+import InputError from '@vitamind/ui/input-error';
+import { cn } from '@vitamind/ui/cn';
 import { LoaderCircleIcon, UploadCloudIcon, UploadIcon } from 'lucide-react';
 import VisibilitySelect, { Visibility } from './visibility-select';
 

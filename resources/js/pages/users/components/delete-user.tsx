@@ -10,8 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from '@vitamind/ui/dialog';
+import { Button } from '@vitamind/ui/button';
 import { LoaderCircleIcon } from 'lucide-react';
 
 export default function DeleteUser({ user, children }: { user: User; children: ReactNode }) {

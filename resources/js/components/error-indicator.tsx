@@ -1,5 +1,5 @@
 import { TriangleAlertIcon } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@vitamind/ui/tooltip';
 
 export default function ErrorIndicator({ error, label = 'View error' }: { error: string | null; label?: string }) {
   if (!error) {

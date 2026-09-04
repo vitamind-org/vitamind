@@ -1,7 +1,7 @@
 import { Plugin } from '@/types/plugin';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from '@vitamind/ui/dropdown-menu';
 import { MoreVerticalIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import DisablePlugin from '@/pages/plugins/components/disable';
 import UpdatePlugin from '@/pages/plugins/components/update';
 import EnablePlugin from '@/pages/plugins/components/enable';

@@ -1,12 +1,12 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { LoaderCircleIcon } from 'lucide-react';
 import { FormEvent } from 'react';
-import InputError from '@/components/ui/input-error';
+import InputError from '@vitamind/ui/input-error';
 import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@vitamind/ui/button';
+import { Checkbox } from '@vitamind/ui/checkbox';
+import { Input } from '@vitamind/ui/input';
+import { Label } from '@vitamind/ui/label';
 import AuthLayout from '@/layouts/auth/layout';
 import { PageProps } from '@/types';
 

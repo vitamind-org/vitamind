@@ -18,6 +18,7 @@ use VitaminD\Plugins\Workspace\Http\Middleware\EnsureWorkspaceOnboarded;
 use VitaminD\Plugins\Workspace\Http\Middleware\HasWorkspaceMiddleware;
 use VitaminD\Plugins\Workspace\Http\Resources\WorkspaceResource;
 use VitaminD\Plugins\Workspace\Models\UserWorkspace;
+use VitaminD\PluginSdk\RegisterPage;
 
 class WorkspaceServiceProvider extends ServiceProvider
 {
@@ -40,6 +41,27 @@ class WorkspaceServiceProvider extends ServiceProvider
         $this->registerInertiaSharedData();
         $this->registerRoutes();
         $this->registerEventListeners();
+        $this->registerMenu();
+    }
+
+    /**
+     * Registers the "Workspaces" Settings second-nav entry. Guarded by the
+     * same `vitamin-d.features.workspaces` check as the rest of `boot()`
+     * (see the top of this method) — the settings page never registers,
+     * and so never appears, when the feature is off. This replaces what
+     * used to be a hardcoded, feature-flag-conditional item in
+     * `resources/js/layouts/settings/layout.tsx` itself; see
+     * docs/plugin-development/menu-registration.md.
+     */
+    protected function registerMenu(): void
+    {
+        RegisterPage::make('workspaces')
+            ->title('Workspaces')
+            ->icon('list')
+            ->route('workspaces')
+            ->placement('settings')
+            ->adminOnly(false)
+            ->register();
     }
 
     /**

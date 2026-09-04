@@ -1,14 +1,14 @@
-import InputError from '@/components/ui/input-error';
+import InputError from '@vitamind/ui/input-error';
 import { useForm, usePage } from '@inertiajs/react';
 import { FormEvent, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@vitamind/ui/button';
+import { Input } from '@vitamind/ui/input';
+import { Label } from '@vitamind/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@vitamind/ui/card';
 import { LoaderCircleIcon, TriangleAlertIcon } from 'lucide-react';
 import FormSuccessful from '@/components/form-successful';
 import { SharedData } from '@/types';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@vitamind/ui/alert';
 
 export default function UpdatePassword() {
   const page = usePage<SharedData>();

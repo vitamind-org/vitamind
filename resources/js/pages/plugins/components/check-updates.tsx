@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import { useForm } from '@inertiajs/react';
 import { RefreshCw } from 'lucide-react';
 

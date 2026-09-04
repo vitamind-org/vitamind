@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@vitamind/ui/cn';
 import { LucideIcon } from 'lucide-react';
 import { ReactNode } from 'react';
 

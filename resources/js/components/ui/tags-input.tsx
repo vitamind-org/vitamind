@@ -2,10 +2,10 @@
 
 import * as React from 'react';
 import { X } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { Badge } from '@vitamind/ui/badge';
+import { Button } from '@vitamind/ui/button';
+import { Input } from '@vitamind/ui/input';
+import { cn } from '@vitamind/ui/cn';
 
 interface TagsInputProps {
   value?: string[];

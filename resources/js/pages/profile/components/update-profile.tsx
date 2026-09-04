@@ -1,9 +1,9 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import InputError from '@/components/ui/input-error';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@vitamind/ui/card';
+import { Label } from '@vitamind/ui/label';
+import { Input } from '@vitamind/ui/input';
+import InputError from '@vitamind/ui/input-error';
 import { Link, useForm, usePage } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import type { SharedData } from '@/types';
 import { FormEvent } from 'react';
 import { LoaderCircleIcon } from 'lucide-react';

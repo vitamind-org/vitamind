@@ -1,8 +1,8 @@
-import { CardRow } from '@/components/ui/card';
+import { CardRow } from '@vitamind/ui/card';
 import { Plugin } from '@/types/plugin';
-import { Separator } from '@/components/ui/separator';
+import { Separator } from '@vitamind/ui/separator';
 import PluginDropdown from '@/pages/plugins/components/plugin-dropdown';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@vitamind/ui/tooltip';
 import { TriangleAlert } from 'lucide-react';
 
 export default function DiscoveredPlugins({ plugins }: { plugins: Plugin[] }) {

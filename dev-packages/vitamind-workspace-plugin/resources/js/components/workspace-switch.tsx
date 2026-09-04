@@ -2,13 +2,13 @@ import { type SharedData } from '@/types';
 import { type Workspace } from '@/types/workspace';
 import { useForm, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import { ChevronsUpDownIcon, PlusIcon } from 'lucide-react';
 import { useInitials } from '@/hooks/use-initials';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import WorkspaceForm from '@plugin/workspace-plugin/pages/components/workspace-form';
-import { WorkspaceSelect } from '@/components/workspace-select';
-import { CommandGroup, CommandItem } from '@/components/ui/command';
+import { Avatar, AvatarFallback } from '@vitamind/ui/avatar';
+import WorkspaceForm from '../pages/components/workspace-form';
+import { WorkspaceSelect } from './workspace-select';
+import { CommandGroup, CommandItem } from '@vitamind/ui/command';
 
 export function WorkspaceSwitch() {
   const page = usePage<SharedData>();

@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 import { router } from '@inertiajs/react';
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@vitamind/ui/table';
+import { Button } from '@vitamind/ui/button';
+import { cn } from '@vitamind/ui/cn';
 import { PaginatedData } from '@/types';
 import { Input } from './ui/input';
 import { useEffect, useState } from 'react';

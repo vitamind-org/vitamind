@@ -14,6 +14,8 @@
     "allowJs": true,
     "baseUrl": ".",
     "paths": {
+      "@vitamind/ui/cn": ["./resources/js/lib/utils.ts"],
+      "@vitamind/ui/*": ["./resources/js/components/ui/*"],
       "@/*": ["./resources/js/*"],
       "ziggy-js": ["./vendor/tightenco/ziggy"]
     }

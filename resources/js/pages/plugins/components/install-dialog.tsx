@@ -8,17 +8,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from '@vitamind/ui/dialog';
+import { Button } from '@vitamind/ui/button';
 import { useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { DownloadIcon, LoaderCircleIcon, TriangleAlertIcon } from 'lucide-react';
-import { Form, FormField, FormFields } from '@/components/ui/form';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import InputError from '@/components/ui/input-error';
+import { Form, FormField, FormFields } from '@vitamind/ui/form';
+import { Label } from '@vitamind/ui/label';
+import { Input } from '@vitamind/ui/input';
+import InputError from '@vitamind/ui/input-error';
 import { Plugin } from '@/types/plugin';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@vitamind/ui/alert';
 import { PageProps } from '@/types';
 
 export default function InstallDialog({ repo }: { repo?: Repo }) {

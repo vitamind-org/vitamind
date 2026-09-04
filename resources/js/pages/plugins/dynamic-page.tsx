@@ -2,11 +2,11 @@ import SectionLayout from '@/layouts/section/layout';
 import { Head, router, useForm } from '@inertiajs/react';
 import Container from '@/components/container';
 import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@vitamind/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@vitamind/ui/tabs';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/data-table';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@vitamind/ui/badge';
 import { Edit2Icon, Trash2Icon } from 'lucide-react';
 import { FormEventHandler, ReactNode, useState } from 'react';
 import {
@@ -15,9 +15,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Form, FormFields } from '@/components/ui/form';
-import DynamicField from '@/components/ui/dynamic-field';
+} from '@vitamind/ui/dialog';
+import { Form, FormFields } from '@vitamind/ui/form';
+import DynamicField from '@vitamind/ui/dynamic-field';
 import { DynamicFieldConfig } from '@/types/dynamic-field-config';
 import Layout from '@/layouts/app/layout';
 import {
@@ -26,7 +26,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@vitamind/ui/select';
 
 type PageConfig = {
   key: string;

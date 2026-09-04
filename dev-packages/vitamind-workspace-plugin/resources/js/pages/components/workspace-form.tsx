@@ -7,16 +7,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from '@vitamind/ui/dialog';
 import { FormEvent, ReactNode, useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import { LoaderCircle } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import InputError from '@/components/ui/input-error';
+import { Label } from '@vitamind/ui/label';
+import { Input } from '@vitamind/ui/input';
+import InputError from '@vitamind/ui/input-error';
 import { Workspace } from '@/types/workspace';
-import { Form, FormField, FormFields } from '@/components/ui/form';
+import { Form, FormField, FormFields } from '@vitamind/ui/form';
 
 export default function WorkspaceForm({
   workspace,

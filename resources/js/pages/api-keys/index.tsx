@@ -2,7 +2,7 @@ import SectionLayout from '@/layouts/section/layout';
 import { Head, usePage } from '@inertiajs/react';
 import Container from '@/components/container';
 import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import { DataTable } from '@/components/data-table';
 import { ApiKey } from '@/types/api-key';
 import { getColumns } from '@/pages/api-keys/components/columns';

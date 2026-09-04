@@ -1,10 +1,10 @@
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@vitamind/ui/button';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@vitamind/ui/dialog';
 import { useForm } from '@inertiajs/react';
 import type { VisitOptions } from '@inertiajs/core';
 import { LoaderCircleIcon } from 'lucide-react';
 import FormSuccessful from '@/components/form-successful';
-import InputError from '@/components/ui/input-error';
+import InputError from '@vitamind/ui/input-error';
 
 export type ConfirmationDialogProps = {
   open: boolean;

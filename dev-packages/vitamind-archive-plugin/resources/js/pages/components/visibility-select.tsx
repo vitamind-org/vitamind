@@ -1,7 +1,7 @@
 import { ComponentType, SVGProps } from 'react';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '@vitamind/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@vitamind/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@vitamind/ui/tooltip';
 import { CheckIcon, ChevronDownIcon, TriangleAlertIcon, Users } from 'lucide-react';
 
 // 'app' (anyone signed in) and 'public' are deferred — see design.md Non-Goals.

@@ -1,6 +1,6 @@
-import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { cn } from '@/lib/utils';
+import { Skeleton } from '@vitamind/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@vitamind/ui/table';
+import { cn } from '@vitamind/ui/cn';
 
 export function TableSkeleton({ cells, rows, modal }: { cells: number; rows: number; modal?: boolean }) {
   const extraClasses = modal && 'border-none shadow-none';

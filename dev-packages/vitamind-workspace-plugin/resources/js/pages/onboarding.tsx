@@ -1,11 +1,11 @@
 import AuthLayout from '@/layouts/auth/layout';
-import { Card, CardContent, CardHeader, CardRow, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardRow, CardTitle } from '@vitamind/ui/card';
 import IconBanner from '@/components/icon-banner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import InputError from '@/components/ui/input-error';
-import { Form, FormField, FormFields } from '@/components/ui/form';
+import { Button } from '@vitamind/ui/button';
+import { Input } from '@vitamind/ui/input';
+import { Label } from '@vitamind/ui/label';
+import InputError from '@vitamind/ui/input-error';
+import { Form, FormField, FormFields } from '@vitamind/ui/form';
 import { WorkspaceUser } from '@/types/workspace-user';
 import { PageProps } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';

@@ -1,7 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { LoaderCircleIcon } from 'lucide-react';
 import { FormEvent } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import AuthLayout from '@/layouts/auth/layout';
 
 export default function VerifyEmail({ status }: { status?: string }) {

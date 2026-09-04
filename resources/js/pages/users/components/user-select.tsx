@@ -1,11 +1,11 @@
 import { User } from '@/types/user';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@vitamind/ui/popover';
+import { Button } from '@vitamind/ui/button';
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { cn } from '@/lib/utils';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@vitamind/ui/command';
+import { cn } from '@vitamind/ui/cn';
 import axios from 'axios';
 
 export default function UserSelect({ value, onValueChange }: { value: string; onValueChange: (selectedUser: User) => void }) {

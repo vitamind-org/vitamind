@@ -1,9 +1,9 @@
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@vitamind/ui/scroll-area';
 import { ReactNode, useRef, useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@vitamind/ui/button';
 import { ArrowDown, ClockArrowDownIcon } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@vitamind/ui/tooltip';
+import { cn } from '@vitamind/ui/cn';
 
 export default function LogOutput({ className, children }: { className?: string; children: ReactNode }) {
   const scrollRef = useRef<HTMLDivElement>(null);

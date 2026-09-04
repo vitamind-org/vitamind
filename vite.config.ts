@@ -47,6 +47,11 @@ export default defineConfig({
   resolve: {
     alias: {
       'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
+      // Neutral UI-kit alias: resolves to the same physical location for
+      // both host and plugin source, so neither statically depends on the
+      // other's `@/` namespace — see openspec/changes/extract-frontend-ui-kit.
+      '@vitamind/ui/cn': resolve(__dirname, 'resources/js/lib/utils.ts'),
+      '@vitamind/ui': resolve(__dirname, 'resources/js/components/ui'),
       '@': resolve(__dirname, 'resources/js'),
       ...getPluginAliases(),
     },

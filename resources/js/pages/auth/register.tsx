@@ -1,15 +1,15 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { LoaderCircleIcon, LockIcon, MailIcon } from 'lucide-react';
 import { FormEvent, useRef, useState } from 'react';
-import InputError from '@/components/ui/input-error';
+import InputError from '@vitamind/ui/input-error';
 import TextLink from '@/components/text-link';
 import IconBanner from '@/components/icon-banner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@vitamind/ui/button';
+import { Input } from '@vitamind/ui/input';
+import { Label } from '@vitamind/ui/label';
 import AuthLayout from '@/layouts/auth/layout';
 import { SharedData } from '@/types';
-import { cn } from '@/lib/utils';
+import { cn } from '@vitamind/ui/cn';
 
 export default function Register() {
   const page = usePage<SharedData>();

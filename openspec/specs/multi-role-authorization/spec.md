@@ -1,11 +1,17 @@
-## ADDED Requirements
+# multi-role-authorization Specification
+
+## Purpose
+
+Multi-role authorization is the mechanism that lets plugins and host applications declare custom roles in code and assign more than one role to a user at a time, independent of the `is_admin` toggle and of any tenancy plugin. It provides a `RegisterRole` builder for declaring roles, a `user_roles` table for holding assignments, and a pluggable `RoleScopeResolver` for determining which scope (global or tenant-scoped) a role check applies to.
+
+## Requirements
 
 ### Requirement: Developers define roles in code
-`vitamind-plugin-sdk` SHALL provide a `RegisterRole` builder that lets a plugin or host application declare a role by a short, package-local string key and a display title, registered from the declaring package's `boot()` into a static, per-process registry. The registry key SHALL be automatically prefixed with an identifier derived from the registering package, without the developer supplying it explicitly, so that role keys chosen independently by different packages cannot collide. Roles SHALL NOT be creatable or editable at runtime (no database-backed or admin-UI-driven role definition).
+`vitamind-plugin-sdk` SHALL provide a `RegisterRole` builder that lets a plugin or host application declare a role by a short, package-local string key and a display title, registered from the declaring package's `boot()` into a static, per-process registry. The registry key SHALL be prefixed with the registering plugin's own declared identity (`pluginDetails()['key']`), supplied explicitly by the caller — via the shared `registerRole()` helper, which reads the caller's own `pluginDetails()` — and never guessed from the caller's namespace or call stack, so that role keys chosen independently by different packages cannot collide. Roles SHALL NOT be creatable or editable at runtime (no database-backed or admin-UI-driven role definition).
 
 #### Scenario: Plugin registers a role
-- **WHEN** a plugin's service provider calls `RegisterRole::make('admin-gudang')->title('Admin Gudang')->register()` during `boot()`
-- **THEN** the role is available in the registry, under a key automatically prefixed by that plugin's identity, for the lifetime of the process
+- **WHEN** a plugin's service provider (declaring `pluginDetails()['key'] === 'warehouse'`) calls `$this->registerRole('admin-gudang', 'Admin Gudang')` during `boot()`
+- **THEN** the role is available in the registry, under the key `warehouse.admin-gudang`, for the lifetime of the process
 - **AND** no database write occurs as a result of registration
 
 #### Scenario: Two packages register roles independently
@@ -14,8 +20,8 @@
 - **AND** neither registration affects the other
 
 #### Scenario: Two packages register a role with the same short key
-- **WHEN** two different plugins each call `RegisterRole::make('owner')` with no coordination between them
-- **THEN** both registrations succeed, because each key is automatically prefixed by its own registering package
+- **WHEN** two different plugins each call `registerRole('owner', ...)` with no coordination between them
+- **THEN** both registrations succeed, because each key is prefixed by its own explicitly declared plugin identity
 - **AND** the two roles remain distinguishable and independently checkable via `hasRole()`
 
 ### Requirement: Role assignment supports multiple roles per user

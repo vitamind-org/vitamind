@@ -4,6 +4,7 @@ namespace VitaminD\Plugins\Workspace\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use VitaminD\Core\Http\Resources\UserResource;
@@ -39,7 +40,7 @@ class WorkspaceUserResource extends JsonResource
             'workspace_id' => $this->workspace_id,
             'workspace_name' => $this->workspace->name ?? null,
             'user' => UserResource::make($this->user),
-            'role' => $this->role->value,
+            'role' => $this->displayRole(),
             'type' => $this->user_id !== null ? 'user' : 'invitation',
             // Signed, time-limited accept link for pending invitations — the
             // accept route requires a valid signature, so the frontend can no
@@ -52,5 +53,39 @@ class WorkspaceUserResource extends JsonResource
                 )
                 : null,
         ];
+    }
+
+    /**
+     * A pending invitation shows its stored choice directly (short role key,
+     * or 'admin' for an Admin grant). An accepted membership shows 'owner'
+     * for the workspace's owner (`workspaces.owner_id` — plain data, not a
+     * role); otherwise, any workspace-scoped role the member happens to
+     * hold (workspace-plugin registers none of its own, so this is always
+     * an app-registered role, or none — 'member' as a plain fallback
+     * label). `is_admin` is a separate, unscoped mechanism and never shown
+     * here (see `HasRolePolicies`).
+     */
+    private function displayRole(): ?string
+    {
+        if ($this->user_id === null) {
+            return $this->is_admin_grant ? 'admin' : $this->shortKey($this->invited_role);
+        }
+
+        if ($this->workspace && $this->workspace->owner_id === $this->user_id) {
+            return 'owner';
+        }
+
+        $roleKey = DB::table('user_roles')
+            ->where('user_id', $this->user_id)
+            ->where('scope_type', 'workspace')
+            ->where('scope_id', $this->workspace_id)
+            ->value('role');
+
+        return $roleKey ? $this->shortKey($roleKey) : 'member';
+    }
+
+    private function shortKey(?string $key): ?string
+    {
+        return $key !== null ? Str::afterLast($key, '.') : null;
     }
 }

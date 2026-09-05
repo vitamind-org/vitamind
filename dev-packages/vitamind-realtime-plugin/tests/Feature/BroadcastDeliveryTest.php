@@ -39,7 +39,7 @@ class BroadcastDeliveryTest extends TestCase
         // asserts what Reverb is actually told to deliver on it.
         $user = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $user->id]);
 
         $requests = [];
         $mockHandler = new MockHandler([new Response(200, [], '{}')]);

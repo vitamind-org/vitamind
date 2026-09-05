@@ -29,7 +29,7 @@ class FolderListingWorkspaceScopeTest extends TestCase
     {
         $user = User::factory()->create();
         $workspaceA = Workspace::create(['name' => 'workspace-a-'.Str::random(8)]);
-        $workspaceA->users()->create(['user_id' => $user->id, 'role' => 'owner', 'is_default' => true]);
+        $workspaceA->users()->create(['user_id' => $user->id, 'is_default' => true]);
         $user->update(['current_workspace_id' => $workspaceA->id]);
 
         return $user->fresh();
@@ -70,7 +70,7 @@ class FolderListingWorkspaceScopeTest extends TestCase
     {
         $user = $this->onboardedUser();
         $workspaceB = Workspace::create(['name' => 'workspace-b-'.Str::random(8)]);
-        $workspaceB->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+        $workspaceB->users()->create(['user_id' => $user->id]);
 
         // Owned by $user, but created under workspace B — the reported
         // repro: create with visibility "Only me" in one workspace, then
@@ -92,7 +92,7 @@ class FolderListingWorkspaceScopeTest extends TestCase
     {
         $user = $this->onboardedUser();
         $workspaceB = Workspace::create(['name' => 'workspace-b-'.Str::random(8)]);
-        $workspaceB->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+        $workspaceB->users()->create(['user_id' => $user->id]);
 
         $this->makeFile($user, $workspaceB->id, ['original_name' => 'from-b.pdf', 'visibility' => 'workspace']);
         $ownFile = $this->makeFile($user, $user->current_workspace_id, ['original_name' => 'from-a.pdf', 'visibility' => 'workspace']);

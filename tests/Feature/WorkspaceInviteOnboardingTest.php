@@ -19,7 +19,7 @@ class WorkspaceInviteOnboardingTest extends TestCase
     {
         $owner = User::factory()->create();
         $workspace = app(CreateWorkspace::class)->create($owner, ['name' => 'workspace-a']);
-        $invite = $workspace->users()->create(['email' => 'revoke-me@example.com', 'role' => 'user']);
+        $invite = $workspace->users()->create(['email' => 'revoke-me@example.com', 'invited_role' => 'test-member']);
 
         $signedUrl = URL::temporarySignedRoute('workspaces.invitations.accept', now()->addDays(7), [
             'workspace' => $workspace->id,
@@ -41,8 +41,8 @@ class WorkspaceInviteOnboardingTest extends TestCase
         $workspaceA = app(CreateWorkspace::class)->create($owner, ['name' => 'workspace-a']);
         $workspaceB = app(CreateWorkspace::class)->create($owner, ['name' => 'workspace-b']);
 
-        $inviteA = $workspaceA->users()->create(['email' => 'invitee@example.com', 'role' => 'user']);
-        $inviteB = $workspaceB->users()->create(['email' => 'invitee@example.com', 'role' => 'user']);
+        $inviteA = $workspaceA->users()->create(['email' => 'invitee@example.com', 'invited_role' => 'test-member']);
+        $inviteB = $workspaceB->users()->create(['email' => 'invitee@example.com', 'invited_role' => 'test-member']);
 
         $signedUrl = URL::temporarySignedRoute('workspaces.invitations.accept', now()->addDays(7), [
             'workspace' => $workspaceA->id,
@@ -79,7 +79,7 @@ class WorkspaceInviteOnboardingTest extends TestCase
     {
         $owner = User::factory()->create();
         $workspace = app(CreateWorkspace::class)->create($owner, ['name' => 'workspace-a']);
-        $invite = $workspace->users()->create(['email' => 'invitee2@example.com', 'role' => 'user']);
+        $invite = $workspace->users()->create(['email' => 'invitee2@example.com', 'invited_role' => 'test-member']);
 
         $this->post('/register', [
             'name' => 'Invitee Two',
@@ -104,7 +104,7 @@ class WorkspaceInviteOnboardingTest extends TestCase
     {
         $owner = User::factory()->create();
         $workspace = app(CreateWorkspace::class)->create($owner, ['name' => 'workspace-a']);
-        $invite = $workspace->users()->create(['email' => 'invitee3@example.com', 'role' => 'user']);
+        $invite = $workspace->users()->create(['email' => 'invitee3@example.com', 'invited_role' => 'test-member']);
 
         $response = $this->withSession(['pending_invite_id' => $invite->id])->get('/register');
 
@@ -119,7 +119,7 @@ class WorkspaceInviteOnboardingTest extends TestCase
     {
         $owner = User::factory()->create();
         $workspace = app(CreateWorkspace::class)->create($owner, ['name' => 'workspace-a']);
-        $invite = $workspace->users()->create(['email' => 'invited@example.com', 'role' => 'user']);
+        $invite = $workspace->users()->create(['email' => 'invited@example.com', 'invited_role' => 'test-member']);
 
         $this->withSession(['pending_invite_id' => $invite->id])->post('/register', [
             'name' => 'Different Email',
@@ -198,8 +198,8 @@ class WorkspaceInviteOnboardingTest extends TestCase
         $workspaceB = app(CreateWorkspace::class)->create($inviter, ['name' => 'workspace-b']);
 
         $user = User::factory()->create();
-        $inviteA = $workspaceA->users()->create(['email' => $user->email, 'role' => 'user']);
-        $inviteB = $workspaceB->users()->create(['email' => $user->email, 'role' => 'user']);
+        $inviteA = $workspaceA->users()->create(['email' => $user->email, 'invited_role' => 'test-member']);
+        $inviteB = $workspaceB->users()->create(['email' => $user->email, 'invited_role' => 'test-member']);
 
         $response = $this->actingAs($user)->post("/settings/workspaces/onboarding/{$inviteA->id}/accept");
 
@@ -223,11 +223,11 @@ class WorkspaceInviteOnboardingTest extends TestCase
     {
         $owner = User::factory()->create();
         $workspace = app(CreateWorkspace::class)->create($owner, ['name' => 'workspace-a']);
-        $invite = $workspace->users()->create(['email' => 'guest@example.com', 'role' => 'user']);
+        $invite = $workspace->users()->create(['email' => 'guest@example.com', 'invited_role' => 'test-member']);
         // A second, real invitation to swap in — tampering by substituting a
         // valid-looking but different identifier, not a nonexistent one,
         // exercises the signature check itself rather than a 404 on binding.
-        $otherInvite = $workspace->users()->create(['email' => 'someone-else@example.com', 'role' => 'user']);
+        $otherInvite = $workspace->users()->create(['email' => 'someone-else@example.com', 'invited_role' => 'test-member']);
 
         $validUrl = URL::temporarySignedRoute('workspaces.invitations.accept', now()->addDays(7), [
             'workspace' => $workspace->id,
@@ -252,7 +252,7 @@ class WorkspaceInviteOnboardingTest extends TestCase
 
         $inviter = User::factory()->create();
         $otherWorkspace = app(CreateWorkspace::class)->create($inviter, ['name' => 'other-workspace']);
-        $invite = $otherWorkspace->users()->create(['email' => $user->email, 'role' => 'user']);
+        $invite = $otherWorkspace->users()->create(['email' => $user->email, 'invited_role' => 'test-member']);
 
         $signedUrl = URL::temporarySignedRoute('workspaces.invitations.accept', now()->addDays(7), [
             'workspace' => $otherWorkspace->id,
@@ -291,7 +291,7 @@ class WorkspaceInviteOnboardingTest extends TestCase
         ]);
 
         $workspaceC = Workspace::create(['name' => 'workspace-c']);
-        $membershipC = $workspaceC->users()->create(['user_id' => $user->id, 'role' => 'user']);
+        $membershipC = $workspaceC->users()->create(['user_id' => $user->id]);
 
         $this->actingAs($user)
             ->delete("/settings/workspaces/{$workspaceB->id}/leave")

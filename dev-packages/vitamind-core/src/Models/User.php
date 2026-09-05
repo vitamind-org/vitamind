@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use VitaminD\Core\Contracts\RoleScopeResolver;
 use VitaminD\Core\Traits\HasTimezoneTimestamps;
 
 /**
@@ -67,5 +68,27 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return (bool) $this->is_admin;
+    }
+
+    /**
+     * Omitted scope args fall back to the bound `RoleScopeResolver`
+     * (global/unscoped by default, or whatever a tenancy-like plugin —
+     * e.g. `vitamind-workspace-plugin` — has bound instead). Passing both
+     * explicitly skips resolution entirely and checks that exact scope.
+     */
+    public function hasRole(string $role, ?string $scopeType = null, ?int $scopeId = null): bool
+    {
+        if ($scopeType === null && $scopeId === null) {
+            $resolved = app(RoleScopeResolver::class)->resolve($this);
+            $scopeType = $resolved['scope_type'] ?? null;
+            $scopeId = $resolved['scope_id'] ?? null;
+        }
+
+        return UserRoleAssignment::query()
+            ->where('user_id', $this->id)
+            ->where('role', $role)
+            ->where('scope_type', $scopeType)
+            ->where('scope_id', $scopeId)
+            ->exists();
     }
 }

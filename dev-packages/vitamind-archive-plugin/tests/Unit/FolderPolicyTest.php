@@ -59,7 +59,7 @@ class FolderPolicyTest extends TestCase
         $member = User::factory()->create();
         $nonMember = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $member->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $member->id]);
 
         $folder = $this->makeFolder($owner, ['visibility' => 'workspace', 'workspace_id' => $workspace->id]);
 
@@ -82,7 +82,7 @@ class FolderPolicyTest extends TestCase
         $owner = User::factory()->create();
         $member = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $member->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $member->id]);
         $folder = $this->makeFolder($owner, ['visibility' => 'workspace', 'workspace_id' => $workspace->id]);
 
         $this->assertTrue($this->policy->view($member, $folder));
@@ -97,7 +97,7 @@ class FolderPolicyTest extends TestCase
         $owner = User::factory()->create();
         $member = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $member->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $member->id]);
 
         $folder = $this->makeFolder($owner, ['visibility' => 'workspace', 'workspace_id' => $workspace->id]);
 

@@ -3,11 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 use VitaminD\Plugins\Workspace\Actions\Workspaces\CreateWorkspace;
 use VitaminD\Plugins\Workspace\Http\Resources\WorkspaceUserResource;
 use VitaminD\Plugins\Workspace\Models\Workspace;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
 class WorkspaceTest extends TestCase
 {
@@ -35,9 +35,10 @@ class WorkspaceTest extends TestCase
         $this->assertDatabaseHas('workspaces', ['name' => 'acme-corp']);
         $this->assertDatabaseHas('user_workspace', [
             'user_id' => $user->id,
-            'role' => 'owner',
             'is_default' => true,
         ]);
+        $workspace = Workspace::where('name', 'acme-corp')->firstOrFail();
+        $this->assertSame($user->id, $workspace->owner_id);
     }
 
     public function test_user_can_switch_active_workspace(): void
@@ -45,7 +46,7 @@ class WorkspaceTest extends TestCase
         $user = User::factory()->create();
         $workspace = app(CreateWorkspace::class)->create($user, ['name' => 'first-workspace']);
         $other = Workspace::create(['name' => 'other-workspace']);
-        $other->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+        $other->users()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)->patch("/settings/workspaces/switch/{$other->id}");
 
@@ -165,7 +166,7 @@ class WorkspaceTest extends TestCase
     {
         $owner = User::factory()->create();
         $workspace = app(CreateWorkspace::class)->create($owner, ['name' => 'acme-corp']);
-        $pendingInvite = $workspace->users()->create(['email' => 'pending@example.com', 'role' => 'user']);
+        $pendingInvite = $workspace->users()->create(['email' => 'pending@example.com', 'invited_role' => 'test-member']);
         $ownerMembership = $workspace->users()->where('user_id', $owner->id)->firstOrFail();
 
         $this->assertSame('user', (new WorkspaceUserResource($ownerMembership))->toArray(request())['type']);

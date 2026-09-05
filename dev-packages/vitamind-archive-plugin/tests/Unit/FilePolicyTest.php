@@ -62,7 +62,7 @@ class FilePolicyTest extends TestCase
         $member = User::factory()->create();
         $nonMember = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $member->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $member->id]);
 
         $file = $this->makeFile($owner, ['visibility' => 'workspace', 'workspace_id' => $workspace->id]);
 
@@ -85,7 +85,7 @@ class FilePolicyTest extends TestCase
         $owner = User::factory()->create();
         $member = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $member->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $member->id]);
         $file = $this->makeFile($owner, ['visibility' => 'workspace', 'workspace_id' => $workspace->id]);
 
         $this->assertTrue($this->policy->view($member, $file));
@@ -100,7 +100,7 @@ class FilePolicyTest extends TestCase
         $owner = User::factory()->create();
         $member = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $member->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $member->id]);
 
         $file = $this->makeFile($owner, ['visibility' => 'workspace', 'workspace_id' => $workspace->id]);
 

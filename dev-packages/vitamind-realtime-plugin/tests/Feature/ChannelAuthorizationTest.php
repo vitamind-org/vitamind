@@ -69,7 +69,7 @@ class ChannelAuthorizationTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)->postJson('/broadcasting/auth', [
             'channel_name' => "private-workspace.{$workspace->id}.ping",
@@ -103,7 +103,7 @@ class ChannelAuthorizationTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $user->id]);
 
         $token = $user->createToken('test-token')->plainTextToken;
 

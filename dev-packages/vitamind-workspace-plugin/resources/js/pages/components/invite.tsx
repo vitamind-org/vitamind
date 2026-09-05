@@ -14,16 +14,18 @@ import { Input } from '@vitamind/ui/input';
 import InputError from '@vitamind/ui/input-error';
 import { Label } from '@vitamind/ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@vitamind/ui/select';
+import { SharedData } from '@/types';
 import { Workspace } from '@/types/workspace';
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { LoaderCircleIcon } from 'lucide-react';
 import { FormEvent, ReactNode, useState } from 'react';
 
 export default function Invite({ workspace, onInviteSent, children }: { workspace: Workspace; onInviteSent?: () => void; children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { workspaceRoles = [] } = usePage<SharedData>().props;
   const form = useForm({
     email: '',
-    role: 'user',
+    role: 'none',
   });
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -73,8 +75,13 @@ export default function Invite({ workspace, onInviteSent, children }: { workspac
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
+                    <SelectItem value="none">No role (member only)</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="user">User</SelectItem>
+                    {workspaceRoles.map((role) => (
+                      <SelectItem key={role.key} value={role.key}>
+                        {role.title}
+                      </SelectItem>
+                    ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>

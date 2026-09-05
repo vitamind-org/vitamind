@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Spatie\RouteAttributes\RouteRegistrar;
+use VitaminD\Core\Contracts\RoleScopeResolver;
 use VitaminD\Core\Events\UserRemoving;
 use VitaminD\Core\Support\InertiaSharedData;
 use VitaminD\Plugins\Workspace\Actions\Workspaces\AcceptWorkspaceInvite;
@@ -18,7 +19,9 @@ use VitaminD\Plugins\Workspace\Http\Middleware\EnsureWorkspaceOnboarded;
 use VitaminD\Plugins\Workspace\Http\Middleware\HasWorkspaceMiddleware;
 use VitaminD\Plugins\Workspace\Http\Resources\WorkspaceResource;
 use VitaminD\Plugins\Workspace\Models\UserWorkspace;
+use VitaminD\Plugins\Workspace\Support\WorkspaceRoleScopeResolver;
 use VitaminD\PluginSdk\RegisterPage;
+use VitaminD\PluginSdk\RegisterRole;
 
 class WorkspaceServiceProvider extends ServiceProvider
 {
@@ -27,6 +30,14 @@ class WorkspaceServiceProvider extends ServiceProvider
         if (! config('vitamin-d.features.workspaces')) {
             return;
         }
+
+        // An explicit config override always wins; otherwise this plugin's
+        // own default (workspace-scoped) applies. Bound in register() (not
+        // boot()) so it's resolvable regardless of provider boot order —
+        // see CoreServiceProvider::register() for the counterpart default.
+        $this->app->bind(RoleScopeResolver::class, fn ($app) => $app->make(
+            config('vitamin-d.role_scope_resolver') ?? WorkspaceRoleScopeResolver::class
+        ));
     }
 
     public function boot(): void
@@ -220,8 +231,27 @@ class WorkspaceServiceProvider extends ServiceProvider
                 'auth' => [
                     'currentWorkspace' => $currentWorkspace ? WorkspaceResource::make($currentWorkspace) : null,
                 ],
+                'workspaceRoles' => $this->invitableRolesSharedData(),
             ];
         });
+    }
+
+    /**
+     * Every currently registered role, shared globally so the invite form's
+     * dropdown (`Invite`, resources/js/pages/components/invite.tsx) reflects
+     * the live `RegisterRole` registry — including any app-registered
+     * domain-specific role — without a dedicated endpoint. Workspace-plugin
+     * registers no roles of its own (ownership is `workspaces.owner_id`,
+     * not a role), so no exclusion is needed here.
+     *
+     * @return array<int, array{key: string, title: string}>
+     */
+    private function invitableRolesSharedData(): array
+    {
+        return collect(RegisterRole::get())
+            ->values()
+            ->map(fn (RegisterRole $role) => $role->toArray())
+            ->all();
     }
 
     /**

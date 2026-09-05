@@ -3,6 +3,7 @@
 namespace VitaminD\Core\Providers;
 
 use App\Models\PersonalAccessToken;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Gate;
@@ -16,11 +17,15 @@ use VitaminD\Core\Actions\Plugins\DiscoverPlugins;
 use VitaminD\Core\Actions\Plugins\GetPluginInstance;
 use VitaminD\Core\Console\Commands\EnablePluginCommand;
 use VitaminD\Core\Console\Commands\InstallGithubPluginCommand;
+use VitaminD\Core\Contracts\RoleScopeResolver;
 use VitaminD\Core\Http\Middleware\MustBeAdminMiddleware;
 use VitaminD\Core\Models\User;
 use VitaminD\Core\Policies\PersonalAccessTokenPolicy;
 use VitaminD\Core\Policies\UserPolicy;
+use VitaminD\Core\Support\InertiaSharedData;
+use VitaminD\Core\Support\NullRoleScopeResolver;
 use VitaminD\PluginSdk\RegisterCommand;
+use VitaminD\PluginSdk\RegisterRole;
 use VitaminD\PluginSdk\RegisterViews;
 
 class CoreServiceProvider extends ServiceProvider
@@ -32,6 +37,15 @@ class CoreServiceProvider extends ServiceProvider
         $this->app->scoped(GetPluginInstance::class, function () {
             return new GetPluginInstance;
         });
+
+        // Bound in register() (not boot()) so it's resolvable no matter which
+        // provider's boot() runs first. A tenancy-like plugin registered
+        // after Core (e.g. WorkspaceServiceProvider) rebinds this to its own
+        // default when active, overwriting this binding — the explicit
+        // config check here still wins over that plugin default whenever set.
+        $this->app->bind(RoleScopeResolver::class, fn ($app) => $app->make(
+            config('vitamin-d.role_scope_resolver') ?? NullRoleScopeResolver::class
+        ));
     }
 
     public function boot(): void
@@ -45,6 +59,7 @@ class CoreServiceProvider extends ServiceProvider
         Gate::policy(User::class, UserPolicy::class);
         Gate::policy(PersonalAccessToken::class, PersonalAccessTokenPolicy::class);
         $this->registerRoutes();
+        $this->registerInertiaSharedData();
 
         $this->publishes([
             __DIR__.'/../../config/vitamin-d.php' => config_path('vitamin-d.php'),
@@ -67,6 +82,27 @@ class CoreServiceProvider extends ServiceProvider
                     $this->commands($commands);
                 }
             }
+        });
+    }
+
+    /**
+     * Shares every currently registered role globally, so any admin-panel
+     * role picker (e.g. the user-management form) reflects the live
+     * `RegisterRole` registry — including app-registered domain-specific
+     * roles — without a dedicated endpoint. Mirrors
+     * `WorkspaceServiceProvider::registerInertiaSharedData()`'s
+     * `workspaceRoles`, but unfiltered — this is the full registry, not an
+     * invite-flow-specific subset.
+     */
+    protected function registerInertiaSharedData(): void
+    {
+        InertiaSharedData::extend(function (Request $request): array {
+            return [
+                'roles' => collect(RegisterRole::get())
+                    ->values()
+                    ->map(fn (RegisterRole $role) => $role->toArray())
+                    ->all(),
+            ];
         });
     }
 

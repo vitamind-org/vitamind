@@ -7,9 +7,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Str;
-use VitaminD\Core\Enums\UserRole;
 use VitaminD\Core\Models\AbstractModel;
-use VitaminD\Core\Models\User;
 use VitaminD\Core\Traits\HasTimezoneTimestamps;
 
 /**
@@ -53,21 +51,5 @@ class Workspace extends AbstractModel
     public function registeredUsers(): HasManyThrough
     {
         return $this->hasManyThrough(config('auth.providers.users.model'), UserWorkspace::class, 'workspace_id', 'id', 'id', 'user_id');
-    }
-
-    public function hasRoles(User $user, array $roles): bool
-    {
-        return $this->users()
-            ->where('user_id', $user->id)
-            ->whereIn('role', $roles)
-            ->exists();
-    }
-
-    public function role(User $user): UserRole
-    {
-        /** @var UserWorkspace $userWorkspace */
-        $userWorkspace = $this->users()->where('user_id', $user->id)->firstOrFail();
-
-        return $userWorkspace->role;
     }
 }

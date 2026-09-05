@@ -2,13 +2,16 @@
 
 namespace VitaminD\Core\Actions\User;
 
-use VitaminD\Core\Enums\UserRole;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use VitaminD\Core\Actions\Role\SyncRoles;
 use VitaminD\Core\Events\UserStored;
 use VitaminD\Core\Events\UserStoring;
 use VitaminD\Core\Models\User;
+use VitaminD\PluginSdk\RegisterRole;
+
 use function VitaminD\Core\Support\authUserModel;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class CreateUser
 {
@@ -21,10 +24,9 @@ class CreateUser
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
-            'role' => [
-                'required',
-                Rule::in([UserRole::ADMIN->value, UserRole::USER->value]),
-            ],
+            'is_admin' => ['sometimes', 'boolean'],
+            'role' => ['sometimes', 'array'],
+            'role.*' => Rule::in(array_keys(RegisterRole::get())),
         ])->validate();
 
         UserStoring::dispatch($input);
@@ -37,8 +39,12 @@ class CreateUser
             'email' => $input['email'],
             'password' => bcrypt($input['password']),
             'timezone' => 'UTC',
-            'is_admin' => $input['role'] === UserRole::ADMIN->value,
+            'is_admin' => (bool) ($input['is_admin'] ?? false),
         ]);
+
+        /** @var ?User $actor */
+        $actor = Auth::user();
+        app(SyncRoles::class)->sync($user, $input['role'] ?? [], scopeContext: $actor);
 
         UserStored::dispatch($user);
 

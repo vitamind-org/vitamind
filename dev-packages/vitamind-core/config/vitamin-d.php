@@ -38,6 +38,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Role Scope Resolver
+    |--------------------------------------------------------------------------
+    |
+    | Fully-qualified class name of the RoleScopeResolver implementation used
+    | to resolve the current scope for User::hasRole() calls that omit one.
+    | Left null (the default), each provider that binds RoleScopeResolver
+    | falls back to its own default: NullRoleScopeResolver (global/unscoped)
+    | when no tenancy-like plugin is active, or e.g. WorkspaceRoleScopeResolver
+    | when vitamind-workspace-plugin is installed and enabled. Set this to
+    | override that automatic choice with your own implementation.
+    |
+    */
+
+    'role_scope_resolver' => env('VITAMIND_ROLE_SCOPE_RESOLVER'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Plugins Configuration
     |--------------------------------------------------------------------------
     */

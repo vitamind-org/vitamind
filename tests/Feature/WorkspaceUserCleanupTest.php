@@ -43,7 +43,7 @@ class WorkspaceUserCleanupTest extends TestCase
         $owner = User::factory()->create();
         $workspace = app(CreateWorkspace::class)->create($owner, ['name' => 'acme-corp']);
         $member = User::factory()->create();
-        UserWorkspace::create(['workspace_id' => $workspace->id, 'user_id' => $member->id, 'role' => 'user']);
+        UserWorkspace::create(['workspace_id' => $workspace->id, 'user_id' => $member->id]);
 
         app(DeleteUser::class)->delete($owner);
 

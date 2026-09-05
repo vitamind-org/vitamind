@@ -16,7 +16,9 @@ class WorkspaceMenuRegistrationTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme-'.Str::random(8)]);
-        $workspace->users()->create(['user_id' => $user->id, 'role' => 'owner', 'is_default' => true]);
+        $workspace->owner_id = $user->id;
+        $workspace->save();
+        $workspace->users()->create(['user_id' => $user->id, 'is_default' => true]);
         $user->update(['current_workspace_id' => $workspace->id]);
 
         return $user;

@@ -4,7 +4,6 @@ namespace VitaminD\Plugins\Workspace\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
-use VitaminD\Core\Enums\UserRole;
 use VitaminD\Core\Models\AbstractModel;
 use VitaminD\Core\Models\User;
 
@@ -13,7 +12,8 @@ use VitaminD\Core\Models\User;
  * @property int $workspace_id
  * @property ?int $user_id
  * @property ?string $email
- * @property UserRole $role
+ * @property ?string $invited_role
+ * @property bool $is_admin_grant
  * @property bool $is_default
  * @property ?User $user
  * @property Workspace $workspace
@@ -26,14 +26,15 @@ class UserWorkspace extends AbstractModel
         'workspace_id',
         'user_id',
         'email',
-        'role',
+        'invited_role',
+        'is_admin_grant',
         'is_default',
     ];
 
     protected $casts = [
         'workspace_id' => 'integer',
         'user_id' => 'integer',
-        'role' => UserRole::class,
+        'is_admin_grant' => 'boolean',
         'is_default' => 'boolean',
     ];
 

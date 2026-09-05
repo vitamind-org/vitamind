@@ -9,12 +9,12 @@ use Spatie\RouteAttributes\Attributes\Delete;
 use Spatie\RouteAttributes\Attributes\Middleware;
 use Spatie\RouteAttributes\Attributes\Post;
 use Spatie\RouteAttributes\Attributes\Prefix;
-use VitaminD\Core\Enums\UserRole;
 use VitaminD\Core\Http\Controllers\Controller;
 use VitaminD\Plugins\Workspace\Actions\Workspaces\InviteToWorkspace;
 use VitaminD\Plugins\Workspace\Actions\Workspaces\ResendWorkspaceInvitation;
 use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use VitaminD\Plugins\Workspace\Models\Workspace;
+use VitaminD\Plugins\Workspace\Support\WorkspaceRoles;
 
 #[Prefix('settings/workspaces/{workspace}/users')]
 #[Middleware(['auth'])]
@@ -42,7 +42,7 @@ class WorkspaceUserController extends Controller
             abort(404);
         }
 
-        if ($userWorkspace?->user && $workspace->role($userWorkspace->user) === UserRole::OWNER) {
+        if ($userWorkspace?->user_id !== null && $userWorkspace->user_id === $workspace->owner_id) {
             return back()->with('error', __('You cannot remove the workspace owner.'));
         }
 
@@ -57,6 +57,10 @@ class WorkspaceUserController extends Controller
             $workspace->users()
                 ->where('id', $id)
                 ->delete();
+
+            if ($userId) {
+                WorkspaceRoles::clearFor($userId, $workspace->id);
+            }
 
             if ($wasDefault && $userId) {
                 UserWorkspace::promoteOldestDefaultFor($userId);

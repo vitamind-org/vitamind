@@ -115,6 +115,8 @@ export interface SharedData {
     external?: boolean;
   }>;
   pendingInvite?: { email: string; workspaceName: string } | null;
+  workspaceRoles?: Array<{ key: string; title: string }>;
+  roles?: Array<{ key: string; title: string }>;
   flash?: {
     status: string;
     success: string;

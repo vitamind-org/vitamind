@@ -23,7 +23,7 @@ class FileDownloadTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme-'.Str::random(8)]);
-        $workspace->users()->create(['user_id' => $user->id, 'role' => 'owner', 'is_default' => true]);
+        $workspace->users()->create(['user_id' => $user->id, 'is_default' => true]);
         $user->update(['current_workspace_id' => $workspace->id]);
 
         return $user;
@@ -75,7 +75,7 @@ class FileDownloadTest extends TestCase
         $owner = $this->onboardedUser();
         $member = $this->onboardedUser();
         $workspace = Workspace::create(['name' => 'shared-'.Str::random(8)]);
-        $workspace->users()->create(['user_id' => $member->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $member->id]);
         $file = $this->makeFile($owner, ['visibility' => 'workspace', 'workspace_id' => $workspace->id]);
         Storage::disk('local')->put($file->path, 'content');
 

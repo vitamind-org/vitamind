@@ -24,7 +24,7 @@ class WorkspaceChannelAuthorizationTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $user->id]);
 
         $this->assertTrue(WorkspaceChannelAuthorization::check($user, $workspace->id));
     }
@@ -41,7 +41,7 @@ class WorkspaceChannelAuthorizationTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $user->id]);
 
         Config::set('vitamin-d.features.workspaces', false);
 
@@ -65,7 +65,7 @@ class WorkspaceChannelAuthorizationTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $user->id]);
 
         $id = (string) $workspace->id;
 

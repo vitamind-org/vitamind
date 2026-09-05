@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use VitaminD\Core\Enums\UserRole;
 use VitaminD\Core\Models\User;
 use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use VitaminD\Plugins\Workspace\Models\Workspace;
@@ -24,6 +23,7 @@ class CreateWorkspace
                 'name' => $input['name'],
             ]);
             $workspace->slug = Str::slug($input['name']);
+            $workspace->owner_id = $user->id;
 
             try {
                 $workspace->save();
@@ -40,7 +40,6 @@ class CreateWorkspace
 
             $workspace->users()->create([
                 'user_id' => $user->id,
-                'role' => UserRole::OWNER,
                 'is_default' => true,
             ]);
 

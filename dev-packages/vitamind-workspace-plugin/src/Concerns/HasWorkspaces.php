@@ -2,11 +2,11 @@
 
 namespace VitaminD\Plugins\Workspace\Concerns;
 
-use VitaminD\Plugins\Workspace\Models\UserWorkspace;
-use VitaminD\Plugins\Workspace\Models\Workspace;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use VitaminD\Plugins\Workspace\Models\UserWorkspace;
+use VitaminD\Plugins\Workspace\Models\Workspace;
 
 /**
  * Adds workspace relations to the core User model. Applied by the consuming
@@ -59,13 +59,5 @@ trait HasWorkspaces
         }
 
         return $workspace;
-    }
-
-    public function hasRolesInWorkspace(Workspace $workspace, array $roles): bool
-    {
-        return $workspace->users()
-            ->where('user_id', $this->id)
-            ->whereIn('role', $roles)
-            ->exists();
     }
 }

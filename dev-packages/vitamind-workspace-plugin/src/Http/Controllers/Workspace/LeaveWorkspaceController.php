@@ -10,6 +10,7 @@ use Spatie\RouteAttributes\Attributes\Prefix;
 use VitaminD\Core\Http\Controllers\Controller;
 use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use VitaminD\Plugins\Workspace\Models\Workspace;
+use VitaminD\Plugins\Workspace\Support\WorkspaceRoles;
 
 #[Prefix('settings/workspaces')]
 #[Middleware(['auth'])]
@@ -29,9 +30,14 @@ class LeaveWorkspaceController extends Controller
 
         $wasDefault = $userWorkspace->is_default;
         $userId = $userWorkspace->user_id;
+        $workspaceId = $userWorkspace->workspace_id;
 
-        DB::transaction(function () use ($userWorkspace, $wasDefault, $userId): void {
+        DB::transaction(function () use ($userWorkspace, $wasDefault, $userId, $workspaceId): void {
             $userWorkspace->delete();
+
+            if ($userId) {
+                WorkspaceRoles::clearFor($userId, $workspaceId);
+            }
 
             if ($wasDefault && $userId) {
                 UserWorkspace::promoteOldestDefaultFor($userId);

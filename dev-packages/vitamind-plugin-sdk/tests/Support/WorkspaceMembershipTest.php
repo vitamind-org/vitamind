@@ -24,7 +24,7 @@ class WorkspaceMembershipTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $user->id]);
 
         $this->assertTrue(WorkspaceMembership::check($user, $workspace->id));
     }
@@ -54,7 +54,7 @@ class WorkspaceMembershipTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $user->id]);
 
         Config::set('vitamin-d.features.workspaces', false);
 
@@ -78,7 +78,7 @@ class WorkspaceMembershipTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::create(['name' => 'acme']);
-        $workspace->users()->create(['user_id' => $user->id, 'role' => 'owner']);
+        $workspace->users()->create(['user_id' => $user->id]);
 
         $id = (string) $workspace->id;
 

@@ -12,5 +12,6 @@ export interface User {
   workspaces?: Workspace[];
   two_factor_enabled: boolean;
   is_admin: boolean;
+  roles: string[];
   [key: string]: unknown;
 }

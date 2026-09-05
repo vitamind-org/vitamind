@@ -11,24 +11,31 @@ import {
 import { FormEventHandler, ReactNode, useState } from 'react';
 import { Button } from '@vitamind/ui/button';
 import { LoaderCircle } from 'lucide-react';
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { Form, FormField, FormFields } from '@vitamind/ui/form';
 import { Label } from '@vitamind/ui/label';
 import { Input } from '@vitamind/ui/input';
 import InputError from '@vitamind/ui/input-error';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@vitamind/ui/select';
+import { Checkbox } from '@vitamind/ui/checkbox';
+import { SharedData } from '@/types';
 import { User } from '@/types/user';
 import FormSuccessful from '@/components/form-successful';
 
 export default function UserForm({ user, children }: { user?: User; children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { roles = [] } = usePage<SharedData>().props;
 
   const form = useForm({
     name: user?.name || '',
     email: user?.email || '',
     password: '',
-    role: user?.is_admin ? 'admin' : 'user',
+    is_admin: user?.is_admin ?? false,
+    role: user?.roles ?? [],
   });
+
+  const toggleRole = (key: string, checked: boolean) => {
+    form.setData('role', checked ? [...form.data.role, key] : form.data.role.filter((r) => r !== key));
+  };
 
   const submit: FormEventHandler = (e) => {
     e.preventDefault();
@@ -79,22 +86,30 @@ export default function UserForm({ user, children }: { user?: User; children: Re
               <InputError message={form.errors.password} />
             </FormField>
             <FormField>
-              <Label htmlFor="role">Role</Label>
-              <Select value={form.data.role} onValueChange={(value) => form.setData('role', value)}>
-                <SelectTrigger id="role">
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem key="role-user" value="user">
-                      user
-                    </SelectItem>
-                    <SelectItem key="role-admin" value="admin">
-                      admin
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="is_admin"
+                  checked={form.data.is_admin}
+                  onCheckedChange={(checked) => form.setData('is_admin', checked === true)}
+                />
+                <Label htmlFor="is_admin">Admin (system-wide access)</Label>
+              </div>
+              <InputError message={form.errors.is_admin} />
+            </FormField>
+            <FormField>
+              <Label>Roles</Label>
+              <div className="flex flex-col gap-2">
+                {roles.map((role) => (
+                  <div key={role.key} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`role-${role.key}`}
+                      checked={form.data.role.includes(role.key)}
+                      onCheckedChange={(checked) => toggleRole(role.key, checked === true)}
+                    />
+                    <Label htmlFor={`role-${role.key}`}>{role.title}</Label>
+                  </div>
+                ))}
+              </div>
               <InputError message={form.errors.role} />
             </FormField>
           </FormFields>

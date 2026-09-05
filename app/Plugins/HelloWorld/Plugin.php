@@ -7,9 +7,17 @@ use VitaminD\PluginSdk\AbstractPlugin;
 
 class Plugin extends AbstractPlugin
 {
-    protected string $name = 'Hello World';
-
-    protected string $description = 'A very simple HelloWorld demo local plugin for VitaminD.';
+    /**
+     * @return array{key: string, name: string, description: string}
+     */
+    public function pluginDetails(): array
+    {
+        return [
+            'key' => 'hello-world',
+            'name' => 'Hello World',
+            'description' => 'A very simple HelloWorld demo local plugin for VitaminD.',
+        ];
+    }
 
     public function boot(): void
     {

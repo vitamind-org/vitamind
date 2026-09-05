@@ -27,7 +27,7 @@ class WorkspaceRoleAssignmentTest extends TestCase
 
     private function registerTestRole(string $shortKey = 'tester'): string
     {
-        RegisterRole::make($shortKey)->title(ucfirst($shortKey))->register();
+        RegisterRole::make($shortKey)->title(ucfirst($shortKey))->register('test-plugin');
 
         return collect(RegisterRole::get())->keys()->first(fn (string $key) => str_ends_with($key, ".{$shortKey}"));
     }

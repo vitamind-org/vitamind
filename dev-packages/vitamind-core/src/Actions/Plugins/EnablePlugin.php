@@ -2,15 +2,15 @@
 
 namespace VitaminD\Core\Actions\Plugins;
 
+use Exception;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
+use Throwable;
 use VitaminD\Core\Actions\Bootstrap\GetBootstrap;
 use VitaminD\Core\Enums\PluginSource;
 use VitaminD\Core\Events\PluginStateChanged;
 use VitaminD\Core\Models\Plugin;
 use VitaminD\Core\Models\PluginError;
-use Exception;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\File;
-use Throwable;
 
 final readonly class EnablePlugin
 {
@@ -48,8 +48,9 @@ final readonly class EnablePlugin
         try {
             $this->runPendingMigrations($plugin);
 
-            $plugin->name = $implementation->getName();
-            $plugin->description = $implementation->getDescription();
+            $details = $implementation->pluginDetails();
+            $plugin->name = $details['name'];
+            $plugin->description = $details['description'];
             $implementation->enable();
         } catch (Throwable $ex) {
             PluginError::createFromException($ex, $plugin);

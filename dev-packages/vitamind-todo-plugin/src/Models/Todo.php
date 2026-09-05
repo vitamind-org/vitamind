@@ -2,8 +2,9 @@
 
 namespace VitaminD\Plugins\TodoPlugin\Models;
 
-use VitaminD\PluginSdk\Concerns\BelongsToWorkspace;
 use Illuminate\Database\Eloquent\Model;
+use VitaminD\Plugins\TodoPlugin\Plugin;
+use VitaminD\PluginSdk\Concerns\BelongsToWorkspace;
 
 class Todo extends Model
 {
@@ -19,4 +20,24 @@ class Todo extends Model
     protected $casts = [
         'is_done' => 'boolean',
     ];
+
+    /**
+     * Demonstrates checking a registered role with `hasRole()`: only a Todo
+     * Manager may delete a todo — anyone can still create one or toggle it
+     * done. Enforced here, at the model layer, because the generic
+     * plugin-page CRUD controller this demo relies on
+     * (`VitaminD\Core\Http\Controllers\Admin\PluginPageController`) has no
+     * per-action authorization hook of its own. A plugin with its own
+     * routes/controller should prefer a real Policy + `$this->authorize()`
+     * instead — this is a minimal stand-in so the example stays reachable
+     * without that extra scaffolding.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (Todo $todo): void {
+            if (! auth()->user()?->hasRole(Plugin::managerRoleKey())) {
+                abort(403, 'Only a Todo Manager can delete todos.');
+            }
+        });
+    }
 }

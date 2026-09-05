@@ -3,8 +3,6 @@
 namespace VitaminD\PluginSdk\Tests;
 
 use VitaminD\PluginSdk\RegisterRole;
-use VitaminD\PluginSdk\Tests\Fixtures\Plugins\PackageA\RoleRegistrar as PackageARegistrar;
-use VitaminD\PluginSdk\Tests\Fixtures\Plugins\PackageB\RoleRegistrar as PackageBRegistrar;
 
 class RegisterRoleTest extends TestCase
 {
@@ -23,40 +21,40 @@ class RegisterRoleTest extends TestCase
         $this->assertEquals('Admin Gudang', $role->getTitle());
     }
 
-    public function test_registering_a_role_prefixes_the_key_by_the_calling_package(): void
+    public function test_registering_a_role_stores_it_under_the_explicit_plugin_key(): void
     {
-        PackageARegistrar::registerRole('admin-gudang', 'Admin Gudang');
+        RegisterRole::make('admin-gudang')->title('Admin Gudang')->register('acme');
 
         $this->assertCount(1, RegisterRole::get());
-        $this->assertNotNull(RegisterRole::find('package-a.admin-gudang'));
-        $this->assertSame('package-a.admin-gudang', RegisterRole::find('package-a.admin-gudang')->getKey());
+        $this->assertNotNull(RegisterRole::find('acme.admin-gudang'));
+        $this->assertSame('acme.admin-gudang', RegisterRole::find('acme.admin-gudang')->getKey());
     }
 
-    public function test_two_packages_register_roles_independently(): void
+    public function test_two_different_plugin_keys_do_not_collide(): void
     {
-        PackageARegistrar::registerRole('sales', 'Sales');
-        PackageBRegistrar::registerRole('finance', 'Finance');
+        RegisterRole::make('sales')->title('Sales')->register('acme');
+        RegisterRole::make('finance')->title('Finance')->register('other');
 
         $this->assertCount(2, RegisterRole::get());
-        $this->assertNotNull(RegisterRole::find('package-a.sales'));
-        $this->assertNotNull(RegisterRole::find('package-b.finance'));
+        $this->assertNotNull(RegisterRole::find('acme.sales'));
+        $this->assertNotNull(RegisterRole::find('other.finance'));
     }
 
-    public function test_two_packages_registering_the_same_short_key_do_not_collide(): void
+    public function test_the_same_short_key_under_two_different_plugin_keys_does_not_collide(): void
     {
-        PackageARegistrar::registerRole('owner', 'Package A Owner');
-        PackageBRegistrar::registerRole('owner', 'Package B Owner');
+        RegisterRole::make('owner')->title('Acme Owner')->register('acme');
+        RegisterRole::make('owner')->title('Other Owner')->register('other');
 
         $this->assertCount(2, RegisterRole::get());
 
-        $roleA = RegisterRole::find('package-a.owner');
-        $roleB = RegisterRole::find('package-b.owner');
+        $roleA = RegisterRole::find('acme.owner');
+        $roleB = RegisterRole::find('other.owner');
 
         $this->assertNotNull($roleA);
         $this->assertNotNull($roleB);
         $this->assertNotSame($roleA, $roleB);
-        $this->assertSame('Package A Owner', $roleA->getTitle());
-        $this->assertSame('Package B Owner', $roleB->getTitle());
+        $this->assertSame('Acme Owner', $roleA->getTitle());
+        $this->assertSame('Other Owner', $roleB->getTitle());
     }
 
     public function test_find_returns_null_for_an_unregistered_key(): void
@@ -66,7 +64,7 @@ class RegisterRoleTest extends TestCase
 
     public function test_flush_clears_the_registry(): void
     {
-        PackageARegistrar::registerRole('sales', 'Sales');
+        RegisterRole::make('sales')->title('Sales')->register('acme');
         $this->assertCount(1, RegisterRole::get());
 
         RegisterRole::flush();
@@ -79,5 +77,19 @@ class RegisterRoleTest extends TestCase
         $role = RegisterRole::make('sales')->title('Sales');
 
         $this->assertNull($role->getKey());
+    }
+
+    public function test_registering_without_a_plugin_key_fails(): void
+    {
+        $this->expectException(\ArgumentCountError::class);
+
+        // @phpstan-ignore-next-line arguments.count (deliberately testing the missing-argument failure)
+        RegisterRole::make('sales')->title('Sales')->register();
+    }
+
+    public function test_key_for_computes_the_join_format_without_registering(): void
+    {
+        $this->assertSame('acme.admin-gudang', RegisterRole::keyFor('acme', 'admin-gudang'));
+        $this->assertCount(0, RegisterRole::get());
     }
 }

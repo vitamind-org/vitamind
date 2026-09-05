@@ -13,50 +13,107 @@ up, mirroring the `RegisterPage`/`RegisterPageGroup` pattern described in
 There is no admin UI or database-backed role editor — roles are fixed at
 deploy time, defined in code, exactly like pages and page groups.
 
+Registering a role requires your plugin to have already declared its own
+identity via `pluginDetails()` — see
+[`plugin-identity.md`](plugin-identity.md) for that contract on its own
+(it applies to every plugin, whether or not it registers any roles).
+
 ## Declaring a role: `RegisterRole`
 
-Call `RegisterRole::make(...)->title(...)->register()` from your plugin's
-(or app's) `boot()`:
+A plugin declares its own identity once — via a required `pluginDetails()`
+method on its base class (`AbstractPlugin` for dynamically-installed
+plugins, `PluginBase` for Composer-package `ServiceProvider`s) — and then
+registers a role through the `registerRole()` helper both base classes
+share, instead of calling `RegisterRole` directly:
+
+```php
+class WarehouseServiceProvider extends PluginBase
+{
+    public function pluginDetails(): array
+    {
+        return [
+            'key' => 'warehouse',
+            'name' => 'Warehouse Plugin',
+            'description' => 'Inventory management for VitaminD.',
+        ];
+    }
+
+    public function boot(): void
+    {
+        $this->registerRole('admin-gudang', 'Admin Gudang');
+        // → registry key: warehouse.admin-gudang
+    }
+}
+```
+
+### Identity comes from `pluginDetails()`, not a guessed namespace
+
+`registerRole($shortKey, $title)` reads `$this->pluginDetails()['key']` and
+stores the role under `{key}.{shortKey}` — you never type your own prefix at
+the call site, and it's never inferred from where the code happens to live.
+Two plugins can each register a role called `owner` without coordinating or
+colliding, as long as their own declared `key`s differ:
+
+```php
+// WorkspaceServiceProvider: pluginDetails()['key'] === 'workspace'
+$this->registerRole('owner', 'Workspace Owner');
+// → registry key: workspace.owner
+
+// WarehouseServiceProvider: pluginDetails()['key'] === 'warehouse'
+$this->registerRole('owner', 'Warehouse Owner');
+// → registry key: warehouse.owner
+```
+
+If you need the lower-level builder directly (rare — prefer `registerRole()`
+from within a plugin), `RegisterRole::register()` takes the plugin key as an
+explicit, required argument:
 
 ```php
 use VitaminD\PluginSdk\RegisterRole;
 
-RegisterRole::make('admin-gudang')
-    ->title('Admin Gudang')
-    ->register();
-```
-
-### Automatic key prefixing
-
-The key you pass to `make()` is a short, package-local name. The key
-actually stored in the registry (and later written to `user_roles.role`) is
-automatically prefixed with an identifier derived from **whichever package
-called `register()`** — resolved once, at `register()` time, via the
-caller's namespace. You never pass this prefix yourself.
-
-For a class living under `...\Plugins\{Name}\...` — every VitaminD plugin,
-whether shipped in `dev-packages/` (`VitaminD\Plugins\{Name}\...`) or a local
-app plugin (`App\Plugins\{Name}\...`) — the identifier is `{Name}`,
-kebab-cased. So `vitamind-workspace-plugin`'s own
-`RegisterRole::make('owner')` (called from
-`VitaminD\Plugins\Workspace\Providers\WorkspaceServiceProvider`) resolves to
-the registry key `workspace.owner`.
-
-This means two packages can each register a role called `owner` — or any
-other short key — without coordinating or colliding:
-
-```php
-// Called from VitaminD\Plugins\Workspace\Providers\WorkspaceServiceProvider
-RegisterRole::make('owner')->title('Workspace Owner')->register();
-// → registry key: workspace.owner
-
-// Called from App\Plugins\Warehouse\Providers\WarehouseServiceProvider
-RegisterRole::make('owner')->title('Warehouse Owner')->register();
-// → registry key: warehouse.owner
+RegisterRole::make('admin-gudang')->title('Admin Gudang')->register('warehouse');
 ```
 
 Registration is pure in-memory bookkeeping — `register()` never writes to
 the database. Assigning a role to a user (below) is a separate step.
+
+### Referencing a registered role's key from elsewhere in your plugin
+
+Code outside the Plugin/ServiceProvider class itself — a model, a policy —
+often needs the same full key a role was registered under, without
+hand-concatenating `pluginKey.'.'.shortKey` or duplicating the short key as
+a bare string literal (both drift silently: rename the short key in one
+place and a `hasRole()` check elsewhere just always returns `false`). Use
+`RegisterRole::keyFor()` — the same join-format function `register()` uses
+internally — behind a small static accessor on your plugin class:
+
+```php
+class WarehouseServiceProvider extends PluginBase
+{
+    public const KEY = 'warehouse';
+    private const ROLE_ADMIN_GUDANG = 'admin-gudang';
+
+    public function boot(): void
+    {
+        $this->registerRole(self::ROLE_ADMIN_GUDANG, 'Admin Gudang');
+    }
+
+    public static function adminGudangRoleKey(): string
+    {
+        return RegisterRole::keyFor(self::KEY, self::ROLE_ADMIN_GUDANG);
+    }
+}
+```
+
+```php
+if ($user->hasRole(WarehouseServiceProvider::adminGudangRoleKey())) {
+    // ...
+}
+```
+
+The short key now exists as a literal exactly once (the `private const`) —
+see `dev-packages/vitamind-todo-plugin/src/Plugin.php`'s `managerRoleKey()`
+and `Models/Todo.php` for the canonical, real example.
 
 ### Builder reference
 
@@ -64,13 +121,25 @@ the database. Assigning a role to a user (below) is a separate step.
 |---|---|---|
 | `make(string $key)` | — | Starts a builder for the given short key. |
 | `title(string)` | yes | Display title (e.g. shown in the workspace invite dropdown). |
-| `register()` | yes | Adds the role to the registry under its auto-prefixed key. Call last. |
+| `register(string $pluginKey)` | yes | Adds the role to the registry under `{pluginKey}.{shortKey}`. Call last. Required argument — there is no implicit/guessed prefix. |
 | `getShortKey()` | — | The short key passed to `make()`. |
 | `getTitle()` | — | The title. |
-| `getKey()` | — | The auto-prefixed registry key — only non-null after `register()` has run. |
-| `RegisterRole::get()` | — | `static`, returns every registered role, keyed by prefixed key. |
-| `RegisterRole::find(string $key)` | — | `static`, looks up one role by its prefixed key. |
+| `getKey()` | — | The full registry key (`{pluginKey}.{shortKey}`) — only non-null after `register()` has run. |
+| `RegisterRole::keyFor(string $pluginKey, string $shortKey)` | — | `static`, computes `{pluginKey}.{shortKey}` without registering — for referencing a role's key from outside the Plugin class. |
+| `RegisterRole::get()` | — | `static`, returns every registered role, keyed by full key. |
+| `RegisterRole::find(string $key)` | — | `static`, looks up one role by its full key. |
 | `RegisterRole::flush()` | — | `static`, clears the registry — for test isolation, same footgun as `RegisterPage::flush()` (see menu-registration.md). |
+
+### `pluginDetails()` and `registerRole()` — declared once, shared by both plugin kinds
+
+`VitaminD\PluginSdk\Interfaces\HasPluginDetails` is a one-method contract
+(`pluginDetails(): array{key, name, description}`) that both `AbstractPlugin`
+(dynamically-installed plugins: local, GitHub, Composer) and `PluginBase`
+(Composer-package `ServiceProvider`s) require — a plugin class that doesn't
+implement it fails to instantiate. `registerRole()`/the underlying
+`pluginKey()` lookup live in one shared trait,
+`VitaminD\PluginSdk\Concerns\RegistersOwnRole`, used by both base classes, so
+the behavior is identical regardless of which kind of plugin you're writing.
 
 ## Assigning and checking roles
 
@@ -215,19 +284,22 @@ selectable when inviting someone to a workspace. The invite dropdown
 `RegisterRole` registry, plus a fixed "Admin" option that grants `is_admin`
 instead of a workspace-scoped role. Selecting neither is valid too — the
 invitee just becomes a plain member. So an app that registers its own
-domain-specific role — say `RegisterRole::make('admin-gudang')` from an
-`App\Plugins\Warehouse` provider — becomes selectable on the workspace
-invite screen and assignable, scoped to that workspace, through the exact
-same accept-invitation flow, with no plugin-specific UI work and nothing
-for the workspace plugin to exclude or special-case.
+domain-specific role — say `$this->registerRole('admin-gudang', 'Admin Gudang')`
+from a `WarehouseServiceProvider` whose `pluginDetails()['key']` is
+`warehouse` — becomes selectable on the workspace invite screen and
+assignable, scoped to that workspace, through the exact same
+accept-invitation flow, with no plugin-specific UI work and nothing for the
+workspace plugin to exclude or special-case.
 
 ## Testing a role registration
 
 Mirror the pattern in
 `dev-packages/vitamind-plugin-sdk/tests/RegisterRoleTest.php`: flush the
-registry in `setUp()`, register through a fixture class under a realistic
-namespace (so prefix derivation is exercised for real), and assert on
-`RegisterRole::get()`/`find()`. For assignment/check behavior, see
+registry in `setUp()`, call `RegisterRole::make(...)->title(...)->register($pluginKey)`
+with an explicit plugin key (or, to exercise the `registerRole()` helper
+itself, see `AbstractPluginTest`/`PluginBaseTest` for an anonymous class
+implementing `pluginDetails()`), and assert on `RegisterRole::get()`/`find()`.
+For assignment/check behavior, see
 `dev-packages/vitamind-core/tests/Unit/UserRoleAssignmentTest.php` and
 `UserHasRoleTest.php`, and `tests/Feature/WorkspaceRoleAssignmentTest.php`
 for the full HTTP-level invite → accept → role-assigned flow.

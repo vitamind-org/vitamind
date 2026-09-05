@@ -2,15 +2,19 @@
 
 namespace VitaminD\PluginSdk;
 
+use VitaminD\PluginSdk\Concerns\RegistersOwnRole;
 use VitaminD\PluginSdk\Interfaces\PluginInterface;
 
 abstract class AbstractPlugin implements PluginInterface
 {
-    protected string $name = '';
-
-    protected string $description = '';
+    use RegistersOwnRole;
 
     protected array $dependencies = [];
+
+    /**
+     * @return array{key: string, name: string, description: string}
+     */
+    abstract public function pluginDetails(): array;
 
     public function boot(): void {}
 
@@ -21,16 +25,6 @@ abstract class AbstractPlugin implements PluginInterface
     public function install(): void {}
 
     public function uninstall(): void {}
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function getDescription(): string
-    {
-        return $this->description;
-    }
 
     public function getDependencies(): array
     {

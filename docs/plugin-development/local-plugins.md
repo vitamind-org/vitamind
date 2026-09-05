@@ -32,8 +32,14 @@ use VitaminD\PluginSdk\AbstractPlugin;
 
 class Plugin extends AbstractPlugin
 {
-    protected string $name = 'My Plugin';
-    protected string $description = 'What this plugin does.';
+    public function pluginDetails(): array
+    {
+        return [
+            'key' => 'my-plugin',
+            'name' => 'My Plugin',
+            'description' => 'What this plugin does.',
+        ];
+    }
 
     public function boot(): void { /* runs on every request when enabled */ }
     public function install(): void { /* one-time setup */ }
@@ -42,6 +48,10 @@ class Plugin extends AbstractPlugin
     public function uninstall(): void {}
 }
 ```
+
+`pluginDetails()` is required — see
+[`plugin-identity.md`](plugin-identity.md) for what `key` is used for and
+why there's no default.
 
 ## Why no `src/` here?
 

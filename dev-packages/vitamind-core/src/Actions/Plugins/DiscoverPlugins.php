@@ -2,10 +2,11 @@
 
 namespace VitaminD\Core\Actions\Plugins;
 
-use VitaminD\Core\Enums\PluginSource;
-use VitaminD\Core\Models\Plugin;
+use Composer\Autoload\ClassLoader;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use VitaminD\Core\Enums\PluginSource;
+use VitaminD\Core\Models\Plugin;
 
 final readonly class DiscoverPlugins
 {
@@ -38,24 +39,26 @@ final readonly class DiscoverPlugins
             return;
         }
 
-        $plugins = Plugin::all();
-
         foreach ($discovered as $entry) {
-            $exists = $plugins->contains(fn (Plugin $plugin) => $plugin->source === $entry['source'] && $plugin->folder === $entry['folder']);
-
-            if (! $exists) {
-                Plugin::create([
-                    'folder' => $entry['folder'],
+            // firstOrCreate relies on the unique (source, folder) index to stay
+            // race-free across the concurrent processes that all boot Laravel
+            // (web request, queue:listen, pail, artisan commands) — a prior
+            // in-memory "does it exist?" snapshot let two overlapping boots
+            // both decide a row was missing and both insert it.
+            Plugin::firstOrCreate(
+                ['source' => $entry['source'], 'folder' => $entry['folder']],
+                [
                     'namespace' => $entry['namespace'],
-                    'source' => $entry['source'],
                     // Local plugins are application code, already "installed"; packaged
                     // plugins (GitHub/Composer) are merely discovered until an admin installs them.
                     'is_installed' => $entry['source'] === PluginSource::LOCAL,
                     'is_enabled' => $entry['source'] === PluginSource::LOCAL,
                     'installed_at' => $entry['source'] === PluginSource::LOCAL ? now() : null,
-                ]);
-            }
+                ]
+            );
         }
+
+        $plugins = Plugin::all();
 
         $discoveredKeys = collect($discovered)
             ->map(fn (array $entry) => $entry['source']->value.'|'.$entry['folder'])
@@ -141,7 +144,7 @@ final readonly class DiscoverPlugins
 
     private function registerAutoload(string $prefix, string $srcPath): void
     {
-        /** @var \Composer\Autoload\ClassLoader $loader */
+        /** @var ClassLoader $loader */
         $loader = require base_path('vendor'.DIRECTORY_SEPARATOR.'autoload.php');
         $loader->addPsr4($prefix, $srcPath);
     }

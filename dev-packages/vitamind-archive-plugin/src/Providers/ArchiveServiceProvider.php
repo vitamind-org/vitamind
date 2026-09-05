@@ -4,12 +4,12 @@ namespace VitaminD\Plugins\Archive\Providers;
 
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\ServiceProvider;
 use Spatie\RouteAttributes\RouteRegistrar;
 use VitaminD\Plugins\Archive\Models\File;
 use VitaminD\Plugins\Archive\Models\Folder;
 use VitaminD\Plugins\Archive\Policies\FilePolicy;
 use VitaminD\Plugins\Archive\Policies\FolderPolicy;
+use VitaminD\PluginSdk\PluginBase;
 use VitaminD\PluginSdk\RegisterPage;
 
 /**
@@ -19,8 +19,20 @@ use VitaminD\PluginSdk\RegisterPage;
  * `vitamin-d.features.workspaces`, and that is enforced inside
  * FolderPolicy/FilePolicy (via WorkspaceMembership::check()), not here.
  */
-class ArchiveServiceProvider extends ServiceProvider
+class ArchiveServiceProvider extends PluginBase
 {
+    /**
+     * @return array{key: string, name: string, description: string}
+     */
+    public function pluginDetails(): array
+    {
+        return [
+            'key' => 'archive',
+            'name' => 'Archive Plugin',
+            'description' => 'Folder and file storage with per-item visibility control.',
+        ];
+    }
+
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../../config/archive-plugin.php', 'archive-plugin');

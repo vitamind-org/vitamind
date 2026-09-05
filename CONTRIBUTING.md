@@ -19,9 +19,16 @@ use VitaminD\PluginSdk\AbstractPlugin;
 
 class Plugin extends AbstractPlugin
 {
-    protected string $name = 'My Plugin';
-    protected string $description = 'What this plugin does.';
     protected array $dependencies = []; // FQCNs of other plugins' Plugin classes, if any
+
+    public function pluginDetails(): array
+    {
+        return [
+            'key' => 'my-plugin',
+            'name' => 'My Plugin',
+            'description' => 'What this plugin does.',
+        ];
+    }
 
     public function boot(): void
     {
@@ -35,6 +42,10 @@ class Plugin extends AbstractPlugin
     public function disable(): void   { /* runs each time the plugin is turned off */ }
 }
 ```
+
+`pluginDetails()` is required on every plugin — see
+[`docs/plugin-development/plugin-identity.md`](docs/plugin-development/plugin-identity.md)
+for what `key` is used for.
 
 Where that file lives depends on how the plugin will be distributed — see
 [`docs/local-plugins.md`](docs/local-plugins.md) for the full breakdown:

@@ -7,7 +7,6 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Spatie\RouteAttributes\RouteRegistrar;
 use VitaminD\Core\Contracts\RoleScopeResolver;
@@ -20,11 +19,24 @@ use VitaminD\Plugins\Workspace\Http\Middleware\HasWorkspaceMiddleware;
 use VitaminD\Plugins\Workspace\Http\Resources\WorkspaceResource;
 use VitaminD\Plugins\Workspace\Models\UserWorkspace;
 use VitaminD\Plugins\Workspace\Support\WorkspaceRoleScopeResolver;
+use VitaminD\PluginSdk\PluginBase;
 use VitaminD\PluginSdk\RegisterPage;
 use VitaminD\PluginSdk\RegisterRole;
 
-class WorkspaceServiceProvider extends ServiceProvider
+class WorkspaceServiceProvider extends PluginBase
 {
+    /**
+     * @return array{key: string, name: string, description: string}
+     */
+    public function pluginDetails(): array
+    {
+        return [
+            'key' => 'workspace',
+            'name' => 'Workspace Plugin',
+            'description' => 'Optional multi-tenancy workspace/project system for VitaminD Core.',
+        ];
+    }
+
     public function register(): void
     {
         if (! config('vitamin-d.features.workspaces')) {

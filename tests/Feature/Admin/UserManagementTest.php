@@ -211,8 +211,8 @@ class UserManagementTest extends TestCase
      */
     public function test_creating_a_user_with_multiple_roles_assigns_each_one(): void
     {
-        RegisterRole::make('gudang')->title('Gudang')->register();
-        RegisterRole::make('sales')->title('Sales')->register();
+        RegisterRole::make('gudang')->title('Gudang')->register('test-plugin');
+        RegisterRole::make('sales')->title('Sales')->register('test-plugin');
         $keys = collect(RegisterRole::get())->keys()
             ->filter(fn (string $key) => str_ends_with($key, '.gudang') || str_ends_with($key, '.sales'))
             ->values()
@@ -236,7 +236,7 @@ class UserManagementTest extends TestCase
 
     public function test_creating_a_user_with_roles_and_is_admin_together_applies_both(): void
     {
-        RegisterRole::make('finance')->title('Finance')->register();
+        RegisterRole::make('finance')->title('Finance')->register('test-plugin');
         $key = collect(RegisterRole::get())->keys()->first(fn (string $k) => str_ends_with($k, '.finance'));
 
         $admin = User::factory()->create(['is_admin' => true]);
@@ -257,8 +257,8 @@ class UserManagementTest extends TestCase
 
     public function test_updating_a_user_role_selection_is_synced_not_merely_added(): void
     {
-        RegisterRole::make('one')->title('One')->register();
-        RegisterRole::make('two')->title('Two')->register();
+        RegisterRole::make('one')->title('One')->register('test-plugin');
+        RegisterRole::make('two')->title('Two')->register('test-plugin');
         $keyOne = collect(RegisterRole::get())->keys()->first(fn (string $k) => str_ends_with($k, '.one'));
         $keyTwo = collect(RegisterRole::get())->keys()->first(fn (string $k) => str_ends_with($k, '.two'));
 

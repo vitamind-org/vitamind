@@ -8,14 +8,26 @@ use Illuminate\Contracts\Foundation\CachesRoutes;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
 use VitaminD\Core\Events\PluginStateChanged;
 use VitaminD\Plugins\Realtime\Events\BootstrapInvalidated;
 use VitaminD\Plugins\Realtime\Support\WorkspaceChannelAuthorization;
 use VitaminD\Plugins\Workspace\Http\Middleware\EnsureWorkspaceOnboarded;
+use VitaminD\PluginSdk\PluginBase;
 
-class RealtimeServiceProvider extends ServiceProvider
+class RealtimeServiceProvider extends PluginBase
 {
+    /**
+     * @return array{key: string, name: string, description: string}
+     */
+    public function pluginDetails(): array
+    {
+        return [
+            'key' => 'realtime',
+            'name' => 'Realtime Plugin',
+            'description' => 'Optional WebSocket broadcasting (Laravel Reverb) infrastructure for VitaminD Core.',
+        ];
+    }
+
     public function register(): void
     {
         if (! config('vitamin-d.features.websocket')) {

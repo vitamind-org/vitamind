@@ -2,7 +2,7 @@
 
 namespace VitaminD\PluginSdk\Interfaces;
 
-interface PluginInterface
+interface PluginInterface extends HasPluginDetails
 {
     public function boot(): void;
 
@@ -13,10 +13,6 @@ interface PluginInterface
     public function install(): void;
 
     public function uninstall(): void;
-
-    public function getName(): string;
-
-    public function getDescription(): string;
 
     public function getDependencies(): array;
 }

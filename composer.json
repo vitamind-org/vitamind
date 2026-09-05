@@ -25,6 +25,7 @@
         "vitamind/core": "dev-master",
         "vitamind/plugin-sdk": "dev-master",
         "vitamind/realtime-plugin": "dev-master",
+        "vitamind/todo-plugin": "dev-main",
         "vitamind/workspace-plugin": "dev-master"
     },
     "require-dev": {
@@ -141,6 +142,13 @@
         {
             "type": "path",
             "url": "dev-packages/vitamind-archive-plugin",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "dev-packages/vitamind-todo-plugin",
             "options": {
                 "symlink": true
             }

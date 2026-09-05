@@ -2,12 +2,12 @@
 
 namespace VitaminD\Core\Actions\Plugins;
 
+use Exception;
+use Throwable;
 use VitaminD\Core\Actions\Bootstrap\GetBootstrap;
 use VitaminD\Core\Events\PluginStateChanged;
 use VitaminD\Core\Models\Plugin;
 use VitaminD\Core\Models\PluginError;
-use Exception;
-use Throwable;
 
 final readonly class InstallPlugin
 {
@@ -26,8 +26,9 @@ final readonly class InstallPlugin
             throw new Exception('Unable to install the plugin, please check the error logs');
         }
 
-        $plugin->name = $implementation->getName();
-        $plugin->description = $implementation->getDescription();
+        $details = $implementation->pluginDetails();
+        $plugin->name = $details['name'];
+        $plugin->description = $details['description'];
         $plugin->save();
 
         try {
